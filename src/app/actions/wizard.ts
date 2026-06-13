@@ -1,0 +1,1 @@
+export { createWeddingAction } from "./wedding";

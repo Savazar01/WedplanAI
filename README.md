@@ -1,36 +1,272 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WedPlanAI
 
-## Getting Started
+> **AI-powered wedding planning platform** — manage every detail of your wedding with Kanban boards, a live calendar, guest RSVP tracking, vendor budgets, and a beautiful public showcase website.
 
-First, run the development server:
+Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**. Deployed via **Docker Compose**.
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| 🗂️ **Kanban Board** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
+| 📅 **Calendar & Timeline** | Month-view calendar and day-of timeline for all ceremonies and rituals |
+| 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP |
+| 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, and dynamic currency by country |
+| 🌐 **Public Showcase Website** | Auto-generated public wedding page with live countdown, itinerary, and RSVP form |
+| 👩‍💼 **Multi-User Collaboration** | Role-based access — admins invite planners and coordinators |
+| ⚙️ **Settings & User Management** | Admin controls for workspace configuration and team access |
+| 🎉 **Guided Onboarding** | Interactive walkthrough tour and wizard to set up your first wedding event |
+
+### Wedding Traditions Supported
+Hindu · Muslim · Sikh · Christian · Secular (and more)
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | [Next.js 16](https://nextjs.org/) (App Router, Server Components) |
+| UI | [Tailwind CSS v4](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/) |
+| Database | [PostgreSQL 17](https://www.postgresql.org/) + [pgvector](https://github.com/pgvector/pgvector) |
+| ORM | [Drizzle ORM](https://orm.drizzle.team/) |
+| Auth | [Better Auth](https://www.better-auth.com/) |
+| Runtime | [Node.js 20](https://nodejs.org/) |
+| Container | [Docker](https://www.docker.com/) + Docker Compose |
+
+---
+
+## 🚀 Deployment with Coolify (Recommended)
+
+### Prerequisites
+- A VPS with [Coolify](https://coolify.io/) installed
+- This repository connected to your Coolify instance
+- A domain name pointed to your VPS
+
+### Step 1: Connect the Repository in Coolify
+
+1. In Coolify, click **New Resource → Application**
+2. Select **Docker Compose** as the build type
+3. Connect your GitHub repository (`Savazar01/WedplanAI`)
+4. Set the **Docker Compose file** to `docker-compose.yml`
+
+### Step 2: Set Environment Variables in Coolify
+
+In Coolify's **Environment Variables** section, set the following:
+
+```env
+# Generate a strong secret: openssl rand -base64 32
+BETTER_AUTH_SECRET=your_min_32_char_random_secret
+
+# Your public domain (with https://)
+BETTER_AUTH_URL=https://your-domain.com
+
+# Database credentials (must match below)
+DATABASE_URL=postgresql://postgres:your_db_password@db:5432/wedding_planner
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_db_password
+POSTGRES_DB=wedding_planner
+```
+
+> **Important:** `BETTER_AUTH_SECRET` is **required**. The app will fail to start without it.  
+> Generate one with: `openssl rand -base64 32`
+
+### Step 3: Configure Networking in Coolify
+
+- Set the **exposed port** to `3044`
+- Add your **custom domain** and enable **HTTPS** (Coolify handles Let's Encrypt automatically)
+
+### Step 4: Deploy
+
+Click **Deploy**. Coolify will:
+1. Build the Docker image from the `Dockerfile`
+2. Start the PostgreSQL container
+3. Start the Next.js web container
+4. Run database migrations automatically on first start
+
+### Step 5: Create Your Admin Account
+
+Once deployed, visit `https://your-domain.com` and click **Get Started Free** to create the first admin account.
+
+---
+
+## 💻 Local Development
+
+### Prerequisites
+- [Node.js 20+](https://nodejs.org/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Savazar01/WedplanAI.git
+cd WedplanAI
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up environment variables
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local`:
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5611/wedding_planner"
+BETTER_AUTH_SECRET="any-random-string-at-least-32-chars-long"
+BETTER_AUTH_URL="http://localhost:3044"
+NODE_ENV="development"
+```
+
+### 4. Start the database
+
+```bash
+docker compose up db -d
+```
+
+### 5. Run database migrations
+
+```bash
+npm run db:migrate
+```
+
+### 6. Start the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🐳 Running with Docker Compose (Full Stack)
 
-## Learn More
+```bash
+# Copy env file
+cp .env.example .env.local
 
-To learn more about Next.js, take a look at the following resources:
+# Edit .env.local with your values (especially BETTER_AUTH_SECRET)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Build and start all services
+docker compose up --build -d
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# View logs
+docker compose logs -f web
+```
 
-## Deploy on Vercel
+The app will be available at `http://localhost:3044`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Stop / Reset
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Stop containers
+docker compose down
+
+# Stop and remove all data (full reset)
+docker compose down -v
+```
+
+---
+
+## 🗄️ Database Management
+
+```bash
+# Generate migration (after schema changes)
+npm run db:generate
+
+# Apply migrations
+npm run db:migrate
+
+# Open Drizzle Studio (DB browser)
+npm run db:studio
+
+# Full reset (drops + recreates all tables)
+npm run db:reset
+```
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages & API routes
+│   ├── actions/            # Server Actions (guests, vendors, weddings, auth)
+│   ├── api/auth/           # Better Auth API handler
+│   ├── dashboard/          # Authenticated dashboard pages
+│   │   ├── calendar/       # Calendar view
+│   │   ├── guests/         # Guest management
+│   │   ├── kanban/         # Kanban board
+│   │   ├── settings/       # Workspace settings
+│   │   ├── timeline/       # Timeline / ceremonies
+│   │   ├── users/          # User management (admin only)
+│   │   └── vendors/        # Vendor & budget tracker
+│   ├── login/              # Login page
+│   ├── signup/             # Signup page
+│   ├── wedding/[id]/       # Public wedding showcase page
+│   ├── wizard/             # Wedding setup wizard
+│   └── page.tsx            # Landing page (public)
+├── components/
+│   ├── dashboard/          # Dashboard shell, sidebar, wedding switcher
+│   ├── kanban/             # Kanban board components
+│   └── ui/                 # shadcn/ui base components
+├── db/
+│   ├── schema.ts           # Drizzle database schema
+│   └── migrations/         # Auto-generated SQL migrations
+└── lib/                    # Utilities (auth, seed, helpers)
+```
+
+---
+
+## 🔐 Security Notes
+
+- **Never commit** `.env` or `.env.local` files — they are excluded by `.gitignore`
+- Always set a strong `BETTER_AUTH_SECRET` in production (minimum 32 characters)
+- The default PostgreSQL password in `docker-compose.yml` should be overridden via environment variables in production
+- HTTPS is strongly recommended — use Coolify's built-in Let's Encrypt integration
+
+---
+
+## 📝 Environment Variables Reference
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
+| `BETTER_AUTH_SECRET` | ✅ | — | Auth secret key (min 32 chars) |
+| `BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Public URL of the application |
+| `NODE_ENV` | — | `production` | Node environment |
+| `POSTGRES_USER` | — | `postgres` | PostgreSQL username |
+| `POSTGRES_PASSWORD` | — | `postgres` | PostgreSQL password |
+| `POSTGRES_DB` | — | `wedding_planner` | PostgreSQL database name |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m 'Add my feature'`
+4. Push to the branch: `git push origin feature/my-feature`
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Copyright © 2024 [Savazar](https://savazar.com). All rights reserved.
+
+---
+
+<p align="center">
+  Built with ❤️ for extraordinary weddings
+  <br/>
+  <a href="https://savazar.com">savazar.com</a>
+</p>

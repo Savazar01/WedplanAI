@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/test-results
+/e2e
 
 # next.js
 /.next/
@@ -30,8 +32,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — NEVER commit real secrets
+.env
+.env.local
+.env*.local
 
 # vercel
 .vercel
@@ -39,3 +43,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI / dev tooling (not needed in production)
+.agents/
+.opencode/
+.playwright-mcp/
+graphify-out/
+skills-lock.json
+opencode.json
+CLAUDE.md
+
+# Planning / documentation artifacts (dev-only)
+Plans/
+walkthrough.md
+implementation_plan.md
+login-page-snapshot.md
+
+# Screenshot files
+docker-login-page.png
+docker-signup-page.png
+
+# Playwright
+playwright.config.ts

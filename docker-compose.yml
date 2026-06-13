@@ -1,0 +1,39 @@
+name: wedplanai
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.0-pg17
+    container_name: wedding-event-db
+    restart: unless-stopped
+    ports:
+      - "5611:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-wedding_planner}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: wedding-event-web
+    restart: unless-stopped
+    ports:
+      - "3044:3044"
+    environment:
+      PORT: "3044"
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/wedding_planner}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3044}
+      NODE_ENV: "production"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

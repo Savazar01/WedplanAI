@@ -1,0 +1,281 @@
+"use client";
+
+import * as React from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import WeddingSwitcher from "./WeddingSwitcher";
+import SampleWalkthroughCard from "./SampleWalkthroughCard";
+import {
+  LayoutDashboard,
+  KanbanSquare,
+  Calendar,
+  Clock,
+  Users,
+  Store,
+  UserCog,
+  LogOut,
+  Menu,
+  X,
+  Globe,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+
+interface Wedding {
+  id: string;
+  partnerA: string;
+  partnerB: string;
+  description?: string | null;
+}
+
+interface SidebarShellProps {
+  activeWedding: Wedding | null;
+  allWeddings: Wedding[];
+  userName: string;
+  userEmail: string;
+  userRole: string;
+  children: React.ReactNode;
+}
+
+export default function SidebarShell({
+  activeWedding,
+  allWeddings,
+  userName,
+  userEmail,
+  userRole,
+  children,
+}: SidebarShellProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    if (saved === "true") {
+      setTimeout(() => {
+        setIsCollapsed(true);
+      }, 0);
+    }
+  }, []);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("sidebar-collapsed", String(next));
+      return next;
+    });
+  };
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    router.push("/");
+    router.refresh();
+  };
+
+  interface NavItem {
+    href: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    target?: string;
+  }
+
+  const navItems: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/kanban", label: "Kanban Board", icon: KanbanSquare },
+    { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
+    { href: "/dashboard/timeline", label: "Timeline", icon: Clock },
+    { href: "/dashboard/guests", label: "Guests", icon: Users },
+    { href: "/dashboard/vendors", label: "Vendors", icon: Store },
+  ];
+
+  if (activeWedding) {
+    navItems.push({
+      href: `/wedding/${activeWedding.id}`,
+      label: "Showcase Page",
+      icon: Globe,
+      target: "_blank",
+    });
+  }
+
+  navItems.push({ href: "/dashboard/settings", label: "Settings", icon: UserCog });
+
+  if (userRole === "admin") {
+    navItems.push({ href: "/dashboard/users", label: "User Management", icon: UserCog });
+  }
+
+  const sidebarContent = (isMobile = false) => {
+    const showCollapsed = isCollapsed && !isMobile;
+    return (
+      <div className="flex flex-col h-full">
+        {/* Brand Header */}
+        <div className={`mb-6 px-2 ${showCollapsed ? "flex justify-center" : ""}`}>
+          <Link href="/dashboard" className="flex items-center" onClick={() => isMobile && setIsMobileMenuOpen(false)}>
+            {showCollapsed ? (
+              <span className="text-2xl" title="Savazar Dashboard">💒</span>
+            ) : (
+              <img
+                src="https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png"
+                alt="Savazar.com Logo"
+                className="h-10 w-auto object-contain"
+              />
+            )}
+          </Link>
+        </div>
+
+        {/* Wedding Switcher */}
+        <div className="mb-6">
+          <WeddingSwitcher activeWedding={activeWedding} allWeddings={allWeddings} isCollapsed={showCollapsed} />
+        </div>
+
+        {/* Navigation List */}
+        <nav className="flex-1 space-y-1">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                target={item.target}
+                rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+                onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                title={item.label}
+                className={`flex items-center rounded-xl text-sm font-semibold transition-all duration-100 ${
+                  showCollapsed
+                    ? "justify-center h-10 w-10 mx-auto"
+                    : "gap-3 px-3 py-2.5"
+                } ${
+                  isActive
+                    ? "bg-[#eef0f7] text-[#2d336b] shadow-sm"
+                    : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                }`}
+              >
+                <item.icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? "text-[#6771ab]" : "text-slate-400"}`} />
+                {!showCollapsed && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User Card & Sign Out at the bottom */}
+        <div className="border-t border-slate-200/60 pt-4 mt-auto">
+          {showCollapsed ? (
+            <div className="flex justify-center mb-2">
+              <div 
+                className="h-9 w-9 rounded-full bg-violet-100 text-[#2d336b] flex items-center justify-center text-sm font-bold uppercase shrink-0 border border-violet-200 cursor-help"
+                title={`${userName} (${userEmail})`}
+              >
+                {userName.substring(0, 2)}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 px-2 py-1.5 mb-2 bg-[#fefce8]/60 rounded-xl border border-slate-100">
+              <div className="h-9 w-9 rounded-full bg-violet-100 text-[#2d336b] flex items-center justify-center text-sm font-bold uppercase shrink-0">
+                {userName.substring(0, 2)}
+              </div>
+              <div className="truncate min-w-0">
+                <p className="text-xs font-semibold text-slate-800 truncate">{userName}</p>
+                <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={handleSignOut}
+            title={showCollapsed ? "Sign Out" : undefined}
+            className={`flex items-center rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all cursor-pointer active:scale-[0.98] ${
+              showCollapsed
+                ? "justify-center h-10 w-10 mx-auto"
+                : "w-full gap-3 px-3 py-2"
+            }`}
+          >
+            <LogOut className="h-4.5 w-4.5 text-slate-400 group-hover:text-red-500" />
+            {!showCollapsed && <span>Sign Out</span>}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex min-h-screen bg-[#f8fafc] font-sans">
+      {/* Desktop Sidebar */}
+      <aside className={`bg-white border-r border-slate-200/80 hidden md:flex flex-col h-screen sticky top-0 shrink-0 z-30 transition-all duration-300 relative ${
+        isCollapsed ? "w-20 p-3" : "w-64 p-5"
+      }`}>
+        {sidebarContent(false)}
+        
+        {/* Toggle Button */}
+        <button
+          onClick={toggleCollapse}
+          className="absolute top-6 -right-3 h-6 w-6 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 hover:shadow transition-all cursor-pointer z-40"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </button>
+      </aside>
+
+      {/* Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile Navigation Header */}
+        <header className="md:hidden bg-white border-b border-slate-200 h-16 px-4 flex items-center justify-between sticky top-0 z-40">
+          <Link href="/dashboard" className="flex items-center">
+            <img
+              src="https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png"
+              alt="Savazar Logo"
+              className="h-8 w-auto object-contain"
+            />
+          </Link>
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600 focus-visible:ring-2 focus-visible:ring-[#6771ab] outline-none"
+            aria-label="Open menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+        </header>
+
+        {/* Mobile Menu Drawer */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            {/* Drawer */}
+            <aside className="fixed inset-y-0 left-0 w-64 bg-white shadow-2xl p-5 flex flex-col z-50 animate-in slide-in-from-left duration-200">
+              <div className="flex items-center justify-between mb-6">
+                <Link href="/dashboard" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
+                  <img
+                    src="https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png"
+                    alt="Savazar Logo"
+                    className="h-8 w-auto object-contain"
+                  />
+                </Link>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1 rounded-xl hover:bg-slate-100 text-slate-500"
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              {sidebarContent(true)}
+            </aside>
+          </div>
+        )}
+
+        {/* Page Content */}
+        <main className="flex-1">
+          <SampleWalkthroughCard 
+            isSampleWedding={activeWedding ? (activeWedding.description || "").includes("Sample Wedding") : false} 
+            weddingId={activeWedding?.id} 
+            userRole={userRole} 
+          />
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}

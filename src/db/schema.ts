@@ -1,0 +1,142 @@
+import { pgTable, text, timestamp, boolean, integer, uuid } from "drizzle-orm/pg-core";
+
+// Better Auth tables (text IDs as required by default setup)
+export const users = pgTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  image: text("image"),
+  role: text("role").default("user").notNull(), // 'admin' or 'user'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const sessions = pgTable("session", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const accounts = pgTable("account", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  providerId: text("provider_id").notNull(),
+  accountId: text("account_id").notNull(),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  expiresAt: timestamp("expires_at"),
+  password: text("password"), // Hash stored for Credentials Provider
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const verifications = pgTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Better Auth Aliases for Drizzle Adapter compatibility
+export const user = users;
+export const session = sessions;
+export const account = accounts;
+export const verification = verifications;
+
+// Wedding Business Tables (using Random UUIDs as required)
+export const weddings = pgTable("wedding", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  partnerA: text("partner_a").notNull(),
+  partnerB: text("partner_b").notNull(),
+  tradition: text("tradition").notNull(),
+  weddingDate: timestamp("wedding_date").notNull(),
+  budget: integer("budget").default(0).notNull(),
+  guestCount: integer("guest_count").default(0).notNull(),
+  location: text("location").notNull(),
+  locationName: text("location_name"),
+  street: text("street"),
+  city: text("city"),
+  state: text("state"),
+  country: text("country").default("India").notNull(),
+  pincode: text("pincode"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const tasks = pgTable("task", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").default("todo").notNull(), // backlog, todo, in_progress, done
+  dueDate: timestamp("due_date"),
+  category: text("category").notNull(), // venue, catering, decor, apparel, invitations, music, rituals, other
+  isCustom: boolean("is_custom").default(false).notNull(),
+  position: integer("position").default(0).notNull(), // sort order
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const rituals = pgTable("ritual", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  location: text("location").notNull(),
+  isCustom: boolean("is_custom").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const guests = pgTable("guest", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  email: text("email"),
+  phone: text("phone"),
+  loginCode: text("login_code")
+    .unique()
+    .notNull()
+    .$defaultFn(() => {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let result = "";
+      for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }),
+  rsvpStatus: text("rsvp_status").default("pending").notNull(), // pending, attending, declined
+  plusOneCount: integer("plus_one_count").default(0).notNull(),
+  dietaryRestrictions: text("dietary_restrictions"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const vendors = pgTable("vendor", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // catering, photography, decoration, apparel, venue, makeup, music, transport, other
+  contactPerson: text("contact_person"),
+  phone: text("phone"),
+  email: text("email"),
+  totalCost: integer("total_cost").default(0).notNull(), // Contract value
+  paidAmount: integer("paid_amount").default(0).notNull(), // Paid amount
+  paymentStatus: text("payment_status").default("unpaid").notNull(), // unpaid, partially_paid, paid
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

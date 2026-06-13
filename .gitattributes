@@ -1,0 +1,14 @@
+# Normalize line endings to LF on commit (cross-platform consistency for Docker)
+* text=auto eol=lf
+
+# Binaries — never normalize
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary

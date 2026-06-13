@@ -1,0 +1,1 @@
+ALTER TABLE "wedding" ADD COLUMN "state" text;

@@ -2,18 +2,21 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
-  const sessionToken = 
+  // Better Auth uses 'better-auth.session_token' (useSecureCookies: false)
+  // so we check that name only. The __secure- variant is disabled because
+  // Coolify terminates SSL at the proxy layer and forwards HTTP internally.
+  const sessionToken =
     request.cookies.get("better-auth.session_token")?.value ||
     request.cookies.get("__secure-better-auth.session_token")?.value;
 
   const { pathname } = request.nextUrl;
 
-  const isProtectedPath = 
-    pathname.startsWith("/wizard") || 
-    pathname.startsWith("/dashboard") || 
-    pathname.startsWith("/kanban") || 
-    pathname.startsWith("/calendar") || 
-    pathname.startsWith("/guests") || 
+  const isProtectedPath =
+    pathname.startsWith("/wizard") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/kanban") ||
+    pathname.startsWith("/calendar") ||
+    pathname.startsWith("/guests") ||
     pathname.startsWith("/vendors");
 
   const isAuthPath = pathname === "/login";

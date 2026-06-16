@@ -23,12 +23,19 @@ export const auth = betterAuth({
     },
   },
   advanced: {
-    // Trust X-Forwarded-* headers from Coolify's reverse proxy
-    // so secure cookies work correctly behind HTTPS termination
-    useSecureCookies: process.env.NODE_ENV === "production",
+    // Disable the __Secure- cookie prefix.
+    // Coolify terminates SSL at the reverse proxy and forwards HTTP
+    // internally — the __Secure- prefix would cause the browser to
+    // refuse to send the cookie on the internal HTTP leg, breaking
+    // session detection in the middleware.
+    useSecureCookies: false,
     defaultCookieAttributes: {
+      httpOnly: true,
       sameSite: "lax",
+      // Keep secure:true so the browser only sends the cookie over HTTPS
+      // to the public domain, but without the __Secure- name prefix.
       secure: process.env.NODE_ENV === "production",
+      path: "/",
     },
   },
 });

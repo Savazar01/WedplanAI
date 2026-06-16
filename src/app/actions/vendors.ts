@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { vendors, weddings } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
+import { getActiveWedding } from "@/lib/wedding-helper";
 import { revalidatePath } from "next/cache";
 
 export async function createVendorAction(data: {
@@ -29,23 +30,21 @@ export async function createVendorAction(data: {
     return { error: "Costs must be non-negative." };
   }
 
+  const totalCostInt = Math.round(data.totalCost || 0);
+  const paidAmountInt = Math.round(data.paidAmount || 0);
+
   let paymentStatus: "unpaid" | "partially_paid" | "paid" = "unpaid";
-  if (data.paidAmount === data.totalCost && data.totalCost > 0) {
+  if (paidAmountInt === totalCostInt && totalCostInt > 0) {
     paymentStatus = "paid";
-  } else if (data.paidAmount > 0) {
+  } else if (paidAmountInt > 0) {
     paymentStatus = "partially_paid";
   }
 
-  const userWeddings = await db
-    .select()
-    .from(weddings)
-    .where(eq(weddings.userId, session.user.id))
-    .limit(1);
-
-  if (userWeddings.length === 0) {
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) {
     return { error: "No wedding profile found." };
   }
-  const weddingId = userWeddings[0].id;
+  const weddingId = wedding.id;
 
   try {
     await db.insert(vendors).values({
@@ -55,8 +54,8 @@ export async function createVendorAction(data: {
       contactPerson: data.contactPerson || null,
       phone: data.phone || null,
       email: data.email || null,
-      totalCost: data.totalCost,
-      paidAmount: data.paidAmount,
+      totalCost: totalCostInt,
+      paidAmount: paidAmountInt,
       paymentStatus,
       notes: data.notes || null,
     });
@@ -116,10 +115,13 @@ export async function updateVendorAction(
     return { error: "Costs must be non-negative." };
   }
 
+  const totalCostInt = Math.round(data.totalCost || 0);
+  const paidAmountInt = Math.round(data.paidAmount || 0);
+
   let paymentStatus: "unpaid" | "partially_paid" | "paid" = "unpaid";
-  if (data.paidAmount === data.totalCost && data.totalCost > 0) {
+  if (paidAmountInt === totalCostInt && totalCostInt > 0) {
     paymentStatus = "paid";
-  } else if (data.paidAmount > 0 && data.paidAmount < data.totalCost) {
+  } else if (paidAmountInt > 0 && paidAmountInt < totalCostInt) {
     paymentStatus = "partially_paid";
   }
 
@@ -132,8 +134,8 @@ export async function updateVendorAction(
         contactPerson: data.contactPerson || null,
         phone: data.phone || null,
         email: data.email || null,
-        totalCost: data.totalCost,
-        paidAmount: data.paidAmount,
+        totalCost: totalCostInt,
+        paidAmount: paidAmountInt,
         paymentStatus,
         notes: data.notes || null,
         updatedAt: new Date(),

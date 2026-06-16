@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { rituals, weddings } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
+import { getActiveWedding } from "@/lib/wedding-helper";
 import { revalidatePath } from "next/cache";
 
 export async function createRitualAction(data: {
@@ -24,16 +25,11 @@ export async function createRitualAction(data: {
     return { error: "End time must be after the start time." };
   }
 
-  const userWeddings = await db
-    .select()
-    .from(weddings)
-    .where(eq(weddings.userId, session.user.id))
-    .limit(1);
-
-  if (userWeddings.length === 0) {
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) {
     return { error: "No wedding profile found." };
   }
-  const weddingId = userWeddings[0].id;
+  const weddingId = wedding.id;
 
   try {
     await db.insert(rituals).values({

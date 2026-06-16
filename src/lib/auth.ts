@@ -4,6 +4,8 @@ import { db } from "@/db/client";
 import * as schema from "@/db/schema";
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3044",
+  secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: schema,
@@ -18,6 +20,15 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "user",
       },
+    },
+  },
+  advanced: {
+    // Trust X-Forwarded-* headers from Coolify's reverse proxy
+    // so secure cookies work correctly behind HTTPS termination
+    useSecureCookies: process.env.NODE_ENV === "production",
+    defaultCookieAttributes: {
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
     },
   },
 });

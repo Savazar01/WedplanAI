@@ -33,7 +33,7 @@ Hindu · Muslim · Sikh · Christian · Secular (and more)
 | Database | [PostgreSQL 17](https://www.postgresql.org/) + [pgvector](https://github.com/pgvector/pgvector) |
 | ORM | [Drizzle ORM](https://orm.drizzle.team/) |
 | Auth | [Better Auth](https://www.better-auth.com/) |
-| Runtime | [Node.js 20](https://nodejs.org/) |
+| Runtime | [Node.js 22](https://nodejs.org/) (LTS) |
 | Container | [Docker](https://www.docker.com/) + Docker Compose |
 
 ---
@@ -95,7 +95,7 @@ Once deployed, visit `https://your-domain.com` and click **Get Started Free** to
 ## 💻 Local Development
 
 ### Prerequisites
-- [Node.js 20+](https://nodejs.org/)
+- [Node.js 22+](https://nodejs.org/) (LTS)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 ### 1. Clone the repository
@@ -122,6 +122,7 @@ Edit `.env.local`:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5611/wedding_planner"
 BETTER_AUTH_SECRET="any-random-string-at-least-32-chars-long"
 BETTER_AUTH_URL="http://localhost:3044"
+NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3044"
 NODE_ENV="development"
 ```
 
@@ -143,34 +144,45 @@ npm run db:migrate
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3044](http://localhost:3044) in your browser. (The app is configured to run on port `3044` in development).
 
 ---
 
 ## 🐳 Running with Docker Compose (Full Stack)
 
+To run the entire stack (Next.js app + PostgreSQL database) inside Docker containers locally:
+
+### 1. Create a `.env` file
+Copy `.env.example` to `.env` (Docker Compose reads `.env` by default, not `.env.local`):
 ```bash
-# Copy env file
-cp .env.example .env.local
-
-# Edit .env.local with your values (especially BETTER_AUTH_SECRET)
-
-# Build and start all services
-docker compose up --build -d
-
-# View logs
-docker compose logs -f web
+cp .env.example .env
 ```
 
-The app will be available at `http://localhost:3044`.
+### 2. Configure environment variables
+Open the newly created `.env` file and set the required variables:
+```env
+BETTER_AUTH_SECRET="any-random-string-at-least-32-chars-long"
+BETTER_AUTH_URL="http://localhost:3044"
+NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3044"
+```
+
+> **Important:** **Do not** define `DATABASE_URL` in this `.env` file when running via Docker Compose. The `docker-compose.yml` file will automatically configure it to connect to the internal database container (`db:5432`) correctly. If `DATABASE_URL` is set to `localhost:5611` in `.env`, the web container will fail to connect.
+
+### 3. Build and start services
+Run the following command:
+```bash
+docker compose up --build -d
+```
+
+The application will be built and will be available at [http://localhost:3044](http://localhost:3044).
 
 ### Stop / Reset
 
 ```bash
-# Stop containers
+# Stop all services
 docker compose down
 
-# Stop and remove all data (full reset)
+# Stop and remove all persistent database data (full reset)
 docker compose down -v
 ```
 
@@ -241,7 +253,8 @@ src/
 |---|---|---|---|
 | `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
 | `BETTER_AUTH_SECRET` | ✅ | — | Auth secret key (min 32 chars) |
-| `BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Public URL of the application |
+| `BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Server-side URL of the application |
+| `NEXT_PUBLIC_BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Client-side/browser URL of the application |
 | `NODE_ENV` | — | `production` | Node environment |
 | `POSTGRES_USER` | — | `postgres` | PostgreSQL username |
 | `POSTGRES_PASSWORD` | — | `postgres` | PostgreSQL password |

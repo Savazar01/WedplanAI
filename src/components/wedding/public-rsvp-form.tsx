@@ -151,7 +151,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
       <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-amber-400 rounded-bl-xl m-2 opacity-50" />
       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-400 rounded-br-xl m-2 opacity-50" />
 
-      <h3 className="text-xl font-bold text-center text-[#6771ab] font-serif mb-6 tracking-wide">
+      <h3 className="text-xl font-bold text-center text-[var(--color-primary)] font-serif mb-6 tracking-wide">
         Will You Celebrate With Us?
       </h3>
 
@@ -168,7 +168,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
                 placeholder="e.g. G1H3B8"
                 value={loginCode}
                 onChange={(e) => setLoginCode(e.target.value.toUpperCase())}
-                className="text-center text-xl tracking-widest font-mono font-bold border-amber-200 focus:border-[#6771ab] focus:ring-1 focus:ring-[#6771ab] rounded-xl bg-amber-50/20"
+                className="text-center text-xl tracking-widest font-mono font-bold border-amber-200 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] rounded-xl bg-amber-50/20"
                 disabled={loading}
               />
             </div>
@@ -184,7 +184,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
             <Button
               type="submit"
               disabled={loading || loginCode.length !== 6}
-              className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[#6771ab] text-white hover:bg-[#566198] shadow-md transition-all active:scale-[0.97]"
+              className="w-full sm:w-auto px-8 py-2.5 rounded-xl bg-[var(--color-primary)] text-white hover:opacity-90 shadow-md transition-all active:scale-[0.97]"
             >
               {loading ? "Verifying..." : "Unlock Invitation"}
             </Button>
@@ -192,8 +192,8 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
         </form>
       ) : (
         <form onSubmit={handleSaveRsvp} className="space-y-5">
-          <div className="bg-[#fce4f0]/40 p-4 rounded-2xl border border-[#c484b0]/20 text-center">
-            <span className="block text-xs uppercase tracking-widest text-[#c484b0] font-bold">Honored Guest</span>
+          <div className="bg-[var(--color-secondary)]/10 p-4 rounded-2xl border border-[var(--color-secondary)]/20 text-center">
+            <span className="block text-xs uppercase tracking-widest text-[var(--color-secondary)] font-bold">Honored Guest</span>
             <span className="text-lg font-bold text-slate-800 font-serif block mt-1">{guest.name}</span>
           </div>
 
@@ -205,7 +205,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-primary)] uppercase tracking-widest mb-1.5">
                 Attendance
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -236,7 +236,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
 
             {rsvpStatus === "attending" && (
               <div>
-                <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1.5">
+                <label className="block text-xs font-semibold text-[var(--color-primary)] uppercase tracking-widest mb-1.5">
                   Plus One Count
                 </label>
                 <Select
@@ -253,7 +253,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-primary)] uppercase tracking-widest mb-1.5">
                 Dietary Restrictions / Notes
               </label>
               <textarea
@@ -261,7 +261,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
                 placeholder="e.g. Vegetarian, Gluten-free, none"
                 value={dietaryRestrictions}
                 onChange={(e) => { setDietaryRestrictions(e.target.value); setSaveSuccess(false); }}
-                className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#6771ab] focus:border-[#6771ab]"
+                className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
               />
             </div>
           </div>
@@ -288,7 +288,7 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-2/3 py-2.5 rounded-xl bg-[#6771ab] text-white hover:bg-[#566198] shadow-md transition-all active:scale-[0.97] text-sm font-bold"
+              className="w-full sm:w-2/3 py-2.5 rounded-xl bg-[var(--color-primary)] text-white hover:opacity-90 shadow-md transition-all active:scale-[0.97] text-sm font-bold"
             >
               {loading ? "Saving..." : "Confirm RSVP"}
             </Button>

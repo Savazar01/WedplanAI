@@ -1,12 +1,12 @@
 import { db } from "@/db/client";
-import { tasks, guests, vendors } from "@/db/schema";
+import { tasks, guests, vendors, kanbanColumns } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import DashboardWeddingCard from "@/components/dashboard/DashboardWeddingCard";
 import ShareWeddingCard from "@/components/dashboard/ShareWeddingCard";
 import { formatCurrency } from "@/lib/format";
@@ -41,10 +41,19 @@ export default async function DashboardPage() {
   const weddingTasks = await db.select().from(tasks).where(eq(tasks.weddingId, wedding.id));
   const weddingGuests = await db.select().from(guests).where(eq(guests.weddingId, wedding.id));
   const weddingVendors = await db.select().from(vendors).where(eq(vendors.weddingId, wedding.id));
+  const weddingColumns = await db
+    .select()
+    .from(kanbanColumns)
+    .where(eq(kanbanColumns.weddingId, wedding.id))
+    .orderBy(asc(kanbanColumns.position));
+
+  const doneCol = weddingColumns.find((col) => col.type === "done");
 
   // Task percentage
   const totalTasks = weddingTasks.length;
-  const doneTasks = weddingTasks.filter((t) => t.status === "done").length;
+  const doneTasks = weddingTasks.filter((t) => 
+    doneCol ? (t.columnId === doneCol.id || t.status === "done") : t.status === "done"
+  ).length;
   const taskPercentage = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
   // Guest calculations

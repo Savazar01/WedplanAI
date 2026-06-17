@@ -7,7 +7,16 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { createTaskAction, updateTaskStatusAction, deleteTaskAction, updateTaskAction } from "@/app/actions/kanban";
+import { 
+  createTaskAction, 
+  updateTaskStatusAction, 
+  deleteTaskAction, 
+  updateTaskAction,
+  createColumnAction,
+  updateColumnAction,
+  deleteColumnAction,
+  reorderColumnsAction
+} from "@/app/actions/kanban";
 
 interface Task {
   id: string;
@@ -19,52 +28,64 @@ interface Task {
   isCustom: boolean;
 }
 
-interface BoardProps {
-  initialTasks: Task[];
+interface Column {
+  id: string;
+  weddingId: string;
+  name: string;
+  color: string;
+  position: number;
+  type: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const COLUMNS = [
+interface BoardProps {
+  initialTasks: Task[];
+  initialColumns?: Column[];
+}
+
+const DEFAULT_COLUMNS: Column[] = [
   {
     id: "backlog",
-    label: "Backlog",
-    icon: "📋",
-    gradient: "from-slate-50 to-slate-100",
-    headerGradient: "from-slate-600 to-slate-700",
-    accent: "border-slate-300",
-    countBg: "bg-slate-500",
-    dotColor: "bg-slate-400",
+    weddingId: "",
+    name: "Backlog",
+    color: "#6771ab",
+    position: 0,
+    type: "backlog",
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
     id: "todo",
-    label: "To Do",
-    icon: "📌",
-    gradient: "from-blue-50 to-indigo-50",
-    headerGradient: "from-[#6771ab] to-[#2d336b]",
-    accent: "border-indigo-200",
-    countBg: "bg-[#6771ab]",
-    dotColor: "bg-blue-400",
+    weddingId: "",
+    name: "To Do",
+    color: "#6771ab",
+    position: 1,
+    type: "todo",
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
     id: "in_progress",
-    label: "In Progress",
-    icon: "⚡",
-    gradient: "from-amber-50 to-orange-50",
-    headerGradient: "from-amber-500 to-orange-500",
-    accent: "border-amber-200",
-    countBg: "bg-amber-500",
-    dotColor: "bg-amber-400",
+    weddingId: "",
+    name: "In Progress",
+    color: "#f59e0b",
+    position: 2,
+    type: "in_progress",
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
     id: "done",
-    label: "Done",
-    icon: "✅",
-    gradient: "from-emerald-50 to-green-50",
-    headerGradient: "from-emerald-500 to-green-600",
-    accent: "border-emerald-200",
-    countBg: "bg-emerald-500",
-    dotColor: "bg-emerald-400",
-  },
-] as const;
+    weddingId: "",
+    name: "Done",
+    color: "#22c55e",
+    position: 3,
+    type: "done",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+];
 
 const categories = ["venue", "catering", "decor", "apparel", "invitations", "music", "rituals", "other"] as const;
 
@@ -79,13 +100,24 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; dot: string }>
   other:       { bg: "bg-slate-100",   text: "text-slate-700",   dot: "bg-slate-400" },
 };
 
-export default function KanbanBoard({ initialTasks }: BoardProps) {
+export default function KanbanBoard({ initialTasks, initialColumns = DEFAULT_COLUMNS }: BoardProps) {
   const [tasksList, setTasksList] = React.useState<Task[]>(initialTasks);
-  const [activeMobileCol, setActiveMobileCol] = React.useState<string>("todo");
+  const [columnsList, setColumnsList] = React.useState<Column[]>(initialColumns);
+  const [activeMobileCol, setActiveMobileCol] = React.useState<string>(initialColumns[0]?.id || "todo");
+  
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
   const [dragOverCol, setDragOverCol] = React.useState<string | null>(null);
+
+  // Column CRUD states
+  const [isAddColOpen, setIsAddColOpen] = React.useState(false);
+  const [newColName, setNewColName] = React.useState("");
+  const [newColColor, setNewColColor] = React.useState("#6771ab");
+  const [selectedCol, setSelectedCol] = React.useState<Column | null>(null);
+  const [isEditColOpen, setIsEditColOpen] = React.useState(false);
+  const [editColName, setEditColName] = React.useState("");
+  const [editColColor, setEditColColor] = React.useState("#6771ab");
 
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -107,6 +139,22 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
     setTasksList(initialTasks);
     setPrevInitialTasks(initialTasks);
   }
+
+  const [prevInitialColumns, setPrevInitialColumns] = React.useState(initialColumns);
+  if (initialColumns !== prevInitialColumns) {
+    setColumnsList(initialColumns);
+    setPrevInitialColumns(initialColumns);
+  }
+
+  const getColumnIcon = (type: string) => {
+    switch (type) {
+      case "backlog": return "📋";
+      case "todo": return "📌";
+      case "in_progress": return "⚡";
+      case "done": return "✅";
+      default: return "✨";
+    }
+  };
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData("text/plain", taskId);
@@ -186,11 +234,114 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
     }
   };
 
-  const isOverdue = (date: Date | null, status: string) =>
-    date && status !== "done" && new Date(date) < new Date();
+  const handleAddColumn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newColName.trim()) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await createColumnAction({ name: newColName, color: newColColor });
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setIsAddColOpen(false);
+        setNewColName("");
+        setNewColColor("#6771ab");
+        setToast({ message: "Column added.", type: "success" });
+        window.location.reload();
+      }
+    } catch {
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditColumn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCol || !editColName.trim()) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await updateColumnAction(selectedCol.id, { name: editColName, color: editColColor });
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setColumnsList((prev) => prev.map((c) => c.id === selectedCol.id ? { ...c, name: editColName, color: editColColor } : c));
+        setIsEditColOpen(false);
+        setSelectedCol(null);
+        setToast({ message: "Column updated.", type: "success" });
+        window.location.reload();
+      }
+    } catch {
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteColumn = async (colId: string) => {
+    const hasTasks = tasksList.some((t) => t.status === colId);
+    if (hasTasks) {
+      setToast({ message: "Cannot delete column containing tasks. Please move them first.", type: "error" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await deleteColumnAction(colId);
+      if (res?.error) {
+        setToast({ message: res.error, type: "error" });
+      } else {
+        setColumnsList((prev) => prev.filter((c) => c.id !== colId));
+        setToast({ message: "Column deleted.", type: "success" });
+        setIsEditColOpen(false);
+        setSelectedCol(null);
+        window.location.reload();
+      }
+    } catch {
+      setToast({ message: "Failed to delete column.", type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMoveColumn = async (direction: "left" | "right", colId: string) => {
+    const index = columnsList.findIndex((c) => c.id === colId);
+    if (index === -1) return;
+    const targetIndex = direction === "left" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= columnsList.length) return;
+
+    const updatedCols = [...columnsList];
+    const temp = updatedCols[index];
+    updatedCols[index] = updatedCols[targetIndex];
+    updatedCols[targetIndex] = temp;
+
+    setColumnsList(updatedCols);
+
+    try {
+      const res = await reorderColumnsAction(updatedCols.map((c) => c.id));
+      if (res?.error) {
+        setToast({ message: res.error, type: "error" });
+        setColumnsList(columnsList); // revert
+      } else {
+        setToast({ message: "Column reordered.", type: "success" });
+      }
+    } catch {
+      setToast({ message: "Failed to reorder columns.", type: "error" });
+      setColumnsList(columnsList); // revert
+    }
+  };
+
+  const isOverdue = (date: Date | null, status: string) => {
+    if (!date) return false;
+    const doneCol = columnsList.find((col) => col.type === "done");
+    const isDone = doneCol ? status === doneCol.id : status === "done";
+    return !isDone && new Date(date) < new Date();
+  };
 
   const totalTasks = tasksList.length;
-  const doneTasks = tasksList.filter(t => t.status === "done").length;
+  const doneCol = columnsList.find((c) => c.type === "done");
+  const doneTasks = tasksList.filter(t => doneCol ? t.status === doneCol.id : t.status === "done").length;
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
   return (
@@ -227,8 +378,8 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
 
       {/* ── Mobile Tabs ── */}
       <div className="block md:hidden mb-6 bg-slate-100/80 border border-slate-200 p-1.5 rounded-2xl">
-        <div className="flex gap-1">
-          {COLUMNS.map((col) => {
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {columnsList.map((col) => {
             const isActive = activeMobileCol === col.id;
             const count = tasksList.filter((t) => t.status === col.id).length;
             return (
@@ -236,21 +387,24 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
                 key={col.id}
                 type="button"
                 onClick={() => setActiveMobileCol(col.id)}
-                className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-xl text-xs font-bold transition-all duration-200 ${
+                className={`flex-1 flex flex-col items-center justify-center py-2 px-3 rounded-xl text-xs font-bold transition-all duration-200 shrink-0 ${
                   isActive
                     ? "bg-white text-[#2d336b] shadow-sm ring-1 ring-black/5"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
                 <span className="flex items-center gap-1">
-                  <span className="text-sm">{col.icon}</span>
-                  <span className="truncate">{col.label}</span>
+                  <span className="text-sm">{getColumnIcon(col.type)}</span>
+                  <span className="truncate max-w-[80px]">{col.name}</span>
                 </span>
-                <span className={`mt-1 text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${
-                  isActive
-                    ? "bg-[#6771ab] text-white"
-                    : "bg-slate-200/80 text-slate-600"
-                }`}>
+                <span 
+                  className={`mt-1 text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${
+                    isActive
+                      ? "bg-[#6771ab] text-white"
+                      : "bg-slate-200/80 text-slate-600"
+                  }`}
+                  style={isActive ? { backgroundColor: col.color } : {}}
+                >
                   {count}
                 </span>
               </button>
@@ -261,7 +415,7 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
 
       {/* ── Columns ── */}
       <div className="flex flex-col md:flex-row gap-5 md:overflow-x-auto pb-6 select-none items-start">
-        {COLUMNS.map((col) => {
+        {columnsList.map((col) => {
           const colTasks = tasksList.filter((t) => t.status === col.id);
           const isDragTarget = dragOverCol === col.id;
           return (
@@ -270,31 +424,55 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
               onDragOver={(e) => handleDragOver(e, col.id)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col.id)}
-              className={`w-full md:w-[300px] shrink-0 rounded-2xl flex flex-col transition-all duration-200 ${
+              className={`w-full md:w-[300px] shrink-0 rounded-2xl flex flex-col border transition-all duration-200 ${
                 col.id === activeMobileCol ? "flex" : "hidden md:flex"
               } ${
                 isDragTarget ? "ring-2 ring-[#6771ab] ring-offset-2 scale-[1.01]" : ""
               }`}
+              style={{ backgroundColor: `${col.color}08`, borderColor: `${col.color}20` }}
             >
               {/* Column header */}
-              <div className={`bg-gradient-to-r ${col.headerGradient} rounded-t-2xl px-4 py-3 flex items-center justify-between`}>
-                <h3 className="font-bold text-white text-sm tracking-wide flex items-center gap-2">
-                  <span className="text-base">{col.icon}</span>
-                  <span>{col.label}</span>
+              <div 
+                className="rounded-t-2xl px-4 py-3 flex items-center text-white"
+                style={{ backgroundColor: col.color }}
+              >
+                <h3 className="font-bold text-sm tracking-wide flex items-center gap-2">
+                  <span className="text-base">{getColumnIcon(col.type)}</span>
+                  <span>{col.name}</span>
                 </h3>
-                <span className="bg-white/20 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+                <span className="ml-auto mr-1.5 bg-white/20 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
                   {colTasks.length}
                 </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCol(col);
+                    setEditColName(col.name);
+                    setEditColColor(col.color);
+                    setIsEditColOpen(true);
+                  }}
+                  className="p-1 rounded text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  title="Column Settings"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
               </div>
 
               {/* Cards area */}
               <div
-                className={`flex-1 bg-gradient-to-b ${col.gradient} border-x border-b ${col.accent} rounded-b-2xl p-3 space-y-2.5 min-h-[520px] overflow-y-auto`}
+                className="flex-1 rounded-b-2xl p-3 space-y-2.5 min-h-[520px] overflow-y-auto"
               >
                 {colTasks.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-white/60 border border-dashed border-slate-300 flex items-center justify-center mb-3 text-xl">
-                      {col.icon}
+                    <div 
+                      className="w-12 h-12 rounded-2xl bg-white/60 border border-dashed border-slate-300 flex items-center justify-center mb-3 text-xl"
+                      style={{ borderColor: `${col.color}40` }}
+                    >
+                      {getColumnIcon(col.type)}
                     </div>
                     <p className="text-xs text-slate-400 font-medium">Drop tasks here</p>
                   </div>
@@ -382,14 +560,14 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
                                   setTasksList(originalTasks);
                                 } 
                               } catch {
-                                setTasksList(originalTasks);
+                                  setTasksList(originalTasks);
                               }
                             }}
                             className="bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-600 rounded-lg px-1.5 py-0.5 outline-none focus-visible:ring-1 focus-visible:ring-[#6771ab] cursor-pointer hover:bg-slate-100 transition-colors"
                           >
-                            {COLUMNS.map((col) => (
-                              <option key={col.id} value={col.id}>
-                                {col.label}
+                            {columnsList.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
                               </option>
                             ))}
                           </select>
@@ -409,6 +587,15 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
             </div>
           );
         })}
+
+        {/* Add Column Button Card */}
+        <div 
+          onClick={() => setIsAddColOpen(true)}
+          className="w-full md:w-[300px] shrink-0 border-2 border-dashed border-slate-300 hover:border-[#6771ab] hover:bg-slate-50 rounded-2xl flex flex-col items-center justify-center p-6 min-h-[150px] transition-all cursor-pointer group"
+        >
+          <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">➕</span>
+          <span className="text-sm font-bold text-slate-600">Add Column</span>
+        </div>
       </div>
 
       {/* ── Create Task Dialog ── */}
@@ -469,6 +656,100 @@ export default function KanbanBoard({ initialTasks }: BoardProps) {
           <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 mt-2">
             <Button type="button" variant="ghost" onClick={() => { setIsEditOpen(false); setSelectedTask(null); }} disabled={loading}>Cancel</Button>
             <Button type="submit" variant="primary" disabled={loading}>{loading ? "Saving..." : "Save Changes"}</Button>
+          </div>
+        </form>
+      </Dialog>
+
+      {/* ── Add Column Dialog ── */}
+      <Dialog isOpen={isAddColOpen} onClose={() => setIsAddColOpen(false)} title="Add New Column">
+        <form onSubmit={handleAddColumn} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Column Name</label>
+            <Input type="text" placeholder="e.g. Needs Review" value={newColName} onChange={(e) => setNewColName(e.target.value)} required disabled={loading} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Column Theme Color</label>
+            <div className="flex items-center gap-3">
+              <Input type="color" value={newColColor} onChange={(e) => setNewColColor(e.target.value)} className="w-16 h-10 p-1 cursor-pointer" disabled={loading} />
+              <Input type="text" placeholder="#6771ab" value={newColColor} onChange={(e) => setNewColColor(e.target.value)} className="flex-1" disabled={loading} />
+            </div>
+          </div>
+          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">{error}</div>}
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 mt-2">
+            <Button type="button" variant="ghost" onClick={() => setIsAddColOpen(false)} disabled={loading}>Cancel</Button>
+            <Button type="submit" variant="primary" disabled={loading}>{loading ? "Adding..." : "Save Column"}</Button>
+          </div>
+        </form>
+      </Dialog>
+
+      {/* ── Edit Column Dialog ── */}
+      <Dialog isOpen={isEditColOpen} onClose={() => { setIsEditColOpen(false); setSelectedCol(null); }} title={`Column Settings: ${selectedCol?.name ?? ""}`}>
+        <form onSubmit={handleEditColumn} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Column Name</label>
+            <Input type="text" placeholder="Column name" value={editColName} onChange={(e) => setEditColName(e.target.value)} required disabled={loading} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Column Theme Color</label>
+            <div className="flex items-center gap-3">
+              <Input type="color" value={editColColor} onChange={(e) => setEditColColor(e.target.value)} className="w-16 h-10 p-1 cursor-pointer" disabled={loading} />
+              <Input type="text" placeholder="#6771ab" value={editColColor} onChange={(e) => setEditColColor(e.target.value)} className="flex-1" disabled={loading} />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-2">Reorder Column</label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  if (selectedCol) {
+                    handleMoveColumn("left", selectedCol.id);
+                    setIsEditColOpen(false);
+                  }
+                }}
+                disabled={columnsList.findIndex(c => c.id === selectedCol?.id) === 0}
+                className="flex-1"
+              >
+                ⬅️ Move Left
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  if (selectedCol) {
+                    handleMoveColumn("right", selectedCol.id);
+                    setIsEditColOpen(false);
+                  }
+                }}
+                disabled={columnsList.findIndex(c => c.id === selectedCol?.id) === columnsList.length - 1}
+                className="flex-1"
+              >
+                Move Right ➡️
+              </Button>
+            </div>
+          </div>
+
+          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">{error}</div>}
+          
+          <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
+            <Button 
+              type="button" 
+              variant="error" 
+              onClick={() => {
+                if (selectedCol) {
+                  handleDeleteColumn(selectedCol.id);
+                }
+              }} 
+              disabled={loading}
+            >
+              Delete Column
+            </Button>
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="ghost" onClick={() => { setIsEditColOpen(false); setSelectedCol(null); }} disabled={loading}>Cancel</Button>
+              <Button type="submit" variant="primary" disabled={loading}>{loading ? "Saving..." : "Save Changes"}</Button>
+            </div>
           </div>
         </form>
       </Dialog>

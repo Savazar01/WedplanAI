@@ -14,19 +14,31 @@ import {
   Users,
   Store,
   UserCog,
+  Palette,
   LogOut,
   Menu,
   X,
   Globe,
   ChevronLeft,
   ChevronRight,
+  ShieldAlert,
+  KeyRound,
+  ChevronDown,
 } from "lucide-react";
+
+const DEFAULT_LOGO = "https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png";
 
 interface Wedding {
   id: string;
   partnerA: string;
   partnerB: string;
   description?: string | null;
+  themeFont?: string | null;
+  themePrimary?: string | null;
+  themeSecondary?: string | null;
+  themeBackground?: string | null;
+  logoUrl?: string | null;
+  logoData?: string | null;
 }
 
 interface SidebarShellProps {
@@ -48,6 +60,7 @@ export default function SidebarShell({
 }: SidebarShellProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = React.useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -59,6 +72,12 @@ export default function SidebarShell({
       }, 0);
     }
   }, []);
+
+  React.useEffect(() => {
+    if (["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users"].includes(pathname)) {
+      setIsAdminMenuOpen(true);
+    }
+  }, [pathname]);
 
   const toggleCollapse = () => {
     setIsCollapsed((prev) => {
@@ -99,14 +118,14 @@ export default function SidebarShell({
     });
   }
 
-  navItems.push({ href: "/dashboard/settings", label: "Settings", icon: UserCog });
+  navItems.push({ href: "/dashboard/profile", label: "User Profile", icon: UserCog });
 
-  if (userRole === "admin") {
-    navItems.push({ href: "/dashboard/users", label: "User Management", icon: UserCog });
-  }
 
   const sidebarContent = (isMobile = false) => {
     const showCollapsed = isCollapsed && !isMobile;
+    const isSubpageActive = ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users"].includes(pathname);
+    const logoSource = activeWedding?.logoData || activeWedding?.logoUrl || DEFAULT_LOGO;
+
     return (
       <div className="flex flex-col h-full">
         {/* Brand Header */}
@@ -116,9 +135,14 @@ export default function SidebarShell({
               <span className="text-2xl" title="Savazar Dashboard">💒</span>
             ) : (
               <img
-                src="https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png"
+                src={logoSource}
                 alt="Savazar.com Logo"
                 className="h-10 w-auto object-contain"
+                onError={(e) => {
+                  if (e.currentTarget.src !== DEFAULT_LOGO) {
+                    e.currentTarget.src = DEFAULT_LOGO;
+                  }
+                }}
               />
             )}
           </Link>
@@ -156,6 +180,119 @@ export default function SidebarShell({
               </Link>
             );
           })}
+
+          {/* App Administration Accordion */}
+          {userRole === "admin" && (
+            showCollapsed ? (
+              <div className="relative group mx-auto">
+                <button
+                  title="App Administration"
+                  className={`flex items-center justify-center h-10 w-10 mx-auto rounded-xl transition-all duration-100 cursor-pointer ${
+                    isSubpageActive
+                      ? "bg-[#eef0f7] text-[#2d336b] shadow-sm"
+                      : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                  }`}
+                >
+                  <ShieldAlert className={`h-4.5 w-4.5 shrink-0 ${isSubpageActive ? "text-[#6771ab]" : "text-slate-400"}`} />
+                </button>
+                
+                {/* Floating Tooltip Box */}
+                <div className="absolute left-full top-0 ml-2 hidden group-hover:flex flex-col bg-white border border-slate-200 shadow-md p-2.5 rounded-xl z-50 w-48 text-left space-y-1">
+                  <div className="px-2 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+                    App Administration
+                  </div>
+                  <Link
+                    href="/dashboard/admin/appearance"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#f0f1fa] hover:text-[#3d4580] transition-colors ${
+                      pathname === "/dashboard/admin/appearance" ? "bg-[#eef0f7] text-[#2d336b]" : "text-[#475569]"
+                    }`}
+                  >
+                    <Palette className="h-3.5 w-3.5 text-slate-400" />
+                    Appearance
+                  </Link>
+                  <Link
+                    href="/dashboard/admin/api-keys"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#f0f1fa] hover:text-[#3d4580] transition-colors ${
+                      pathname === "/dashboard/admin/api-keys" ? "bg-[#eef0f7] text-[#2d336b]" : "text-[#475569]"
+                    }`}
+                  >
+                    <KeyRound className="h-3.5 w-3.5 text-slate-400" />
+                    API Keys
+                  </Link>
+                  <Link
+                    href="/dashboard/admin/users"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#f0f1fa] hover:text-[#3d4580] transition-colors ${
+                      pathname === "/dashboard/admin/users" ? "bg-[#eef0f7] text-[#2d336b]" : "text-[#475569]"
+                    }`}
+                  >
+                    <UserCog className="h-3.5 w-3.5 text-slate-400" />
+                    User Management
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <button
+                  onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+                  className={`w-full flex items-center justify-between rounded-xl text-sm font-semibold transition-all duration-100 px-3 py-2.5 cursor-pointer ${
+                    isSubpageActive
+                      ? "bg-[#eef0f7]/40 text-[#2d336b]"
+                      : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <ShieldAlert className={`h-4.5 w-4.5 shrink-0 ${isSubpageActive ? "text-[#6771ab]" : "text-slate-400"}`} />
+                    <span>App Administration</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${isAdminMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+                
+                {isAdminMenuOpen && (
+                  <div className="pl-6 space-y-1 mt-1">
+                    <Link
+                      href="/dashboard/admin/appearance"
+                      onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-100 ${
+                        pathname === "/dashboard/admin/appearance"
+                          ? "bg-[#eef0f7] text-[#2d336b]"
+                          : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                      }`}
+                    >
+                      <Palette className="h-4 w-4 text-slate-400" />
+                      <span>Appearance</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/admin/api-keys"
+                      onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-100 ${
+                        pathname === "/dashboard/admin/api-keys"
+                          ? "bg-[#eef0f7] text-[#2d336b]"
+                          : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                      }`}
+                    >
+                      <KeyRound className="h-4 w-4 text-slate-400" />
+                      <span>API Keys</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/admin/users"
+                      onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-100 ${
+                        pathname === "/dashboard/admin/users"
+                          ? "bg-[#eef0f7] text-[#2d336b]"
+                          : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                      }`}
+                    >
+                      <UserCog className="h-4 w-4 text-slate-400" />
+                      <span>User Management</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )
+          )}
         </nav>
 
         {/* User Card & Sign Out at the bottom */}
@@ -197,6 +334,8 @@ export default function SidebarShell({
     );
   };
 
+  const logoSource = activeWedding?.logoData || activeWedding?.logoUrl || DEFAULT_LOGO;
+
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans">
       {/* Desktop Sidebar */}
@@ -221,9 +360,14 @@ export default function SidebarShell({
         <header className="md:hidden bg-white border-b border-slate-200 h-16 px-4 flex items-center justify-between sticky top-0 z-40">
           <Link href="/dashboard" className="flex items-center">
             <img
-              src="https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png"
+              src={logoSource}
               alt="Savazar Logo"
               className="h-8 w-auto object-contain"
+              onError={(e) => {
+                if (e.currentTarget.src !== DEFAULT_LOGO) {
+                  e.currentTarget.src = DEFAULT_LOGO;
+                }
+              }}
             />
           </Link>
           <button
@@ -248,9 +392,14 @@ export default function SidebarShell({
               <div className="flex items-center justify-between mb-6">
                 <Link href="/dashboard" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
                   <img
-                    src="https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png"
+                    src={logoSource}
                     alt="Savazar Logo"
                     className="h-8 w-auto object-contain"
+                    onError={(e) => {
+                      if (e.currentTarget.src !== DEFAULT_LOGO) {
+                        e.currentTarget.src = DEFAULT_LOGO;
+                      }
+                    }}
                   />
                 </Link>
                 <button

@@ -15,7 +15,8 @@ import {
   Clock,
   Globe,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  UserCog
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -107,12 +108,12 @@ export default function SampleWalkthroughCard({
         path: weddingId ? `/wedding/${weddingId}` : "/dashboard",
       },
       {
-        id: "settings",
-        title: "Settings",
-        description: "Configure wedding details, preferences, dates, and customize the planner settings.",
-        icon: Settings,
+        id: "profile",
+        title: "User Profile",
+        description: "Configure user details, profile information, and account security preferences.",
+        icon: UserCog,
         color: "text-amber-600 bg-amber-50 border-amber-100",
-        path: "/dashboard/settings",
+        path: "/dashboard/profile",
       },
       ...(userRole === "admin" ? [{
         id: "users",
@@ -120,7 +121,7 @@ export default function SampleWalkthroughCard({
         description: "Manage user roles, invite planners, assign permissions, and coordinate who can edit wedding details.",
         icon: ShieldCheck,
         color: "text-red-500 bg-red-50 border-red-100",
-        path: "/dashboard/users",
+        path: "/dashboard/admin/users",
       }] : []),
       {
         id: "all-set",

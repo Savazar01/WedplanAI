@@ -51,7 +51,7 @@ export async function createSubsequentUserAction(prevState: { success?: boolean;
 
     await seedSampleWedding(result.user.id);
 
-    revalidatePath("/dashboard/users");
+    revalidatePath("/dashboard/admin/users");
     return { success: true };
   } catch (error) {
     console.error("Error creating user:", error);

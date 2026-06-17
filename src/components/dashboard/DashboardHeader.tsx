@@ -34,7 +34,7 @@ export default function DashboardHeader({ userName, userRole }: DashboardHeaderP
       
       <div className="flex items-center gap-4">
         {userRole === "admin" && (
-          <Link href="/dashboard/users">
+          <Link href="/dashboard/admin/users">
             <Button variant="ghost" size="sm" className="text-[#6771ab] border border-violet-100 hover:bg-violet-50 font-semibold">
               User Management
             </Button>

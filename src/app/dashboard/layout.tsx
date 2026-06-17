@@ -5,6 +5,7 @@ import { db } from "@/db/client";
 import { weddings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import SidebarShell from "@/components/dashboard/SidebarShell";
+import DynamicTheme from "@/components/theme/DynamicTheme";
 import * as React from "react";
 
 interface LayoutProps {
@@ -26,14 +27,18 @@ export default async function DashboardLayout({ children }: LayoutProps) {
     .where(eq(weddings.userId, session.user.id));
 
   return (
-    <SidebarShell
-      activeWedding={activeWedding}
-      allWeddings={allWeddings}
-      userName={session.user.name}
-      userEmail={session.user.email}
-      userRole={(session.user as { role?: string }).role || "user"}
-    >
-      {children}
-    </SidebarShell>
+    <>
+      <DynamicTheme wedding={activeWedding} />
+      <SidebarShell
+        activeWedding={activeWedding}
+        allWeddings={allWeddings}
+        userName={session.user.name}
+        userEmail={session.user.email}
+        userRole={(session.user as { role?: string }).role || "user"}
+      >
+        {children}
+      </SidebarShell>
+    </>
   );
 }
+

@@ -1,8 +1,8 @@
 import { db } from "@/db/client";
-import { weddings, tasks } from "@/db/schema";
+import { weddings, tasks, kanbanColumns } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import KanbanBoard from "@/components/kanban/board";
 
@@ -24,11 +24,22 @@ export default async function KanbanPage() {
 
   const wedding = userWeddings[0];
 
+  const dbColumns = await db
+    .select()
+    .from(kanbanColumns)
+    .where(eq(kanbanColumns.weddingId, wedding.id))
+    .orderBy(asc(kanbanColumns.position));
+
   const dbTasks = await db
     .select()
     .from(tasks)
     .where(eq(tasks.weddingId, wedding.id))
     .orderBy(tasks.position);
+
+  const clientTasks = dbTasks.map((t) => ({
+    ...t,
+    status: t.columnId || "",
+  }));
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -39,7 +50,7 @@ export default async function KanbanPage() {
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-6">
-        <KanbanBoard initialTasks={dbTasks} />
+        <KanbanBoard initialTasks={clientTasks} initialColumns={dbColumns} />
       </main>
     </div>
   );

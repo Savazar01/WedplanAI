@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { weddings, tasks, rituals } from "@/db/schema";
+import { weddings, tasks, rituals, kanbanColumns } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
@@ -109,6 +109,36 @@ export async function createWeddingAction(data: {
       newlyCreatedWeddingId = insertedWedding.id;
       const weddingId = insertedWedding.id;
 
+      // Insert default kanban columns
+      const [todoCol] = await tx.insert(kanbanColumns).values([
+        {
+          weddingId,
+          name: "To-Do",
+          type: "todo",
+          color: "#6771ab",
+          position: 0,
+        },
+        {
+          weddingId,
+          name: "In Progress",
+          type: "in_progress",
+          color: "#f59e0b",
+          position: 1,
+        },
+        {
+          weddingId,
+          name: "Done",
+          type: "done",
+          color: "#22c55e",
+          position: 2,
+        },
+      ]).returning();
+
+      if (!todoCol) {
+        throw new Error("Failed to insert default columns");
+      }
+      const todoColumnId = todoCol.id;
+
       // 2. Define custom seeds based on requirements
       let seedTasks: { title: string; category: string }[] = [];
       let seedRituals: {
@@ -206,6 +236,7 @@ export async function createWeddingAction(data: {
       if (seedTasks.length > 0) {
         const tasksToInsert = seedTasks.map((t, idx) => ({
           weddingId: weddingId,
+          columnId: todoColumnId,
           title: t.title,
           status: "todo",
           category: t.category,
@@ -300,4 +331,100 @@ export async function updateWeddingAction(weddingId: string, data: {
 
   revalidatePath('/dashboard');
   return { success: true };
+}
+
+export async function updateWeddingAppearanceAction(
+  weddingId: string,
+  data: {
+    themeFont: string;
+    themePrimary: string;
+    themeSecondary: string;
+    themeBackground: string;
+    logoUrl?: string | null;
+    logoData?: string | null;
+  }
+) {
+  const session = await getServerSession();
+  if (!session || !session.user || session.user.role !== "admin") {
+    return { error: "Unauthorized. Admin role required." };
+  }
+
+  try {
+    const existing = await db
+      .select()
+      .from(weddings)
+      .where(eq(weddings.id, weddingId))
+      .limit(1);
+    if (!existing[0]) {
+      return { error: "Wedding not found" };
+    }
+
+    await db.update(weddings).set({
+      themeFont: data.themeFont,
+      themePrimary: data.themePrimary,
+      themeSecondary: data.themeSecondary,
+      themeBackground: data.themeBackground,
+      logoUrl: data.logoUrl || null,
+      logoData: data.logoData || null,
+      updatedAt: new Date(),
+    }).where(eq(weddings.id, weddingId));
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/wedding/${weddingId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating wedding appearance:", error);
+    const message = error instanceof Error ? error.message : "Failed to update appearance.";
+    return { error: message };
+  }
+}
+
+export async function updateWeddingShowcaseAction(
+  weddingId: string,
+  data: {
+    showcaseFont?: string;
+    showcasePrimary?: string;
+    showcaseSecondary?: string;
+    showcaseBackground?: string;
+    showcaseHeroUrl?: string | null;
+    showcaseHeroData?: string | null;
+    showcaseWelcomeText?: string | null;
+    showcaseDetails?: string | null;
+  }
+) {
+  const session = await getServerSession();
+  if (!session || !session.user || session.user.role !== "admin") {
+    return { error: "Unauthorized. Admin role required." };
+  }
+
+  try {
+    const existing = await db
+      .select()
+      .from(weddings)
+      .where(eq(weddings.id, weddingId))
+      .limit(1);
+    if (!existing[0]) {
+      return { error: "Wedding not found" };
+    }
+
+    await db.update(weddings).set({
+      ...(data.showcaseFont !== undefined && { showcaseFont: data.showcaseFont }),
+      ...(data.showcasePrimary !== undefined && { showcasePrimary: data.showcasePrimary }),
+      ...(data.showcaseSecondary !== undefined && { showcaseSecondary: data.showcaseSecondary }),
+      ...(data.showcaseBackground !== undefined && { showcaseBackground: data.showcaseBackground }),
+      ...(data.showcaseHeroUrl !== undefined && { showcaseHeroUrl: data.showcaseHeroUrl }),
+      ...(data.showcaseHeroData !== undefined && { showcaseHeroData: data.showcaseHeroData }),
+      ...(data.showcaseWelcomeText !== undefined && { showcaseWelcomeText: data.showcaseWelcomeText }),
+      ...(data.showcaseDetails !== undefined && { showcaseDetails: data.showcaseDetails }),
+      updatedAt: new Date(),
+    }).where(eq(weddings.id, weddingId));
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/wedding/${weddingId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating wedding showcase:", error);
+    const message = error instanceof Error ? error.message : "Failed to update showcase.";
+    return { error: message };
+  }
 }

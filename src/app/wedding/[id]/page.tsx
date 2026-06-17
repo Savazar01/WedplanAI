@@ -7,11 +7,13 @@ import Countdown from "@/components/wedding/countdown";
 import PublicRsvpForm from "@/components/wedding/public-rsvp-form";
 import { formatDateTime, formatDate } from "@/lib/format";
 import SampleWalkthroughCard from "@/components/dashboard/SampleWalkthroughCard";
+import DynamicTheme from "@/components/theme/DynamicTheme";
 
 // Define the async params type for Next.js 16
 interface PageProps {
   params: Promise<{ id: string }>;
 }
+
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -59,9 +61,11 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
   const isSampleWedding = (wedding.description || "").includes("Sample Wedding");
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center">
+    <div className="min-h-screen bg-[var(--color-background)] text-slate-800 flex flex-col items-center">
+      <DynamicTheme wedding={wedding} mode="showcase" />
       {/* Decorative Top Border */}
-      <div className="w-full h-2 bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500" />
+      <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
+
 
       {isSampleWedding && (
         <SampleWalkthroughCard isSampleWedding={true} weddingId={wedding.id} userRole="admin" />
@@ -73,7 +77,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
           {traditionLabel}
         </div>
         
-        <h1 className={`${playfair.className} text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500 py-3 leading-tight tracking-wide`}>
+        <h1 className={`${playfair.className} text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide`}>
           {wedding.partnerA} & {wedding.partnerB}
         </h1>
 
@@ -84,7 +88,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
           <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-l from-transparent to-amber-400" />
         </div>
 
-        <p className="text-base sm:text-lg text-[#6771ab] font-medium tracking-wide">
+        <p className="text-base sm:text-lg text-[var(--color-primary)] font-medium tracking-wide">
           Save The Date
         </p>
         <p className={`${playfair.className} text-xl sm:text-2xl font-bold text-slate-800 mt-1`}>
@@ -106,9 +110,43 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
         </div>
       </section>
 
+      {/* Hero Banner Image */}
+      {(wedding.showcaseHeroData || wedding.showcaseHeroUrl) && (
+        <div className="w-full max-w-4xl px-6 mb-8">
+          <div className="relative w-full h-[250px] sm:h-[400px] overflow-hidden rounded-3xl shadow-md border border-slate-200/50">
+            <img
+              src={wedding.showcaseHeroData || wedding.showcaseHeroUrl || ""}
+              alt="Wedding Hero Banner"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Our Story / Welcome Section */}
+      {(wedding.showcaseWelcomeText || wedding.showcaseDetails) && (
+        <section className="w-full max-w-2xl mx-auto px-6 py-6">
+          <div className="bg-white border border-slate-200/60 p-6 sm:p-8 rounded-3xl shadow-xs text-center space-y-4">
+            <h3 className={`${playfair.className} text-2xl sm:text-3xl font-bold text-[var(--color-primary)]`}>
+              Our Story
+            </h3>
+            {wedding.showcaseWelcomeText && (
+              <p className="text-lg text-slate-700 font-medium leading-relaxed">
+                {wedding.showcaseWelcomeText}
+              </p>
+            )}
+            {wedding.showcaseDetails && (
+              <p className="text-sm text-slate-500 font-light leading-relaxed whitespace-pre-wrap">
+                {wedding.showcaseDetails}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Itinerary Rituals Section */}
       <section className="w-full max-w-2xl mx-auto px-6 py-8">
-        <h3 className={`${playfair.className} text-2xl sm:text-3xl font-bold text-[#6771ab] text-center mb-8 tracking-wide`}>
+        <h3 className={`${playfair.className} text-2xl sm:text-3xl font-bold text-[var(--color-primary)] text-center mb-8 tracking-wide`}>
           Wedding Itinerary
         </h3>
 
@@ -123,7 +161,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
                   <div className="absolute -left-2 top-1.5 h-4 w-4 rounded-full border-2 border-amber-400 bg-white shadow-xs" />
                   
                   <div className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-xs hover:shadow-md transition-shadow">
-                    <span className="text-[10px] font-bold text-[#c484b0] tracking-widest uppercase block mb-1">
+                    <span className="text-[10px] font-bold text-[var(--color-secondary)] tracking-widest uppercase block mb-1">
                       🕒 {startStr} — {endTimeStr}
                     </span>
                     <h4 className={`${playfair.className} text-lg font-bold text-slate-800`}>
@@ -156,8 +194,8 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
       </section>
 
       {/* Footer */}
-      <footer className="w-full bg-[#eef0f7] border-t border-slate-200 text-center py-6 mt-auto">
-        <p className="text-xs text-[#8b93c5] tracking-widest uppercase font-semibold">
+      <footer className="w-full bg-slate-100/50 border-t border-slate-200 text-center py-6 mt-auto">
+        <p className="text-xs text-slate-400 tracking-widest uppercase font-semibold">
           Created with Love for {wedding.partnerA} & {wedding.partnerB}
         </p>
       </footer>

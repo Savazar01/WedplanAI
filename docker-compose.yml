@@ -27,7 +27,7 @@ services:
       - "3044:3044"
     environment:
       PORT: "3044"
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/wedding_planner}
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/wedding_planner
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3044}
       NODE_ENV: "production"

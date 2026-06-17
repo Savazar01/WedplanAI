@@ -8,6 +8,12 @@ export const users = pgTable("user", {
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
   role: text("role").default("user").notNull(), // 'admin' or 'user'
+  street: text("street"),
+  city: text("city"),
+  state: text("state"),
+  country: text("country"),
+  pincode: text("pincode"),
+  languages: text("languages"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -70,6 +76,31 @@ export const weddings = pgTable("wedding", {
   country: text("country").default("India").notNull(),
   pincode: text("pincode"),
   description: text("description"),
+  themeFont: text("theme_font").default("Geist").notNull(),
+  themePrimary: text("theme_primary").default("#6771ab").notNull(),
+  themeSecondary: text("theme_secondary").default("#8b93c5").notNull(),
+  themeBackground: text("theme_background").default("#f8fafc").notNull(),
+  logoUrl: text("logo_url"),
+  logoData: text("logo_data"),
+  showcaseFont: text("showcase_font").default("Playfair Display").notNull(),
+  showcasePrimary: text("showcase_primary").default("#c484b0").notNull(),
+  showcaseSecondary: text("showcase_secondary").default("#e6b7d2").notNull(),
+  showcaseBackground: text("showcase_background").default("#fffafb").notNull(),
+  showcaseHeroUrl: text("showcase_hero_url"),
+  showcaseHeroData: text("showcase_hero_data"),
+  showcaseWelcomeText: text("showcase_welcome_text"),
+  showcaseDetails: text("showcase_details"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const kanbanColumns = pgTable("kanban_column", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  color: text("color").default("#6771ab").notNull(),
+  position: integer("position").default(0).notNull(),
+  type: text("type").default("custom").notNull(), // can be 'todo', 'in_progress', 'done', 'custom'
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -77,6 +108,7 @@ export const weddings = pgTable("wedding", {
 export const tasks = pgTable("task", {
   id: uuid("id").defaultRandom().primaryKey(),
   weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  columnId: uuid("column_id").references(() => kanbanColumns.id, { onDelete: "restrict" }),
   title: text("title").notNull(),
   description: text("description"),
   status: text("status").default("todo").notNull(), // backlog, todo, in_progress, done
@@ -139,4 +171,13 @@ export const vendors = pgTable("vendor", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const apiKeys = pgTable("api_key", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").unique().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
 });

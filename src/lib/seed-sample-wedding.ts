@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { weddings, tasks, rituals, guests, vendors } from "@/db/schema";
+import { weddings, tasks, rituals, guests, vendors, kanbanColumns } from "@/db/schema";
 
 export async function seedSampleWedding(userId: string): Promise<string> {
   const weddingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -29,11 +29,45 @@ export async function seedSampleWedding(userId: string): Promise<string> {
 
     const id = wedding.id;
 
+    // Seed default kanban columns
+    const [todoCol, inProgressCol, doneCol] = await tx.insert(kanbanColumns).values([
+      {
+        weddingId: id,
+        name: "To-Do",
+        type: "todo",
+        color: "#6771ab",
+        position: 0,
+      },
+      {
+        weddingId: id,
+        name: "In Progress",
+        type: "in_progress",
+        color: "#f59e0b",
+        position: 1,
+      },
+      {
+        weddingId: id,
+        name: "Done",
+        type: "done",
+        color: "#22c55e",
+        position: 2,
+      },
+    ]).returning();
+
+    if (!todoCol || !inProgressCol || !doneCol) {
+      throw new Error("Failed to insert default columns for sample wedding");
+    }
+
+    const todoColId = todoCol.id;
+    const inProgressColId = inProgressCol.id;
+    const doneColId = doneCol.id;
+
     const now = new Date();
 
     await tx.insert(tasks).values([
       {
         weddingId: id,
+        columnId: todoColId,
         title: "Book Mehndi Artist",
         status: "todo",
         category: "rituals",
@@ -43,6 +77,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: inProgressColId,
         title: "Buy Wedding Lehenga & Sherwani",
         status: "in_progress",
         category: "apparel",
@@ -52,6 +87,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: todoColId,
         title: "Hire Dhol Players & DJ",
         status: "todo",
         category: "music",
@@ -61,6 +97,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: todoColId,
         title: "Select Mandap Decorator",
         status: "todo",
         category: "decor",
@@ -70,6 +107,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: doneColId,
         title: "Finalize Guest List",
         status: "done",
         category: "invitations",
@@ -79,6 +117,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: doneColId,
         title: "Order Wedding Invitations",
         status: "done",
         category: "invitations",
@@ -88,6 +127,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: inProgressColId,
         title: "Book Photographer & Videographer",
         status: "in_progress",
         category: "other",
@@ -97,6 +137,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: todoColId,
         title: "Arrange Catering Menu Tasting",
         status: "todo",
         category: "catering",
@@ -106,6 +147,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: todoColId,
         title: "Confirm Honeymoon Booking",
         status: "backlog",
         category: "other",
@@ -115,6 +157,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
       },
       {
         weddingId: id,
+        columnId: inProgressColId,
         title: "Wedding Dress Final Fitting",
         status: "in_progress",
         category: "apparel",

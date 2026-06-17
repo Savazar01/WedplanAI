@@ -40,3 +40,68 @@ export async function switchWeddingAction(weddingId: string) {
   cookieStore.set("active_wedding_id", weddingId);
   redirect("/dashboard");
 }
+
+export async function ensureDefaultColumns(weddingId: string) {
+  const { kanbanColumns, tasks } = await import("@/db/schema");
+  
+  const existingCols = await db
+    .select()
+    .from(kanbanColumns)
+    .where(eq(kanbanColumns.weddingId, weddingId));
+
+  if (existingCols.length > 0) {
+    return existingCols;
+  }
+
+  console.log(`[Self-Healing] Seeding default columns for wedding ${weddingId}`);
+
+  return await db.transaction(async (tx) => {
+    // Seed default 3 columns
+    const [todoCol] = await tx.insert(kanbanColumns).values({
+      weddingId,
+      name: "To-Do",
+      type: "todo",
+      color: "#6771ab",
+      position: 0,
+    }).returning();
+    
+    const [inProgressCol] = await tx.insert(kanbanColumns).values({
+      weddingId,
+      name: "In Progress",
+      type: "in_progress",
+      color: "#f59e0b",
+      position: 1,
+    }).returning();
+    
+    const [doneCol] = await tx.insert(kanbanColumns).values({
+      weddingId,
+      name: "Done",
+      type: "done",
+      color: "#22c55e",
+      position: 2,
+    }).returning();
+
+    // Fetch all tasks for this wedding
+    const weddingTasks = await tx
+      .select()
+      .from(tasks)
+      .where(eq(tasks.weddingId, weddingId));
+
+    for (const t of weddingTasks) {
+      if (t.columnId) continue;
+      let targetColId = todoCol.id;
+      if (t.status === "in_progress") {
+        targetColId = inProgressCol.id;
+      } else if (t.status === "done") {
+        targetColId = doneCol.id;
+      }
+      await tx
+        .update(tasks)
+        .set({ columnId: targetColId })
+        .where(eq(tasks.id, t.id));
+    }
+
+    return [todoCol, inProgressCol, doneCol];
+  });
+}
+

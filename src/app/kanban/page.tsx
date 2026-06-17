@@ -1,8 +1,9 @@
 import { db } from "@/db/client";
-import { weddings, tasks, kanbanColumns } from "@/db/schema";
+import { weddings, tasks } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
+import { ensureDefaultColumns } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
-import { eq, asc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import KanbanBoard from "@/components/kanban/board";
 
@@ -24,11 +25,7 @@ export default async function KanbanPage() {
 
   const wedding = userWeddings[0];
 
-  const dbColumns = await db
-    .select()
-    .from(kanbanColumns)
-    .where(eq(kanbanColumns.weddingId, wedding.id))
-    .orderBy(asc(kanbanColumns.position));
+  const dbColumns = await ensureDefaultColumns(wedding.id);
 
   const dbTasks = await db
     .select()

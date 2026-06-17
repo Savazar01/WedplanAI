@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
-import { tasks, guests, vendors, kanbanColumns } from "@/db/schema";
+import { tasks, guests, vendors } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
-import { getActiveWedding } from "@/lib/wedding-helper";
+import { getActiveWedding, ensureDefaultColumns } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -41,11 +41,7 @@ export default async function DashboardPage() {
   const weddingTasks = await db.select().from(tasks).where(eq(tasks.weddingId, wedding.id));
   const weddingGuests = await db.select().from(guests).where(eq(guests.weddingId, wedding.id));
   const weddingVendors = await db.select().from(vendors).where(eq(vendors.weddingId, wedding.id));
-  const weddingColumns = await db
-    .select()
-    .from(kanbanColumns)
-    .where(eq(kanbanColumns.weddingId, wedding.id))
-    .orderBy(asc(kanbanColumns.position));
+  const weddingColumns = await ensureDefaultColumns(wedding.id);
 
   const doneCol = weddingColumns.find((col) => col.type === "done");
 

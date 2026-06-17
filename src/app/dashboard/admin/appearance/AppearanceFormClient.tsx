@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,11 @@ interface Wedding {
   showcaseHeroData?: string | null;
   showcaseWelcomeText?: string | null;
   showcaseDetails?: string | null;
+  showcaseSubtitle?: string | null;
+  showcaseTitle?: string | null;
+  showcaseDescription?: string | null;
+  showcaseRsvpTitle?: string | null;
+  showcaseRsvpDescription?: string | null;
 }
 
 interface AppearanceFormClientProps {
@@ -39,7 +45,30 @@ const fonts = [
 ];
 
 export default function AppearanceFormClient({ wedding }: AppearanceFormClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<"app" | "showcase">("app");
+
+  React.useEffect(() => {
+    setThemeFont(wedding.themeFont || "Geist");
+    setThemePrimary(wedding.themePrimary || "#6771ab");
+    setThemeSecondary(wedding.themeSecondary || "#8b93c5");
+    setThemeBackground(wedding.themeBackground || "#f8fafc");
+    setLogoUrl(wedding.logoUrl || "");
+    setLogoData(wedding.logoData || "");
+    setShowcaseFont(wedding.showcaseFont || "Playfair Display");
+    setShowcasePrimary(wedding.showcasePrimary || "#c484b0");
+    setShowcaseSecondary(wedding.showcaseSecondary || "#e6b7d2");
+    setShowcaseBackground(wedding.showcaseBackground || "#fffafb");
+    setHeroUrl(wedding.showcaseHeroUrl || "");
+    setHeroData(wedding.showcaseHeroData || "");
+    setShowcaseWelcomeText(wedding.showcaseWelcomeText || "");
+    setShowcaseDetails(wedding.showcaseDetails || "");
+    setShowcaseSubtitle(wedding.showcaseSubtitle || "");
+    setShowcaseTitle(wedding.showcaseTitle || "");
+    setShowcaseDescription(wedding.showcaseDescription || "");
+    setShowcaseRsvpTitle(wedding.showcaseRsvpTitle || "");
+    setShowcaseRsvpDescription(wedding.showcaseRsvpDescription || "");
+  }, [wedding]);
 
   // App Theme State
   const [themeFont, setThemeFont] = React.useState(wedding.themeFont || "Geist");
@@ -60,6 +89,11 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
   const [heroName, setHeroName] = React.useState("");
   const [showcaseWelcomeText, setShowcaseWelcomeText] = React.useState(wedding.showcaseWelcomeText || "");
   const [showcaseDetails, setShowcaseDetails] = React.useState(wedding.showcaseDetails || "");
+  const [showcaseSubtitle, setShowcaseSubtitle] = React.useState(wedding.showcaseSubtitle || "");
+  const [showcaseTitle, setShowcaseTitle] = React.useState(wedding.showcaseTitle || "");
+  const [showcaseDescription, setShowcaseDescription] = React.useState(wedding.showcaseDescription || "");
+  const [showcaseRsvpTitle, setShowcaseRsvpTitle] = React.useState(wedding.showcaseRsvpTitle || "");
+  const [showcaseRsvpDescription, setShowcaseRsvpDescription] = React.useState(wedding.showcaseRsvpDescription || "");
 
   const [isPending, setIsPending] = React.useState(false);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -104,6 +138,7 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
       if (res?.error) {
         setToast({ message: res.error, type: "error" });
       } else {
+        router.refresh();
         setToast({ message: "App theme settings saved successfully!", type: "success" });
       }
     } catch (err) {
@@ -127,11 +162,17 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
         showcaseHeroData: heroData || null,
         showcaseWelcomeText: showcaseWelcomeText || null,
         showcaseDetails: showcaseDetails || null,
+        showcaseSubtitle: showcaseSubtitle || null,
+        showcaseTitle: showcaseTitle || null,
+        showcaseDescription: showcaseDescription || null,
+        showcaseRsvpTitle: showcaseRsvpTitle || null,
+        showcaseRsvpDescription: showcaseRsvpDescription || null,
       });
 
       if (res?.error) {
         setToast({ message: res.error, type: "error" });
       } else {
+        router.refresh();
         setToast({ message: "Showcase website settings saved successfully!", type: "success" });
       }
     } catch (err) {
@@ -595,6 +636,83 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                   </div>
                 </div>
 
+                {/* Showcase Headings & Text Blocks */}
+                <div className="space-y-4 pt-4 border-t border-slate-100">
+                  <h4 className="text-sm font-bold text-slate-700">Showcase Headings & Descriptions</h4>
+                  
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      Tradition Subtitle
+                    </label>
+                    <Input
+                      type="text"
+                      value={showcaseSubtitle}
+                      onChange={(e) => setShowcaseSubtitle(e.target.value)}
+                      disabled={isPending}
+                      placeholder="e.g. SHUBH VIVAH (HINDU TRADITION)"
+                    />
+                  </div>
+
+                  <div className="space-y-1 pt-2">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      Main Title (Names/Header)
+                    </label>
+                    <Input
+                      type="text"
+                      value={showcaseTitle}
+                      onChange={(e) => setShowcaseTitle(e.target.value)}
+                      disabled={isPending}
+                      placeholder={`e.g. ${wedding.partnerA} & ${wedding.partnerB}`}
+                    />
+                  </div>
+
+                  <div className="space-y-1 pt-2">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      Boilerplate Description Block
+                    </label>
+                    <textarea
+                      value={showcaseDescription}
+                      onChange={(e) => setShowcaseDescription(e.target.value)}
+                      disabled={isPending}
+                      rows={3}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#6771ab] focus:border-[#6771ab] font-sans"
+                      placeholder="e.g. Custom introductory paragraph after date and location details..."
+                    />
+                  </div>
+                </div>
+
+                {/* RSVP Box Text Customization */}
+                <div className="space-y-4 pt-4 border-t border-slate-100">
+                  <h4 className="text-sm font-bold text-slate-700">RSVP Custom Wording</h4>
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      RSVP Title Text
+                    </label>
+                    <Input
+                      type="text"
+                      value={showcaseRsvpTitle}
+                      onChange={(e) => setShowcaseRsvpTitle(e.target.value)}
+                      disabled={isPending}
+                      placeholder="e.g. Will You Celebrate With Us?"
+                    />
+                  </div>
+
+                  <div className="space-y-1 pt-2">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      RSVP Instructions / Description
+                    </label>
+                    <textarea
+                      value={showcaseRsvpDescription}
+                      onChange={(e) => setShowcaseRsvpDescription(e.target.value)}
+                      disabled={isPending}
+                      rows={3}
+                      className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#6771ab] focus:border-[#6771ab] font-sans"
+                      placeholder="e.g. Enter your invitation card login code to unlock RSVP..."
+                    />
+                  </div>
+                </div>
+
                 {/* Submit Button */}
                 <div className="pt-4 border-t border-slate-100 flex justify-end">
                   <Button
@@ -709,19 +827,25 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                   <span 
                     className="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-50 border border-amber-200 text-amber-800"
                   >
-                    Celebration Label
+                    {showcaseSubtitle || "Celebration Label"}
                   </span>
 
                   <h5 
                     className="text-lg font-bold leading-tight"
                     style={{ color: showcasePrimary }}
                   >
-                    {wedding.partnerA} & {wedding.partnerB}
+                    {showcaseTitle || `${wedding.partnerA} & ${wedding.partnerB}`}
                   </h5>
 
                   <p className="text-[10px] text-slate-500 font-medium">
                     Save the Date • October 12, 2026
                   </p>
+
+                  {showcaseDescription && (
+                    <p className="text-[9px] text-slate-500 italic max-w-[200px] mx-auto line-clamp-2 leading-relaxed">
+                      &ldquo;{showcaseDescription}&rdquo;
+                    </p>
+                  )}
 
                   {/* Our Story preview inside showcase preview */}
                   {(showcaseWelcomeText || showcaseDetails) && (
@@ -743,13 +867,20 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                   )}
                 </div>
 
-                <div className="pt-4 mt-auto">
+                {/* RSVP Box Live Preview */}
+                <div className="mt-4 p-3 bg-white/85 border border-amber-100 rounded-2xl text-center space-y-1.5 shadow-xs">
+                  <span className="text-[9px] font-bold block" style={{ color: showcasePrimary }}>
+                    {showcaseRsvpTitle || "Will You Celebrate With Us?"}
+                  </span>
+                  <p className="text-[8px] text-slate-500 line-clamp-2 leading-normal">
+                    {showcaseRsvpDescription || "Please enter the unique 6-character Login Code from your invitation card to unlock your RSVP."}
+                  </p>
                   <button
                     type="button"
-                    className="w-full text-[10px] font-bold py-2 px-3 rounded-lg text-white"
+                    className="w-full text-[9px] font-bold py-1.5 px-3 rounded-lg text-white mt-1"
                     style={{ backgroundColor: showcasePrimary }}
                   >
-                    RSVP to Wedding
+                    Unlock RSVP
                   </button>
                 </div>
               </div>

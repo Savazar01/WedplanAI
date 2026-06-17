@@ -74,11 +74,11 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
       {/* Hero Banner Section */}
       <section className="w-full max-w-4xl mx-auto px-6 pt-12 pb-8 flex flex-col items-center text-center">
         <div className="inline-block px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider mb-6">
-          {traditionLabel}
+          {wedding.showcaseSubtitle || traditionLabel}
         </div>
         
         <h1 className={`${playfair.className} text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide`}>
-          {wedding.partnerA} & {wedding.partnerB}
+          {wedding.showcaseTitle || `${wedding.partnerA} & ${wedding.partnerB}`}
         </h1>
 
         {/* Elegant Gold Divider */}
@@ -98,9 +98,9 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
           📍 {fullAddress || wedding.location}
         </p>
 
-        {wedding.description && (
+        {(wedding.showcaseDescription || wedding.description) && (
           <p className="max-w-xl text-sm text-slate-500 mt-6 font-light leading-relaxed italic">
-            &ldquo;{wedding.description}&rdquo;
+            &ldquo;{wedding.showcaseDescription || wedding.description}&rdquo;
           </p>
         )}
 
@@ -190,7 +190,11 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
 
       {/* RSVP Section */}
       <section className="w-full max-w-4xl mx-auto px-6 pt-6 pb-16">
-        <PublicRsvpForm weddingId={wedding.id} />
+        <PublicRsvpForm 
+          weddingId={wedding.id} 
+          rsvpTitle={wedding.showcaseRsvpTitle}
+          rsvpDescription={wedding.showcaseRsvpDescription}
+        />
       </section>
 
       {/* Footer */}

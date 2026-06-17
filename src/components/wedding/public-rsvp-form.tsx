@@ -8,6 +8,8 @@ import { findGuestByCodeAction, updateGuestRsvpPublicAction } from "@/app/action
 
 interface PublicRsvpFormProps {
   weddingId: string;
+  rsvpTitle?: string | null;
+  rsvpDescription?: string | null;
 }
 
 interface Guest {
@@ -20,7 +22,11 @@ interface Guest {
   dietaryRestrictions: string | null;
 }
 
-export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
+export default function PublicRsvpForm({ 
+  weddingId,
+  rsvpTitle,
+  rsvpDescription
+}: PublicRsvpFormProps) {
   const [loginCode, setLoginCode] = React.useState("");
   const [guest, setGuest] = React.useState<Guest | null>(null);
   const [error, setError] = React.useState("");
@@ -152,14 +158,14 @@ export default function PublicRsvpForm({ weddingId }: PublicRsvpFormProps) {
       <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-400 rounded-br-xl m-2 opacity-50" />
 
       <h3 className="text-xl font-bold text-center text-[var(--color-primary)] font-serif mb-6 tracking-wide">
-        Will You Celebrate With Us?
+        {rsvpTitle || "Will You Celebrate With Us?"}
       </h3>
 
       {!guest ? (
         <form onSubmit={handleVerifyCode} className="space-y-4">
           <div className="text-center">
             <p className="text-sm text-slate-600 mb-4 font-light leading-relaxed">
-              Please enter the unique 6-character Login Code from your invitation card to unlock your RSVP.
+              {rsvpDescription || "Please enter the unique 6-character Login Code from your invitation card to unlock your RSVP."}
             </p>
             <div className="max-w-[240px] mx-auto">
               <Input

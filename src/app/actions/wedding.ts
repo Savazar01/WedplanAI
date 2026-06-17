@@ -369,7 +369,7 @@ export async function updateWeddingAppearanceAction(
       updatedAt: new Date(),
     }).where(eq(weddings.id, weddingId));
 
-    revalidatePath("/dashboard");
+    revalidatePath("/dashboard", "layout");
     revalidatePath(`/wedding/${weddingId}`);
     return { success: true };
   } catch (error) {
@@ -390,6 +390,11 @@ export async function updateWeddingShowcaseAction(
     showcaseHeroData?: string | null;
     showcaseWelcomeText?: string | null;
     showcaseDetails?: string | null;
+    showcaseSubtitle?: string | null;
+    showcaseTitle?: string | null;
+    showcaseDescription?: string | null;
+    showcaseRsvpTitle?: string | null;
+    showcaseRsvpDescription?: string | null;
   }
 ) {
   const session = await getServerSession();
@@ -416,10 +421,15 @@ export async function updateWeddingShowcaseAction(
       ...(data.showcaseHeroData !== undefined && { showcaseHeroData: data.showcaseHeroData }),
       ...(data.showcaseWelcomeText !== undefined && { showcaseWelcomeText: data.showcaseWelcomeText }),
       ...(data.showcaseDetails !== undefined && { showcaseDetails: data.showcaseDetails }),
+      ...(data.showcaseSubtitle !== undefined && { showcaseSubtitle: data.showcaseSubtitle }),
+      ...(data.showcaseTitle !== undefined && { showcaseTitle: data.showcaseTitle }),
+      ...(data.showcaseDescription !== undefined && { showcaseDescription: data.showcaseDescription }),
+      ...(data.showcaseRsvpTitle !== undefined && { showcaseRsvpTitle: data.showcaseRsvpTitle }),
+      ...(data.showcaseRsvpDescription !== undefined && { showcaseRsvpDescription: data.showcaseRsvpDescription }),
       updatedAt: new Date(),
     }).where(eq(weddings.id, weddingId));
 
-    revalidatePath("/dashboard");
+    revalidatePath("/dashboard", "layout");
     revalidatePath(`/wedding/${weddingId}`);
     return { success: true };
   } catch (error) {

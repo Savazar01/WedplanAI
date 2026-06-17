@@ -90,6 +90,11 @@ export const weddings = pgTable("wedding", {
   showcaseHeroData: text("showcase_hero_data"),
   showcaseWelcomeText: text("showcase_welcome_text"),
   showcaseDetails: text("showcase_details"),
+  showcaseSubtitle: text("showcase_subtitle"),
+  showcaseTitle: text("showcase_title"),
+  showcaseDescription: text("showcase_description"),
+  showcaseRsvpTitle: text("showcase_rsvp_title"),
+  showcaseRsvpDescription: text("showcase_rsvp_description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

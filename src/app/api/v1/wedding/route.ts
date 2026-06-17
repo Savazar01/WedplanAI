@@ -52,6 +52,11 @@ export async function PUT(request: NextRequest) {
       'showcaseHeroData',
       'showcaseWelcomeText',
       'showcaseDetails',
+      'showcaseSubtitle',
+      'showcaseTitle',
+      'showcaseDescription',
+      'showcaseRsvpTitle',
+      'showcaseRsvpDescription',
     ] as const;
 
     const updates: any = {};

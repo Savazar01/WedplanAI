@@ -43,6 +43,13 @@
       "when": 1781696219095,
       "tag": "0005_dizzy_terror",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781699294801,
+      "tag": "0006_great_vin_gonzales",
+      "breakpoints": true
     }
   ]
 }

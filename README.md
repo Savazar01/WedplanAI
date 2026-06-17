@@ -257,8 +257,8 @@ src/
 
 | Variable | Required | Default / Example | Description / Instructions |
 |---|---|---|---|
-| `DATABASE_URL` | ✅ | `postgresql://postgres:postgres@localhost:5611/wedding_planner` | Connection string for PostgreSQL database. **IMPORTANT:** Only define this in `.env.local` for local machine development. **Omit/comment out** when running the full stack with `docker compose up` so the containers can resolve the internal address `db:5432` correctly. |
-| `BETTER_AUTH_SECRET` | ✅ | `savazar_wedding_secret_auth_32_characters` | Any random string at least 32 characters long. Used by Better Auth to encrypt cookies and session data. |
+| `DATABASE_URL` | ✅ | `postgresql://postgres:postgres`<br>`@localhost:5611/`<br>`wedding_planner` | Connection string for PostgreSQL database. **IMPORTANT:** Only define this in `.env.local` for local machine development. **Omit/comment out** when running the full stack with `docker compose up` so the containers can resolve the internal address `db:5432` correctly. |
+| `BETTER_AUTH_SECRET` | ✅ | `savazar_wedding_`<br>`secret_auth_`<br>`32_characters` | Any random string at least 32 characters long. Used by Better Auth to encrypt cookies and session data. |
 | `BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Server-side URL of the application. Required by Better Auth for authentication redirect callbacks. |
 | `NEXT_PUBLIC_BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Client-side/browser URL of the application. Required by the auth client to perform API calls. |
 | `NODE_ENV` | — | `development` | Defines the environment type (set to `development` locally). |
@@ -270,8 +270,8 @@ src/
 
 | Variable | Required | Example | Description / Instructions |
 |---|---|---|---|
-| `DATABASE_URL` | ✅ | `postgresql://postgres:your_password@db:5432/wedding_planner` | Connection string for PostgreSQL database. Uses `db` as host to connect to the linked container. **IMPORTANT:** The password in this URL must match `POSTGRES_PASSWORD` exactly. |
-| `BETTER_AUTH_SECRET` | ✅ | `your_min_32_char_random_secret` | A secure, random 32+ character key. Generate using: `openssl rand -base64 32` |
+| `DATABASE_URL` | ✅ | `postgresql://postgres:your_password`<br>`@db:5432/`<br>`wedding_planner` | Connection string for PostgreSQL database. Uses `db` as host to connect to the linked container. **IMPORTANT:** The password in this URL must match `POSTGRES_PASSWORD` exactly. |
+| `BETTER_AUTH_SECRET` | ✅ | `your_min_32_char_`<br>`random_secret` | A secure, random 32+ character key. Generate using: `openssl rand -base64 32` |
 | `BETTER_AUTH_URL` | ✅ | `https://your-domain.com` | Server-side URL of the application. Set to your custom domain. |
 | `NEXT_PUBLIC_BETTER_AUTH_URL` | ✅ | `https://your-domain.com` | Client-side/browser URL of the application. Set to your custom domain. |
 | `NODE_ENV` | — | `production` | Defines the environment type (set to `production` for optimization and secure cookie strictness). |

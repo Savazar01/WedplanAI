@@ -62,8 +62,12 @@ BETTER_AUTH_SECRET=your_min_32_char_random_secret
 
 # Your public domain (with https://)
 BETTER_AUTH_URL=https://your-domain.com
+NEXT_PUBLIC_BETTER_AUTH_URL=https://your-domain.com
 
-# Database credentials (must match below)
+# Database credentials
+# IMPORTANT: DATABASE_URL must contain the exact same password set in POSTGRES_PASSWORD.
+# Avoid hardcoding passwords across files. Always make sure the password in the connection string
+# matches the actual POSTGRES_PASSWORD set below.
 DATABASE_URL=postgresql://postgres:your_db_password@db:5432/wedding_planner
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_db_password
@@ -249,16 +253,16 @@ src/
 
 ## 📝 Environment Variables Reference
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
-| `BETTER_AUTH_SECRET` | ✅ | — | Auth secret key (min 32 chars) |
-| `BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Server-side URL of the application |
-| `NEXT_PUBLIC_BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | Client-side/browser URL of the application |
-| `NODE_ENV` | — | `production` | Node environment |
-| `POSTGRES_USER` | — | `postgres` | PostgreSQL username |
-| `POSTGRES_PASSWORD` | — | `postgres` | PostgreSQL password |
-| `POSTGRES_DB` | — | `wedding_planner` | PostgreSQL database name |
+| Variable | Required | Localhost (Local Dev & Compose) | VPS Coolify Deploy | Description / Instructions |
+|---|---|---|---|---|
+| `DATABASE_URL` | ✅ | `postgresql://postgres:postgres@localhost:5611/wedding_planner` (Local Dev) <br><br> *Omit for local docker-compose (autolinked via db:5432).* | `postgresql://postgres:your_password@db:5432/wedding_planner` | Connection string for PostgreSQL database. **IMPORTANT:** The password in the URL must match `POSTGRES_PASSWORD` exactly. |
+| `BETTER_AUTH_SECRET` | ✅ | Any random 32+ character string (e.g. `savazar_wedding_secret_auth_32_characters`) | A secure, random 32+ character key. Generate using: `openssl rand -base64 32` | Key used by Better Auth to encrypt/decrypt tokens and sessions. |
+| `BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | `https://your-domain.com` | Server-side URL of the application. Required by Better Auth for authentication redirect callbacks. |
+| `NEXT_PUBLIC_BETTER_AUTH_URL` | ✅ | `http://localhost:3044` | `https://your-domain.com` | Client-side/browser URL of the application. Required by the auth client to perform API calls. |
+| `NODE_ENV` | — | `development` | `production` | Defines runtime environment (controls logs, optimization, and secure cookie strictness). |
+| `POSTGRES_USER` | — | `postgres` | `postgres` (or custom user) | PostgreSQL database username. |
+| `POSTGRES_PASSWORD` | — | `postgres` | Your custom database password | PostgreSQL database password. **IMPORTANT:** Ensure this matches the password specified in `DATABASE_URL`. |
+| `POSTGRES_DB` | — | `wedding_planner` | `wedding_planner` (or custom DB name) | PostgreSQL database name. |
 
 ---
 

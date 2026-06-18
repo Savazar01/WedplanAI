@@ -67,11 +67,12 @@ export default async function DashboardPage() {
   const isBudgetBreached = contractedCost > totalBudget;
 
   const navItems = [
-    { label: "Kanban Board", path: "/dashboard/kanban", desc: "Manage tasks", icon: "📋" },
+    { label: "Planning Board", path: "/dashboard/planning-board", desc: "Manage tasks", icon: "📋" },
     { label: "Calendar", path: "/dashboard/calendar", desc: "Month calendar grid", icon: "🗓️" },
-    { label: "Timeline", path: "/dashboard/timeline", desc: "Ceremonies & rituals", icon: "⏳" },
+    { label: "Event Itinerary", path: "/dashboard/event-itinerary", desc: "Ceremonies & timeline events", icon: "⏳" },
     { label: "Guest RSVP", path: "/dashboard/guests", desc: "Track guest list", icon: "👥" },
     { label: "Vendors & Budget", path: "/dashboard/vendors", desc: "Monitor expenses", icon: "💰" },
+    { label: "Build Showcase Page", path: "/dashboard/showcase", desc: "Customize showcase", icon: "🌐" },
   ];
 
   return (

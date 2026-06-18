@@ -2,7 +2,6 @@ import { db } from "@/db/client";
 import { weddings, rituals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { Playfair_Display } from "next/font/google";
 import Countdown from "@/components/wedding/countdown";
 import PublicRsvpForm from "@/components/wedding/public-rsvp-form";
 import { formatDateTime, formatDate } from "@/lib/format";
@@ -13,13 +12,6 @@ import DynamicTheme from "@/components/theme/DynamicTheme";
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--font-playfair",
-});
 
 export default async function WeddingShowcasePage({ params }: PageProps) {
   const { id } = await params;
@@ -77,7 +69,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
           {wedding.showcaseSubtitle || traditionLabel}
         </div>
         
-        <h1 className={`${playfair.className} text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide`}>
+        <h1 className="font-title text-4xl sm:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide">
           {wedding.showcaseTitle || `${wedding.partnerA} & ${wedding.partnerB}`}
         </h1>
 
@@ -91,7 +83,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
         <p className="text-base sm:text-lg text-[var(--color-primary)] font-medium tracking-wide">
           Save The Date
         </p>
-        <p className={`${playfair.className} text-xl sm:text-2xl font-bold text-slate-800 mt-1`}>
+        <p className="font-title text-xl sm:text-2xl font-bold text-slate-800 mt-1">
           {weddingDateStr}
         </p>
         <p className="text-sm text-slate-500 mt-2 font-medium">
@@ -127,7 +119,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
       {(wedding.showcaseWelcomeText || wedding.showcaseDetails) && (
         <section className="w-full max-w-2xl mx-auto px-6 py-6">
           <div className="bg-white border border-slate-200/60 p-6 sm:p-8 rounded-3xl shadow-xs text-center space-y-4">
-            <h3 className={`${playfair.className} text-2xl sm:text-3xl font-bold text-[var(--color-primary)]`}>
+            <h3 className="font-title text-2xl sm:text-3xl font-bold text-[var(--color-primary)]">
               Our Story
             </h3>
             {wedding.showcaseWelcomeText && (
@@ -146,7 +138,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
 
       {/* Itinerary Rituals Section */}
       <section className="w-full max-w-2xl mx-auto px-6 py-8">
-        <h3 className={`${playfair.className} text-2xl sm:text-3xl font-bold text-[var(--color-primary)] text-center mb-8 tracking-wide`}>
+        <h3 className="font-title text-2xl sm:text-3xl font-bold text-[var(--color-primary)] text-center mb-8 tracking-wide">
           Wedding Itinerary
         </h3>
 
@@ -164,7 +156,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
                     <span className="text-[10px] font-bold text-[var(--color-secondary)] tracking-widest uppercase block mb-1">
                       🕒 {startStr} — {endTimeStr}
                     </span>
-                    <h4 className={`${playfair.className} text-lg font-bold text-slate-800`}>
+                    <h4 className="font-title text-lg font-bold text-slate-800">
                       {ritual.name}
                     </h4>
                     {ritual.description && (

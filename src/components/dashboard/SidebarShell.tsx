@@ -58,11 +58,13 @@ export default function SidebarShell({
   userRole,
   children,
 }: SidebarShellProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [isAdminMenuOpen, setIsAdminMenuOpen] = React.useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = React.useState(() =>
+    ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users"].includes(pathname)
+  );
 
   React.useEffect(() => {
     const saved = localStorage.getItem("sidebar-collapsed");
@@ -73,11 +75,13 @@ export default function SidebarShell({
     }
   }, []);
 
-  React.useEffect(() => {
+  const [prevPathname, setPrevPathname] = React.useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     if (["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users"].includes(pathname)) {
       setIsAdminMenuOpen(true);
     }
-  }, [pathname]);
+  }
 
   const toggleCollapse = () => {
     setIsCollapsed((prev) => {
@@ -102,19 +106,18 @@ export default function SidebarShell({
 
   const navItems: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/kanban", label: "Kanban Board", icon: KanbanSquare },
+    { href: "/dashboard/planning-board", label: "Planning Board", icon: KanbanSquare },
     { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
-    { href: "/dashboard/timeline", label: "Timeline", icon: Clock },
+    { href: "/dashboard/event-itinerary", label: "Event Itinerary", icon: Clock },
     { href: "/dashboard/guests", label: "Guests", icon: Users },
     { href: "/dashboard/vendors", label: "Vendors", icon: Store },
   ];
 
-  if (activeWedding) {
+  if (activeWedding && userRole === "admin") {
     navItems.push({
-      href: `/wedding/${activeWedding.id}`,
-      label: "Showcase Page",
+      href: "/dashboard/showcase",
+      label: "Build Showcase Page",
       icon: Globe,
-      target: "_blank",
     });
   }
 
@@ -127,7 +130,7 @@ export default function SidebarShell({
     const logoSource = activeWedding?.logoData || activeWedding?.logoUrl || DEFAULT_LOGO;
 
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full overflow-y-auto min-h-0">
         {/* Brand Header */}
         <div className={`mb-6 px-2 ${showCollapsed ? "flex justify-center" : ""}`}>
           <Link href="/dashboard" className="flex items-center" onClick={() => isMobile && setIsMobileMenuOpen(false)}>

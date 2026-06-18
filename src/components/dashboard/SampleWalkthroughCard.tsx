@@ -60,12 +60,12 @@ export default function SampleWalkthroughCard({
         path: "/dashboard",
       },
       {
-        id: "kanban",
-        title: "Kanban Tasks",
+        id: "planning-board",
+        title: "Planning Tasks",
         description: "Manage pre-wedding ceremonies like Haldi, Mehndi, Sangeet, and the main wedding events. Easily drag tasks across stages (To Do, In Progress, Done) to stay organized.",
         icon: ClipboardList,
         color: "text-blue-500 bg-blue-50 border-blue-100",
-        path: "/dashboard/kanban",
+        path: "/dashboard/planning-board",
       },
       {
         id: "calendar",
@@ -76,12 +76,12 @@ export default function SampleWalkthroughCard({
         path: "/dashboard/calendar",
       },
       {
-        id: "timeline",
-        title: "Timeline",
-        description: "Track the detailed, minute-by-minute timeline of events on the wedding day to ensure seamless coordination.",
+        id: "event-itinerary",
+        title: "Event Itinerary",
+        description: "Track the detailed, minute-by-minute itinerary of events on the wedding day to ensure seamless coordination.",
         icon: Clock,
         color: "text-violet-500 bg-violet-50 border-violet-100",
-        path: "/dashboard/timeline",
+        path: "/dashboard/event-itinerary",
       },
       {
         id: "guests",

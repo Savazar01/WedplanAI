@@ -31,7 +31,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       'position',
     ] as const;
 
-    const updates: Record<string, any> = {};
+    const updates: Record<string, unknown> = {};
     for (const field of allowedFields) {
       if (field in body) {
         if (field === 'dueDate') {

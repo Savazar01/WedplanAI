@@ -4,9 +4,9 @@ import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import TimelineOnly from "@/components/calendar/TimelineOnly";
+import EventItineraryOnly from "@/components/calendar/TimelineOnly";
 
-export default async function DashboardTimelinePage() {
+export default async function DashboardEventItineraryPage() {
   const session = await getServerSession();
   if (!session || !session.user) {
     redirect("/login?unauthenticated=true");
@@ -25,7 +25,7 @@ export default async function DashboardTimelinePage() {
 
   return (
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8">
-      <TimelineOnly initialRituals={dbRituals} />
+      <EventItineraryOnly initialRituals={dbRituals} />
     </main>
   );
 }

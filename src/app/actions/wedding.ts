@@ -28,6 +28,7 @@ const createWeddingSchema = z.object({
   customTasks: z.array(z.object({
     title: z.string(),
     category: z.string(),
+    dueDate: z.string().optional().nullable(),
   })).optional(),
   customRituals: z.array(z.object({
     name: z.string(),
@@ -38,6 +39,8 @@ const createWeddingSchema = z.object({
     endHour: z.number().optional(),
     endMin: z.number().optional(),
     location: z.string().optional(),
+    startTime: z.string().optional().nullable(),
+    endTime: z.string().optional().nullable(),
   })).optional(),
 });
 
@@ -56,7 +59,7 @@ export async function createWeddingAction(data: {
   country?: string;
   pincode?: string;
   description?: string;
-  customTasks?: { title: string; category: string }[];
+  customTasks?: { title: string; category: string; dueDate?: string | null }[];
   customRituals?: {
     name: string;
     description?: string;
@@ -66,6 +69,8 @@ export async function createWeddingAction(data: {
     endHour?: number;
     endMin?: number;
     location?: string;
+    startTime?: string | null;
+    endTime?: string | null;
   }[];
 }) {
   const session = await getServerSession();
@@ -109,7 +114,7 @@ export async function createWeddingAction(data: {
       newlyCreatedWeddingId = insertedWedding.id;
       const weddingId = insertedWedding.id;
 
-      // Insert default kanban columns
+      // Insert default planning board columns
       const [todoCol] = await tx.insert(kanbanColumns).values([
         {
           weddingId,
@@ -140,7 +145,7 @@ export async function createWeddingAction(data: {
       const todoColumnId = todoCol.id;
 
       // 2. Define custom seeds based on requirements
-      let seedTasks: { title: string; category: string }[] = [];
+      let seedTasks: { title: string; category: string; dueDate?: string | null }[] = [];
       let seedRituals: {
         name: string;
         description?: string;
@@ -150,6 +155,8 @@ export async function createWeddingAction(data: {
         endHour?: number;
         endMin?: number;
         location?: string;
+        startTime?: string | null;
+        endTime?: string | null;
       }[] = [];
 
       if (customTasks) {
@@ -241,6 +248,7 @@ export async function createWeddingAction(data: {
           status: "todo",
           category: t.category,
           position: idx,
+          dueDate: t.dueDate ? new Date(t.dueDate) : null,
         }));
         await tx.insert(tasks).values(tasksToInsert);
       }
@@ -248,15 +256,23 @@ export async function createWeddingAction(data: {
       // Batch insert rituals
       if (seedRituals.length > 0) {
         const ritualsToInsert = seedRituals.map((r) => {
-          const baseDate = new Date(weddingDateObj);
-          const offsetDays = r.offsetDays ?? 0;
-          baseDate.setDate(baseDate.getDate() + offsetDays);
-          
-          const startTime = new Date(baseDate);
-          startTime.setHours(r.startHour ?? 9, r.startMin ?? 0, 0, 0);
+          let startTime: Date;
+          let endTime: Date;
 
-          const endTime = new Date(baseDate);
-          endTime.setHours(r.endHour ?? 17, r.endMin ?? 0, 0, 0);
+          if (r.startTime && r.endTime) {
+            startTime = new Date(r.startTime);
+            endTime = new Date(r.endTime);
+          } else {
+            const baseDate = new Date(weddingDateObj);
+            const offsetDays = r.offsetDays ?? 0;
+            baseDate.setDate(baseDate.getDate() + offsetDays);
+            
+            startTime = new Date(baseDate);
+            startTime.setHours(r.startHour ?? 9, r.startMin ?? 0, 0, 0);
+
+            endTime = new Date(baseDate);
+            endTime.setHours(r.endHour ?? 17, r.endMin ?? 0, 0, 0);
+          }
 
           return {
             weddingId: weddingId,
@@ -383,6 +399,7 @@ export async function updateWeddingShowcaseAction(
   weddingId: string,
   data: {
     showcaseFont?: string;
+    showcaseTitleFont?: string;
     showcasePrimary?: string;
     showcaseSecondary?: string;
     showcaseBackground?: string;
@@ -414,6 +431,7 @@ export async function updateWeddingShowcaseAction(
 
     await db.update(weddings).set({
       ...(data.showcaseFont !== undefined && { showcaseFont: data.showcaseFont }),
+      ...(data.showcaseTitleFont !== undefined && { showcaseTitleFont: data.showcaseTitleFont }),
       ...(data.showcasePrimary !== undefined && { showcasePrimary: data.showcasePrimary }),
       ...(data.showcaseSecondary !== undefined && { showcaseSecondary: data.showcaseSecondary }),
       ...(data.showcaseBackground !== undefined && { showcaseBackground: data.showcaseBackground }),

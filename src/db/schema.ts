@@ -83,6 +83,7 @@ export const weddings = pgTable("wedding", {
   logoUrl: text("logo_url"),
   logoData: text("logo_data"),
   showcaseFont: text("showcase_font").default("Playfair Display").notNull(),
+  showcaseTitleFont: text("showcase_title_font").default("Playfair Display").notNull(),
   showcasePrimary: text("showcase_primary").default("#c484b0").notNull(),
   showcaseSecondary: text("showcase_secondary").default("#e6b7d2").notNull(),
   showcaseBackground: text("showcase_background").default("#fffafb").notNull(),

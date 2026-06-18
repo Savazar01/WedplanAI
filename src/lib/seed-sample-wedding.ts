@@ -22,6 +22,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         state: "Rajasthan",
         country: "India",
         pincode: "313001",
+        showcaseTitleFont: "Playfair Display",
         description:
           "🎉 Sample Wedding — Explore all features of WedPlanAI! This sample Hindu wedding includes tasks, rituals, guests with RSVPs, vendors, and budget tracking to help you understand the app.",
       })
@@ -29,7 +30,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
 
     const id = wedding.id;
 
-    // Seed default kanban columns
+    // Seed default planning board columns
     const [todoCol, inProgressCol, doneCol] = await tx.insert(kanbanColumns).values([
       {
         weddingId: id,

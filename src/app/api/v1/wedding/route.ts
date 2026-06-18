@@ -45,6 +45,7 @@ export async function PUT(request: NextRequest) {
       'guestCount',
       'description',
       'showcaseFont',
+      'showcaseTitleFont',
       'showcasePrimary',
       'showcaseSecondary',
       'showcaseBackground',
@@ -59,7 +60,7 @@ export async function PUT(request: NextRequest) {
       'showcaseRsvpDescription',
     ] as const;
 
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
     for (const field of allowedFields) {
       if (field in body) {
         if (field === 'weddingDate') {

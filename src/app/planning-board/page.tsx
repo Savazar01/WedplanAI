@@ -5,9 +5,9 @@ import { ensureDefaultColumns } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import KanbanBoard from "@/components/kanban/board";
+import PlanningBoard from "@/components/kanban/board";
 
-export default async function KanbanPage() {
+export default async function PlanningBoardPage() {
   const session = await getServerSession();
   if (!session || !session.user) {
     redirect("/login?unauthenticated=true");
@@ -47,7 +47,7 @@ export default async function KanbanPage() {
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-6">
-        <KanbanBoard initialTasks={clientTasks} initialColumns={dbColumns} />
+        <PlanningBoard initialTasks={clientTasks} initialColumns={dbColumns} />
       </main>
     </div>
   );

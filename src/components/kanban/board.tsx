@@ -100,7 +100,7 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; dot: string }>
   other:       { bg: "bg-slate-100",   text: "text-slate-700",   dot: "bg-slate-400" },
 };
 
-export default function KanbanBoard({ initialTasks, initialColumns = DEFAULT_COLUMNS }: BoardProps) {
+export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_COLUMNS }: BoardProps) {
   const [tasksList, setTasksList] = React.useState<Task[]>(initialTasks);
   const [columnsList, setColumnsList] = React.useState<Column[]>(initialColumns);
   const [activeMobileCol, setActiveMobileCol] = React.useState<string>(initialColumns[0]?.id || "todo");

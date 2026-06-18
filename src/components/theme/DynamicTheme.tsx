@@ -7,6 +7,7 @@ interface DynamicThemeProps {
     themeSecondary?: string | null;
     themeBackground?: string | null;
     showcaseFont?: string | null;
+    showcaseTitleFont?: string | null;
     showcasePrimary?: string | null;
     showcaseSecondary?: string | null;
     showcaseBackground?: string | null;
@@ -29,6 +30,10 @@ export default function DynamicTheme({ wedding, mode = "app" }: DynamicThemeProp
   const sanitized = font?.replace(/[^a-zA-Z0-9\s-]/g, "") || defaultFont;
   const hasFont = !!font;
 
+  const titleFont = isShowcase ? (wedding?.showcaseTitleFont || "Playfair Display") : null;
+  const sanitizedTitle = titleFont?.replace(/[^a-zA-Z0-9\s-]/g, "") || "Playfair Display";
+  const hasTitleFont = isShowcase && !!titleFont;
+
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,6 +41,12 @@ export default function DynamicTheme({ wedding, mode = "app" }: DynamicThemeProp
       {hasFont && (
         <link
           href={"https://fonts.googleapis.com/css2?family=" + encodeURIComponent(sanitized) + "&display=swap"}
+          rel="stylesheet"
+        />
+      )}
+      {hasTitleFont && (
+        <link
+          href={"https://fonts.googleapis.com/css2?family=" + encodeURIComponent(sanitizedTitle) + "&display=swap"}
           rel="stylesheet"
         />
       )}
@@ -47,6 +58,7 @@ export default function DynamicTheme({ wedding, mode = "app" }: DynamicThemeProp
               --color-secondary: ${secondary || defaultSecondary};
               --color-background: ${background || defaultBackground};
               --font-sans: "${sanitized}", var(--font-geist-sans), sans-serif;
+              ${isShowcase ? `--font-title: "${sanitizedTitle}", Georgia, serif;` : ""}
             }
             body {
               font-family: var(--font-sans);

@@ -81,6 +81,17 @@ const defaultRituals = {
   ],
 };
 
+const taskCategories = [
+  { id: "venue", label: "Venue" },
+  { id: "catering", label: "Catering" },
+  { id: "decor", label: "Decor" },
+  { id: "apparel", label: "Apparel" },
+  { id: "invitations", label: "Invitations" },
+  { id: "music", label: "Music" },
+  { id: "rituals", label: "Rituals" },
+  { id: "other", label: "Other" },
+];
+
 export default function WizardPage() {
   const router = useRouter();
   const [step, setStep] = React.useState(1);
@@ -90,6 +101,10 @@ export default function WizardPage() {
   const [partnerB, setPartnerB] = React.useState("");
   const [weddingDate, setWeddingDate] = React.useState("");
   const [location, setLocation] = React.useState("");
+  const locationRef = React.useRef(location);
+  React.useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
   const [locationName, setLocationName] = React.useState("");
   const [street, setStreet] = React.useState("");
   const [city, setCity] = React.useState("");
@@ -101,38 +116,70 @@ export default function WizardPage() {
   const [budget, setBudget] = React.useState(1000000);
   const [guestCount, setGuestCount] = React.useState(150);
 
+  // Helper function to calculate due date dynamically
+  const calculateTaskDueDate = (wDateStr: string, category: string): string => {
+    if (!wDateStr) return "";
+    const wDate = new Date(wDateStr);
+    const now = new Date();
+    const diffTime = wDate.getTime() - now.getTime();
+    if (diffTime <= 0) {
+      return now.toISOString().split("T")[0];
+    }
+    let ratio = 0.5;
+    switch (category) {
+      case "rituals":
+        ratio = 0.15;
+        break;
+      case "venue":
+        ratio = 0.2;
+        break;
+      case "decor":
+        ratio = 0.25;
+        break;
+      case "music":
+        ratio = 0.35;
+        break;
+      case "invitations":
+        ratio = 0.4;
+        break;
+      case "apparel":
+        ratio = 0.5;
+        break;
+      case "catering":
+        ratio = 0.65;
+        break;
+      case "other":
+      default:
+        ratio = 0.8;
+        break;
+    }
+    const targetTime = now.getTime() + diffTime * ratio;
+    return new Date(targetTime).toISOString().split("T")[0];
+  };
+
   // Customized list states
-  const [customTasks, setCustomTasks] = React.useState<{ title: string; category: string }[]>([]);
+  const [customTasks, setCustomTasks] = React.useState<{ title: string; category: string; dueDate: string }[]>([]);
   const [customRituals, setCustomRituals] = React.useState<{
     name: string;
-    description?: string;
-    offsetDays?: number;
-    startHour?: number;
-    startMin?: number;
-    endHour?: number;
-    endMin?: number;
-    location?: string;
+    description: string;
+    date: string;
+    startTimeOnly: string;
+    endTimeOnly: string;
+    location: string;
   }[]>([]);
-  const [newRitualName, setNewRitualName] = React.useState("");
-  const [newTaskTitle, setNewTaskTitle] = React.useState("");
 
-  const handleAddRitual = () => {
-    if (!newRitualName.trim()) return;
-    setCustomRituals([
-      ...customRituals,
-      {
-        name: newRitualName.trim(),
-        description: "Custom ritual",
-        offsetDays: 0,
-        startHour: 9,
-        startMin: 0,
-        endHour: 17,
-        endMin: 0,
-        location: location || "",
-      },
-    ]);
-    setNewRitualName("");
-  };
+  // Form states for adding new task
+  const [newTaskTitle, setNewTaskTitle] = React.useState("");
+  const [newTaskCategory, setNewTaskCategory] = React.useState("other");
+  const [newTaskDueDate, setNewTaskDueDate] = React.useState("");
+
+  // Form states for adding new ritual
+  const [newRitualName, setNewRitualName] = React.useState("");
+  const [newRitualDescription, setNewRitualDescription] = React.useState("");
+  const [newRitualDate, setNewRitualDate] = React.useState("");
+  const [newRitualStartTime, setNewRitualStartTime] = React.useState("09:00");
+  const [newRitualEndTime, setNewRitualEndTime] = React.useState("17:00");
+  const [newRitualLocation, setNewRitualLocation] = React.useState("");
 
   const handleAddTask = () => {
     if (!newTaskTitle.trim()) return;
@@ -140,22 +187,92 @@ export default function WizardPage() {
       ...customTasks,
       {
         title: newTaskTitle.trim(),
-        category: "other",
+        category: newTaskCategory,
+        dueDate: newTaskDueDate || weddingDate || new Date().toISOString().split("T")[0],
       },
     ]);
     setNewTaskTitle("");
+    setNewTaskCategory("other");
+    setNewTaskDueDate("");
+  };
+
+  const handleAddRitual = () => {
+    if (!newRitualName.trim()) return;
+    setCustomRituals([
+      ...customRituals,
+      {
+        name: newRitualName.trim(),
+        description: newRitualDescription.trim() || "Custom ritual",
+        date: newRitualDate || weddingDate || new Date().toISOString().split("T")[0],
+        startTimeOnly: newRitualStartTime,
+        endTimeOnly: newRitualEndTime,
+        location: newRitualLocation.trim() || location || "",
+      },
+    ]);
+    setNewRitualName("");
+    setNewRitualDescription("");
+    setNewRitualDate("");
+    setNewRitualStartTime("09:00");
+    setNewRitualEndTime("17:00");
+    setNewRitualLocation("");
+  };
+
+  const updateTask = (index: number, field: keyof typeof customTasks[0], value: string) => {
+    setCustomTasks(
+      customTasks.map((t, i) => (i === index ? { ...t, [field]: value } : t))
+    );
+  };
+
+  const deleteTask = (index: number) => {
+    setCustomTasks(customTasks.filter((_, i) => i !== index));
+  };
+
+  const updateRitual = (index: number, field: keyof typeof customRituals[0], value: string) => {
+    setCustomRituals(
+      customRituals.map((r, i) => (i === index ? { ...r, [field]: value } : r))
+    );
+  };
+
+  const deleteRitual = (index: number) => {
+    setCustomRituals(customRituals.filter((_, i) => i !== index));
   };
 
   const [error, setError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
+    if (!weddingDate) return;
     setTimeout(() => {
-      setCustomTasks(defaultTasks[tradition]);
-      setCustomRituals(defaultRituals[tradition]);
-    }, 0);
-  }, [tradition]);
+      const tasksMapped = defaultTasks[tradition].map((t) => ({
+        ...t,
+        dueDate: calculateTaskDueDate(weddingDate, t.category),
+      }));
 
+      const ritualsMapped = defaultRituals[tradition].map((r) => {
+        const offset = r.offsetDays ?? 0;
+        const rDate = new Date(weddingDate);
+        rDate.setDate(rDate.getDate() + offset);
+        const dateStr = rDate.toISOString().split("T")[0];
+
+        const startHStr = String(r.startHour ?? 9).padStart(2, "0");
+        const startMStr = String(r.startMin ?? 0).padStart(2, "0");
+        const endHStr = String(r.endHour ?? 17).padStart(2, "0");
+        const endMStr = String(r.endMin ?? 0).padStart(2, "0");
+
+        return {
+          name: r.name,
+          description: r.description || "",
+          date: dateStr,
+          startTimeOnly: `${startHStr}:${startMStr}`,
+          endTimeOnly: `${endHStr}:${endMStr}`,
+          location: locationRef.current || "",
+        };
+      });
+
+      setCustomTasks(tasksMapped);
+      setCustomRituals(ritualsMapped);
+    }, 0);
+  }, [tradition, weddingDate]);
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -203,6 +320,22 @@ export default function WizardPage() {
         return false;
       }
     }
+    if (step === 5) {
+      for (const t of customTasks) {
+        if (!t.title.trim()) {
+          setError("All tasks must have a title.");
+          return false;
+        }
+      }
+    }
+    if (step === 6) {
+      for (const r of customRituals) {
+        if (!r.name.trim()) {
+          setError("All events must have a name.");
+          return false;
+        }
+      }
+    }
     return true;
   };
 
@@ -221,6 +354,18 @@ export default function WizardPage() {
     setError("");
     setSubmitting(true);
     try {
+      const formattedRituals = customRituals.map((r) => {
+        const startStr = `${r.date}T${r.startTimeOnly || "00:00"}`;
+        const endStr = `${r.date}T${r.endTimeOnly || "00:00"}`;
+        return {
+          name: r.name,
+          description: r.description,
+          startTime: new Date(startStr).toISOString(),
+          endTime: new Date(endStr).toISOString(),
+          location: r.location,
+        };
+      });
+
       const res = await createWeddingAction({
         partnerA,
         partnerB,
@@ -236,8 +381,12 @@ export default function WizardPage() {
         country,
         pincode: pincode || undefined,
         description: description || undefined,
-        customTasks,
-        customRituals,
+        customTasks: customTasks.map((t) => ({
+          title: t.title,
+          category: t.category,
+          dueDate: t.dueDate,
+        })),
+        customRituals: formattedRituals,
       });
 
       if (res?.error) {
@@ -258,7 +407,7 @@ export default function WizardPage() {
       <Card variant="default" className="w-full max-w-2xl bg-white p-8 shadow-xl border border-slate-100 flex flex-col">
         {/* Top Progress Indicator */}
         <div className="flex items-center justify-between mb-8">
-          {[1, 2, 3, 4, 5].map((s) => (
+          {[1, 2, 3, 4, 5, 6, 7].map((s) => (
             <React.Fragment key={s}>
               <div className="flex items-center">
                 <div
@@ -270,15 +419,17 @@ export default function WizardPage() {
                 >
                   {s}
                 </div>
-                <span className="hidden sm:inline text-xs ml-2 font-medium text-slate-500">
+                <span className="hidden md:inline text-xs ml-2 font-medium text-slate-500">
                   {s === 1 && "Partners"}
                   {s === 2 && "Date & Place"}
                   {s === 3 && "Tradition"}
                   {s === 4 && "Budget & Guests"}
-                  {s === 5 && "Review"}
+                  {s === 5 && "Planning Tasks"}
+                  {s === 6 && "Event Itinerary"}
+                  {s === 7 && "Review"}
                 </span>
               </div>
-              {s < 5 && <div className={`flex-1 h-[2px] mx-2 ${step > s ? "bg-[#6771ab]" : "bg-slate-100"}`} />}
+              {s < 7 && <div className={`flex-1 h-[2px] mx-1 ${step > s ? "bg-[#6771ab]" : "bg-slate-100"}`} />}
             </React.Fragment>
           ))}
         </div>
@@ -480,6 +631,290 @@ export default function WizardPage() {
           {step === 5 && (
             <div className="space-y-6">
               <div>
+                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Planning Tasks</h2>
+                <p className="text-sm text-slate-500">
+                  Customize the tasks for your wedding. Set due dates to keep your planning on track.
+                </p>
+              </div>
+
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {customTasks.map((t, idx) => (
+                  <Card key={idx} variant="default" className="p-4 border border-slate-100 shadow-sm relative bg-[#fefce8]">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                      <div className="sm:col-span-6">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
+                        <Input
+                          type="text"
+                          value={t.title}
+                          onChange={(e) => updateTask(idx, "title", e.target.value)}
+                          placeholder="e.g. Book mehndi artist"
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
+                        <select
+                          value={t.category}
+                          onChange={(e) => updateTask(idx, "category", e.target.value)}
+                          className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                        >
+                          {taskCategories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="sm:col-span-3 flex items-end gap-2">
+                        <div className="flex-1">
+                          <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Due Date</label>
+                          <Input
+                            type="date"
+                            value={t.dueDate}
+                            onChange={(e) => updateTask(idx, "dueDate", e.target.value)}
+                            className="h-9 text-xs"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => deleteTask(idx)}
+                          className="h-9 px-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl flex items-center justify-center min-w-[36px]"
+                          title="Delete task"
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {customTasks.length === 0 && (
+                  <p className="text-sm text-slate-400 italic text-center py-4">No tasks added yet. Add one below!</p>
+                )}
+              </div>
+
+              {/* Add New Task Form */}
+              <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-xl border">
+                <h4 className="text-xs font-semibold text-[#6771ab] uppercase tracking-wider mb-2">Add New Planning Task</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  <div className="sm:col-span-6">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Hire Wedding Planner"
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
+                    <select
+                      value={newTaskCategory}
+                      onChange={(e) => setNewTaskCategory(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                    >
+                      {taskCategories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-3 flex gap-2">
+                    <div className="flex-1">
+                      <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Due Date</label>
+                      <Input
+                        type="date"
+                        value={newTaskDueDate}
+                        onChange={(e) => setNewTaskDueDate(e.target.value)}
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleAddTask}
+                      variant="primary"
+                      className="h-9 px-4 text-xs rounded-xl bg-[#6771ab] text-white hover:bg-[#566198]"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Event Itinerary</h2>
+                <p className="text-sm text-slate-500">
+                  Customize details, dates, times, and venues for each ceremony or event.
+                </p>
+              </div>
+
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {customRituals.map((r, idx) => (
+                  <Card key={idx} variant="default" className="p-4 border border-slate-100 shadow-sm relative bg-[#fefce8]">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                      <div className="md:col-span-4">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Event Name</label>
+                        <Input
+                          type="text"
+                          value={r.name}
+                          onChange={(e) => updateRitual(idx, "name", e.target.value)}
+                          placeholder="e.g. Sangeet"
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      <div className="md:col-span-4">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Description</label>
+                        <Input
+                          type="text"
+                          value={r.description || ""}
+                          onChange={(e) => updateRitual(idx, "description", e.target.value)}
+                          placeholder="e.g. Dance and music night"
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      <div className="md:col-span-4">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Location / Venue</label>
+                        <Input
+                          type="text"
+                          value={r.location || ""}
+                          onChange={(e) => updateRitual(idx, "location", e.target.value)}
+                          placeholder="e.g. Royal Banquet Hall"
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-4">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Date</label>
+                        <Input
+                          type="date"
+                          value={r.date}
+                          onChange={(e) => updateRitual(idx, "date", e.target.value)}
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      <div className="md:col-span-4">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Start Time</label>
+                        <Input
+                          type="time"
+                          value={r.startTimeOnly}
+                          onChange={(e) => updateRitual(idx, "startTimeOnly", e.target.value)}
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      <div className="md:col-span-4 flex items-end gap-2">
+                        <div className="flex-1">
+                          <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">End Time</label>
+                          <Input
+                            type="time"
+                            value={r.endTimeOnly}
+                            onChange={(e) => updateRitual(idx, "endTimeOnly", e.target.value)}
+                            className="h-9 text-xs"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => deleteRitual(idx)}
+                          className="h-9 px-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl flex items-center justify-center min-w-[36px]"
+                          title="Delete ritual"
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {customRituals.length === 0 && (
+                  <p className="text-sm text-slate-400 italic text-center py-4">No events scheduled. Add one below!</p>
+                )}
+              </div>
+
+              {/* Add New Ritual Form */}
+              <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-xl border">
+                <h4 className="text-xs font-semibold text-[#6771ab] uppercase tracking-wider mb-2">Add New Custom Itinerary Event</h4>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                  <div className="md:col-span-4">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Event Name</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Welcome Drinks"
+                      value={newRitualName}
+                      onChange={(e) => setNewRitualName(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Description</label>
+                    <Input
+                      type="text"
+                      placeholder="Ice breaker social"
+                      value={newRitualDescription}
+                      onChange={(e) => setNewRitualDescription(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Location / Venue</label>
+                    <Input
+                      type="text"
+                      placeholder="Hotel Poolside"
+                      value={newRitualLocation}
+                      onChange={(e) => setNewRitualLocation(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  
+                  <div className="md:col-span-4">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Date</label>
+                    <Input
+                      type="date"
+                      value={newRitualDate}
+                      onChange={(e) => setNewRitualDate(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Start Time</label>
+                    <Input
+                      type="time"
+                      value={newRitualStartTime}
+                      onChange={(e) => setNewRitualStartTime(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="md:col-span-4 flex gap-2">
+                    <div className="flex-1">
+                      <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">End Time</label>
+                      <Input
+                        type="time"
+                        value={newRitualEndTime}
+                        onChange={(e) => setNewRitualEndTime(e.target.value)}
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleAddRitual}
+                      variant="primary"
+                      className="h-9 px-4 text-xs rounded-xl bg-[#6771ab] text-white hover:bg-[#566198]"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 7 && (
+            <div className="space-y-6">
+              <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Review & Confirm</h2>
                 <p className="text-sm text-slate-500">Add a description for your wedding showcase, then review and confirm.</p>
               </div>
@@ -540,94 +975,43 @@ export default function WizardPage() {
                   {/* Rituals Section */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-semibold text-[#2d336b]">Rituals ({customRituals.length})</span>
+                      <span className="text-xs font-semibold text-[#2d336b]">Event Itinerary ({customRituals.length})</span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 p-3 bg-white rounded-xl border border-slate-200 min-h-[46px] max-h-[150px] overflow-y-auto">
+                    <div className="space-y-2 p-3 bg-white rounded-xl border border-slate-200 max-h-[200px] overflow-y-auto">
                       {customRituals.map((r, idx) => (
-                        <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#eef0f7] text-[#2d336b]">
-                          {r.name}
-                          <button
-                            type="button"
-                            onClick={() => setCustomRituals(customRituals.filter((_, i) => i !== idx))}
-                            className="text-[#6771ab] hover:text-[#ef4444] transition-colors font-bold text-[10px] ml-1"
-                          >
-                            ✕
-                          </button>
-                        </span>
+                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs border-b border-slate-100 last:border-0 pb-1.5 last:pb-0">
+                          <div>
+                            <span className="font-semibold text-[#2d336b]">{r.name}</span>
+                            {r.location && <span className="text-slate-400 block sm:inline sm:ml-2">📍 {r.location}</span>}
+                          </div>
+                          <div className="text-[#6771ab] font-medium">
+                            📅 {r.date} ({r.startTimeOnly} - {r.endTimeOnly})
+                          </div>
+                        </div>
                       ))}
                       {customRituals.length === 0 && (
-                        <span className="text-xs text-slate-400 italic">No rituals scheduled</span>
+                        <p className="text-xs text-slate-400 italic text-center">No events scheduled</p>
                       )}
-                    </div>
-                    <div className="flex gap-2 mt-2 max-w-md">
-                      <Input
-                        type="text"
-                        placeholder="Add new ritual name..."
-                        value={newRitualName}
-                        onChange={(e) => setNewRitualName(e.target.value)}
-                        className="h-8 text-xs bg-white border-slate-200 rounded-xl flex-1"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleAddRitual();
-                          }
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        onClick={handleAddRitual}
-                        variant="primary"
-                        className="h-8 px-3 text-xs rounded-xl flex-none bg-[#6771ab] text-white hover:bg-[#566198]"
-                      >
-                        + Add
-                      </Button>
                     </div>
                   </div>
 
                   {/* Tasks Section */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-semibold text-[#2d336b]">Tasks ({customTasks.length})</span>
+                      <span className="text-xs font-semibold text-[#2d336b]">Planning Tasks ({customTasks.length})</span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 p-3 bg-white rounded-xl border border-slate-200 min-h-[46px] max-h-[150px] overflow-y-auto">
+                    <div className="space-y-2 p-3 bg-white rounded-xl border border-slate-200 max-h-[200px] overflow-y-auto">
                       {customTasks.map((t, idx) => (
-                        <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#fefce8] text-[#475569] border border-yellow-200">
-                          {t.title}
-                          <button
-                            type="button"
-                            onClick={() => setCustomTasks(customTasks.filter((_, i) => i !== idx))}
-                            className="text-slate-400 hover:text-[#ef4444] transition-colors font-bold text-[10px] ml-1"
-                          >
-                            ✕
-                          </button>
-                        </span>
+                        <div key={idx} className="flex justify-between items-center text-xs border-b border-slate-100 last:border-0 pb-1.5 last:pb-0">
+                          <span className="font-medium text-slate-800">{t.title}</span>
+                          <span className="text-[#6771ab] text-[10px] font-semibold bg-[#eef0f7] px-2 py-0.5 rounded-full flex items-center gap-1">
+                            📅 Due: {t.dueDate || "Not set"}
+                          </span>
+                        </div>
                       ))}
                       {customTasks.length === 0 && (
-                        <span className="text-xs text-slate-400 italic">No tasks created</span>
+                        <p className="text-xs text-slate-400 italic text-center">No tasks created</p>
                       )}
-                    </div>
-                    <div className="flex gap-2 mt-2 max-w-md">
-                      <Input
-                        type="text"
-                        placeholder="Add new task title..."
-                        value={newTaskTitle}
-                        onChange={(e) => setNewTaskTitle(e.target.value)}
-                        className="h-8 text-xs bg-white border-slate-200 rounded-xl flex-1"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleAddTask();
-                          }
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        onClick={handleAddTask}
-                        variant="primary"
-                        className="h-8 px-3 text-xs rounded-xl flex-none bg-[#6771ab] text-white hover:bg-[#566198]"
-                      >
-                        + Add
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -655,7 +1039,7 @@ export default function WizardPage() {
             Back
           </Button>
 
-          {step < 5 ? (
+          {step < 7 ? (
             <Button type="button" onClick={handleNext} variant="primary">
               Continue
             </Button>

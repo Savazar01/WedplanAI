@@ -20,11 +20,11 @@ interface Ritual {
   isCustom: boolean;
 }
 
-interface TimelineOnlyProps {
+interface EventItineraryOnlyProps {
   initialRituals: Ritual[];
 }
 
-export default function TimelineOnly({ initialRituals }: TimelineOnlyProps) {
+export default function EventItineraryOnly({ initialRituals }: EventItineraryOnlyProps) {
   const router = useRouter();
   const [ritualsList, setRitualsList] = React.useState<Ritual[]>(initialRituals);
 
@@ -148,7 +148,7 @@ export default function TimelineOnly({ initialRituals }: TimelineOnlyProps) {
       } else {
         setIsFormOpen(false);
         setRitualsList((prev) => prev.filter((r) => r.id !== deleteConfirm));
-        setToast({ message: "Ritual deleted.", type: "success" });
+        setToast({ message: "Itinerary Event deleted.", type: "success" });
         router.refresh();
       }
     } catch (err) {
@@ -168,11 +168,11 @@ export default function TimelineOnly({ initialRituals }: TimelineOnlyProps) {
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Wedding Timeline</h1>
-          <p className="text-xs text-slate-500">Chronological order of your rituals and ceremonies.</p>
+          <h1 className="text-2xl font-bold text-slate-800">Wedding Event Itinerary</h1>
+          <p className="text-xs text-slate-500">Chronological order of your itinerary events and ceremonies.</p>
         </div>
         <Button onClick={openCreateModal} variant="primary">
-          + Schedule Ritual
+          + Add Itinerary Event
         </Button>
       </div>
 
@@ -230,13 +230,13 @@ export default function TimelineOnly({ initialRituals }: TimelineOnlyProps) {
 
         {sortedTimelineRituals.length === 0 && (
           <div className="text-center py-12 text-slate-400 text-sm bg-white rounded-xl border border-slate-100">
-            No rituals scheduled yet. Click &quot;Schedule Ritual&quot; to get started.
+            No itinerary events scheduled yet. Click &quot;Add Itinerary Event&quot; to get started.
           </div>
         )}
       </div>
 
       {/* Create / Edit Dialog Form */}
-      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedRitual ? "Edit Ritual Ceremony" : "Schedule New Ritual"}>
+      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedRitual ? "Edit Itinerary Event" : "Add Itinerary Event"}>
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Ceremony Name</label>
@@ -314,8 +314,8 @@ export default function TimelineOnly({ initialRituals }: TimelineOnlyProps) {
         isOpen={!!deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
         onConfirm={confirmDeleteRitual}
-        title="Delete Ritual"
-        message="Are you sure you want to delete this ritual? This action cannot be undone."
+        title="Delete Itinerary Event"
+        message="Are you sure you want to delete this itinerary event? This action cannot be undone."
         confirmLabel="Delete"
         cancelLabel="Cancel"
         variant="danger"

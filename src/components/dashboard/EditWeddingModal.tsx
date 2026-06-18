@@ -125,9 +125,9 @@ export default function EditWeddingModal({ wedding, isOpen, onClose }: Props) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-lg mx-4 bg-[#fefce8] border border-violet-100 rounded-3xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-lg mx-4 bg-[#fefce8] border border-violet-100 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-violet-100 bg-gradient-to-r from-[#6771ab]/10 to-transparent">
+        <div className="px-6 pt-6 pb-4 border-b border-violet-100 bg-gradient-to-r from-[#6771ab]/10 to-transparent shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-[#2d336b]">✏️ Edit Wedding Details</h2>
@@ -144,7 +144,8 @@ export default function EditWeddingModal({ wedding, isOpen, onClose }: Props) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-[#6771ab] uppercase tracking-widest">Partner A</label>
@@ -348,8 +349,9 @@ export default function EditWeddingModal({ wedding, isOpen, onClose }: Props) {
               {message.type === "success" ? "✅ " : "⚠️ "}{message.text}
             </div>
           )}
+          </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="px-6 py-4 border-t border-violet-100 flex gap-3 shrink-0 bg-[#fefce8]">
             <button
               type="button"
               onClick={onClose}

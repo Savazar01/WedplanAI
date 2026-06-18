@@ -38,9 +38,11 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
   // Toast notification state
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  React.useEffect(() => {
+  const [prevInitialKeys, setPrevInitialKeys] = React.useState(initialKeys);
+  if (initialKeys !== prevInitialKeys) {
+    setPrevInitialKeys(initialKeys);
     setKeys(initialKeys);
-  }, [initialKeys]);
+  }
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();

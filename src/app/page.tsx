@@ -111,7 +111,7 @@ export default async function LandingPage() {
         <div className="relative mt-20 w-full max-w-4xl mx-auto">
           <div className="grid grid-cols-3 gap-4 px-4">
             {[
-              { emoji: "💍", label: "Kanban Tasks", sub: "12 tasks completed" },
+              { emoji: "💍", label: "Planning Tasks", sub: "12 tasks completed" },
               { emoji: "📅", label: "Wedding Date", sub: "142 days to go" },
               { emoji: "👥", label: "Guest RSVPs", sub: "86 confirmed" },
             ].map((card) => (
@@ -156,7 +156,7 @@ export default async function LandingPage() {
                 icon: (
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
                 ),
-                title: "Smart Kanban Board",
+                title: "Smart Planning Board",
                 desc: "Drag-and-drop task management across Backlog, To-Do, In Progress and Done columns. Pre-seeded with tradition-specific tasks for Hindu, Muslim, Sikh, and more.",
                 color: "from-violet-500/10 to-violet-50",
                 border: "border-violet-100",
@@ -166,8 +166,8 @@ export default async function LandingPage() {
                 icon: (
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 ),
-                title: "Calendar & Timeline",
-                desc: "View all ceremonies and rituals in a beautiful month calendar grid or a day-of timeline. Never miss a ritual with visual scheduling.",
+                title: "Calendar & Event Itinerary",
+                desc: "View all ceremonies and itinerary events in a beautiful month calendar grid or a day-of event itinerary. Never miss an itinerary event with visual scheduling.",
                 color: "from-rose-500/10 to-rose-50",
                 border: "border-rose-100",
                 iconBg: "bg-rose-100 text-[#c484b0]",
@@ -305,7 +305,7 @@ export default async function LandingPage() {
               {
                 name: "Priya Sharma",
                 role: "Bride — Hindu Wedding, Udaipur",
-                quote: "WedPlanAI transformed our chaotic planning into something magical. The Kanban board kept 200 tasks perfectly organized, and the public RSVP page was a hit with our guests!",
+                quote: "WedPlanAI transformed our chaotic planning into something magical. The planning board kept 200 tasks perfectly organized, and the public RSVP page was a hit with our guests!",
                 initials: "PS",
                 color: "from-violet-400 to-purple-500",
               },
@@ -376,7 +376,7 @@ export default async function LandingPage() {
             Every Tradition, Beautifully Supported
           </h2>
           <p className="text-slate-500 mb-12 max-w-2xl mx-auto text-base leading-relaxed">
-            WedPlanAI pre-populates your tasks, rituals, and timeline based on your wedding tradition — so you start with a smart foundation, not a blank slate.
+            WedPlanAI pre-populates your tasks, itinerary events, and schedule based on your wedding tradition — so you start with a smart foundation, not a blank slate.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {[

@@ -1,0 +1,1 @@
+ALTER TABLE "wedding" ADD COLUMN "showcase_title_font" text DEFAULT 'Playfair Display' NOT NULL;

@@ -14,7 +14,7 @@ export function proxy(request: NextRequest) {
   const isProtectedPath =
     pathname.startsWith("/wizard") ||
     pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/kanban") ||
+    pathname.startsWith("/planning-board") ||
     pathname.startsWith("/calendar") ||
     pathname.startsWith("/guests") ||
     pathname.startsWith("/vendors");
@@ -48,7 +48,7 @@ export const config = {
   matcher: [
     "/wizard/:path*",
     "/dashboard/:path*",
-    "/kanban/:path*",
+    "/planning-board/:path*",
     "/calendar/:path*",
     "/guests/:path*",
     "/vendors/:path*",

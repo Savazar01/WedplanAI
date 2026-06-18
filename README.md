@@ -10,11 +10,11 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 
 | Feature | Description |
 |---|---|
-| 🗂️ **Kanban Board** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
-| 📅 **Calendar & Timeline** | Month-view calendar and day-of timeline for all ceremonies and rituals |
+| 🗂️ **Planning Board** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
+| 📅 **Calendar & Event Itinerary** | Month-view calendar and day-of event itinerary for all ceremonies and events |
 | 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP |
 | 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, and dynamic currency by country |
-| 🌐 **Public Showcase Website** | Auto-generated public wedding page with live countdown, itinerary, and RSVP form |
+| 🌐 **Build Showcase Page** | Auto-generated public wedding page with an interactive live builder, countdown, itinerary, and RSVP form |
 | 👩‍💼 **Multi-User Collaboration** | Role-based access — admins invite planners and coordinators |
 | ⚙️ **Settings & User Management** | Admin controls for workspace configuration and team access |
 | 🎉 **Guided Onboarding** | Interactive walkthrough tour and wizard to set up your first wedding event |
@@ -219,20 +219,22 @@ src/
 │   ├── api/auth/           # Better Auth API handler
 │   ├── dashboard/          # Authenticated dashboard pages
 │   │   ├── calendar/       # Calendar view
+│   │   ├── event-itinerary/# Event itinerary / ceremonies
 │   │   ├── guests/         # Guest management
-│   │   ├── kanban/         # Kanban board
+│   │   ├── planning-board/ # Planning board (tasks)
 │   │   ├── settings/       # Workspace settings
-│   │   ├── timeline/       # Timeline / ceremonies
+│   │   ├── showcase/       # Showcase builder
 │   │   ├── users/          # User management (admin only)
 │   │   └── vendors/        # Vendor & budget tracker
 │   ├── login/              # Login page
+│   ├── planning-board/     # Public planning board
 │   ├── signup/             # Signup page
 │   ├── wedding/[id]/       # Public wedding showcase page
 │   ├── wizard/             # Wedding setup wizard
 │   └── page.tsx            # Landing page (public)
 ├── components/
 │   ├── dashboard/          # Dashboard shell, sidebar, wedding switcher
-│   ├── kanban/             # Kanban board components
+│   ├── kanban/             # Planning board (Kanban) components
 │   └── ui/                 # shadcn/ui base components
 ├── db/
 │   ├── schema.ts           # Drizzle database schema

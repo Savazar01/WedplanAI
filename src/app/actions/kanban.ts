@@ -34,7 +34,8 @@ export async function createColumnAction(data: { name: string; color: string }) 
       type: "custom",
     });
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     return { success: true };
   } catch (error) {
     console.error("Create column error:", error);
@@ -59,7 +60,8 @@ export async function updateColumnAction(columnId: string, data: { name: string;
       })
       .where(eq(kanbanColumns.id, columnId));
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     return { success: true };
   } catch (error) {
     console.error("Update column error:", error);
@@ -87,7 +89,8 @@ export async function deleteColumnAction(columnId: string) {
 
     await db.delete(kanbanColumns).where(eq(kanbanColumns.id, columnId));
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     return { success: true };
   } catch (error) {
     console.error("Delete column error:", error);
@@ -110,7 +113,8 @@ export async function reorderColumnsAction(columnIds: string[]) {
         .where(eq(kanbanColumns.id, columnIds[i]));
     }
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     return { success: true };
   } catch (error) {
     console.error("Reorder columns error:", error);
@@ -164,7 +168,8 @@ export async function createTaskAction(data: {
       isCustom: true,
     });
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
@@ -224,7 +229,8 @@ export async function updateTaskStatusAction(taskId: string, newStatus: string) 
       .set({ columnId: targetColumnId, status: newStatus, updatedAt: new Date() })
       .where(eq(tasks.id, taskId));
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
@@ -243,7 +249,8 @@ export async function deleteTaskAction(taskId: string) {
   try {
     await db.delete(tasks).where(eq(tasks.id, taskId));
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
@@ -279,7 +286,8 @@ export async function updateTaskAction(
       })
       .where(eq(tasks.id, taskId));
 
-    revalidatePath("/kanban");
+    revalidatePath("/planning-board");
+    revalidatePath("/dashboard/planning-board");
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {

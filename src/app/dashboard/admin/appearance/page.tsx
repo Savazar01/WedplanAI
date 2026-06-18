@@ -1,6 +1,7 @@
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import AppearanceFormClient from "./AppearanceFormClient";
 
 export default async function AppearancePage() {
@@ -23,7 +24,9 @@ export default async function AppearancePage() {
           <p className="text-slate-600">No active wedding found. Please create a wedding event first.</p>
         </div>
       ) : (
-        <AppearanceFormClient wedding={activeWedding} />
+        <Suspense fallback={<div>Loading appearance settings...</div>}>
+          <AppearanceFormClient wedding={activeWedding} />
+        </Suspense>
       )}
     </main>
   );

@@ -579,11 +579,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
             <span className="w-3 h-3 rounded-full bg-amber-400 block" />
             <span className="w-3 h-3 rounded-full bg-emerald-400 block" />
           </div>
-          <div className="bg-white border border-slate-200 rounded-lg px-4 py-1 text-xs text-slate-500 font-mono select-all truncate max-w-xs md:max-w-md">
-            https://wedplan.ai/wedding/{wedding.partnerA.toLowerCase()}-and-{wedding.partnerB.toLowerCase()}
-          </div>
-          <span className="text-xs uppercase font-bold text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-sm">
-            Live Preview
+          <span className="text-sm font-bold text-slate-500 tracking-wide">
+            Showcase Page - Live Preview
           </span>
         </div>
 

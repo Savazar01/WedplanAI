@@ -6,6 +6,7 @@ import { createWeddingAction } from "@/app/actions/wedding";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { authClient } from "@/lib/auth-client";
 import { formatCurrency } from "@/lib/format";
 
@@ -239,6 +240,7 @@ export default function WizardPage() {
 
   const [error, setError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = React.useState(false);
 
   React.useEffect(() => {
     if (!weddingDate) return;
@@ -404,7 +406,8 @@ export default function WizardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <Card variant="default" className="w-full max-w-2xl bg-white p-8 shadow-xl border border-slate-100 flex flex-col">
+      <Card variant="default" className="w-full max-w-2xl bg-white p-8 shadow-xl border border-slate-100 flex flex-col relative">
+
         {/* Top Progress Indicator */}
         <div className="flex items-center justify-between mb-8">
           {[1, 2, 3, 4, 5, 6, 7].map((s) => (
@@ -1028,7 +1031,18 @@ export default function WizardPage() {
         )}
 
         {/* Wizard Controls */}
-        <div className="flex items-center justify-between border-t border-slate-100 pt-6 mt-8">
+        <div className="flex items-center gap-3 border-t border-slate-100 pt-6 mt-8">
+          <Button
+            type="button"
+            variant="error"
+            onClick={() => setShowCancelConfirm(true)}
+            className="font-semibold"
+          >
+            Cancel
+          </Button>
+
+          <div className="flex-1" />
+
           <Button
             type="button"
             variant="ghost"
@@ -1055,6 +1069,21 @@ export default function WizardPage() {
           )}
         </div>
       </Card>
+
+      {/* Cancel Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          router.push("/dashboard");
+        }}
+        title="Cancel Wedding Setup?"
+        message="Are you sure you want to cancel? All unsaved changes will be lost. You can always start again from the wizard."
+        confirmLabel="Yes, Cancel"
+        cancelLabel="Go Back"
+        variant="danger"
+      />
     </div>
   );
 }

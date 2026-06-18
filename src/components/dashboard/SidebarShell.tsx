@@ -24,6 +24,7 @@ import {
   ShieldAlert,
   KeyRound,
   ChevronDown,
+  BookOpen,
 } from "lucide-react";
 
 const DEFAULT_LOGO = "https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png";
@@ -122,6 +123,7 @@ export default function SidebarShell({
   }
 
   navItems.push({ href: "/dashboard/profile", label: "User Profile", icon: UserCog });
+  navItems.push({ href: "/dashboard/docs", label: "Documentation", icon: BookOpen });
 
 
   const sidebarContent = (isMobile = false) => {

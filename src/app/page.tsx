@@ -28,7 +28,7 @@ export default async function LandingPage() {
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-sm font-medium text-slate-600 hover:text-[#6771ab] transition-colors cursor-pointer">Features</a>
           <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-[#6771ab] transition-colors cursor-pointer">How It Works</a>
-          <a href="#testimonials" className="text-sm font-medium text-slate-600 hover:text-[#6771ab] transition-colors cursor-pointer">Testimonials</a>
+          <Link href="/dashboard/docs" className="text-sm font-medium text-slate-600 hover:text-[#6771ab] transition-colors cursor-pointer">Docs</Link>
         </div>
 
         <div className="flex items-center gap-3">
@@ -40,26 +40,18 @@ export default async function LandingPage() {
               Go to Dashboard
             </Link>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="px-5 py-2 rounded-xl border border-violet-200 text-[#6771ab] text-sm font-semibold hover:bg-violet-50 transition-all cursor-pointer"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="px-5 py-2 rounded-xl bg-[#6771ab] text-white text-sm font-semibold shadow-md hover:bg-[#566198] transition-all active:scale-[0.97] cursor-pointer"
-              >
-                Get Started Free
-              </Link>
-            </>
+            <Link
+              href="/signup"
+              className="px-5 py-2 rounded-xl bg-[#6771ab] text-white text-sm font-semibold shadow-md hover:bg-[#566198] transition-all active:scale-[0.97] cursor-pointer"
+            >
+              Sign In
+            </Link>
           )}
         </div>
       </nav>
 
       {/* ─── HERO SECTION ─── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-20 overflow-hidden">
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-20">
         {/* Decorative gradient blobs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-violet-200/40 to-rose-200/30 blur-3xl" />
@@ -73,7 +65,7 @@ export default async function LandingPage() {
           AI-Powered Wedding Planning
         </div>
 
-        <h1 className={`${cormorant.className} relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500 leading-[1.1] mb-6 max-w-5xl`}>
+        <h1 className={`${cormorant.className} relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500 leading-[1.4] mb-6 max-w-full px-4 pb-3`}>
           Plan Your Perfect Wedding
         </h1>
 
@@ -90,42 +82,15 @@ export default async function LandingPage() {
               Open Your Dashboard
             </Link>
           ) : (
-            <>
-              <Link
-                href="/signup"
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#6771ab] to-[#c484b0] text-white font-semibold text-lg shadow-lg hover:opacity-90 transition-all hover:shadow-xl active:scale-[0.97] cursor-pointer"
-              >
-                Start Planning Free
-              </Link>
-              <Link
-                href="/login"
-                className="px-8 py-4 rounded-xl bg-white border border-violet-200 text-[#6771ab] font-semibold text-lg shadow-sm hover:shadow-md hover:border-[#6771ab] transition-all cursor-pointer"
-              >
-                Sign In to Your Account
-              </Link>
-            </>
+            <Link
+              href="/signup"
+              className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#6771ab] to-[#c484b0] text-white font-semibold text-lg shadow-lg hover:opacity-90 transition-all hover:shadow-xl active:scale-[0.97] cursor-pointer"
+            >
+              Sign In
+            </Link>
           )}
         </div>
 
-        {/* Hero decorative card cluster */}
-        <div className="relative mt-20 w-full max-w-4xl mx-auto">
-          <div className="grid grid-cols-3 gap-4 px-4">
-            {[
-              { emoji: "💍", label: "Planning Tasks", sub: "12 tasks completed" },
-              { emoji: "📅", label: "Wedding Date", sub: "142 days to go" },
-              { emoji: "👥", label: "Guest RSVPs", sub: "86 confirmed" },
-            ].map((card) => (
-              <div
-                key={card.label}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl border border-violet-100 shadow-md p-4 sm:p-6 flex flex-col items-center gap-2 hover:shadow-lg transition-shadow cursor-default"
-              >
-                <span className="text-3xl sm:text-4xl" role="img" aria-label={card.label}>{card.emoji}</span>
-                <span className="font-semibold text-[#2d336b] text-sm sm:text-base">{card.label}</span>
-                <span className="text-xs text-slate-400">{card.sub}</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Elegant gold divider */}
         <div className="relative flex items-center justify-center gap-4 mt-16 w-full">
@@ -288,83 +253,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ─── TESTIMONIALS ─── */}
-      <section id="testimonials" className="py-24 px-6 bg-[#eef0f7]">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-widest mb-4">
-              Loved by Planners
-            </div>
-            <h2 className={`${cormorant.className} text-4xl sm:text-5xl font-bold text-[#2d336b]`}>
-              Stories From Our Families
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Priya Sharma",
-                role: "Bride — Hindu Wedding, Udaipur",
-                quote: "WedPlanAI transformed our chaotic planning into something magical. The planning board kept 200 tasks perfectly organized, and the public RSVP page was a hit with our guests!",
-                initials: "PS",
-                color: "from-violet-400 to-purple-500",
-              },
-              {
-                name: "Aisha & Omar Khan",
-                role: "Couple — Nikah Ceremony, Dubai",
-                quote: "The vendor budget tracker alone saved us from overspending. We could see at a glance how much was paid vs outstanding across all 15 vendors. Simply brilliant.",
-                initials: "AO",
-                color: "from-rose-400 to-pink-500",
-              },
-              {
-                name: "Sarah & James Mitchell",
-                role: "Wedding Planner, London",
-                quote: "As a professional planner managing multiple weddings, WedPlanAI&#39;s multi-user collaboration is a game changer. My clients can see everything, and I stay in control.",
-                initials: "SM",
-                color: "from-amber-400 to-orange-500",
-              },
-            ].map((testimonial) => (
-              <div
-                key={testimonial.name}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-violet-100 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${testimonial.color} text-white flex items-center justify-center font-bold text-sm flex-shrink-0`}>
-                    {testimonial.initials}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-[#2d336b] text-sm">{testimonial.name}</div>
-                    <div className="text-xs text-slate-400">{testimonial.role}</div>
-                  </div>
-                </div>
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                  ))}
-                </div>
-                <p className="text-slate-600 text-sm leading-relaxed italic">&ldquo;{testimonial.quote}&rdquo;</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── STATS STRIP ─── */}
-      <section className="py-16 px-6 bg-gradient-to-r from-[#6771ab] via-[#7b82be] to-[#c484b0]">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
-          {[
-            { value: "500+", label: "Weddings Planned" },
-            { value: "50K+", label: "Tasks Managed" },
-            { value: "25K+", label: "Guests RSVPed" },
-            { value: "12+", label: "Wedding Traditions" },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <div className={`${cormorant.className} text-4xl font-bold mb-1`}>{stat.value}</div>
-              <div className="text-white/80 text-sm font-medium">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ─── TRADITION SUPPORT ─── */}
       <section className="py-24 px-6 bg-[#faf5ff]">
@@ -399,50 +287,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ─── FINAL CTA ─── */}
-      <section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="bg-gradient-to-br from-[#6771ab] to-[#c484b0] rounded-3xl p-12 shadow-2xl relative overflow-hidden">
-            {/* Decorative circles */}
-            <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10" />
-            <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-white/10" />
-
-            <div className="relative">
-              <div className="text-amber-300 text-sm font-bold uppercase tracking-widest mb-4">Start Today</div>
-              <h2 className={`${cormorant.className} text-4xl sm:text-5xl font-bold text-white mb-4`}>
-                Your Perfect Wedding Awaits
-              </h2>
-              <p className="text-white/80 text-base mb-8 leading-relaxed max-w-lg mx-auto">
-                Join hundreds of families who&apos;ve trusted WedPlanAI to orchestrate the most important day of their lives.
-              </p>
-              {isLoggedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="inline-block px-10 py-4 rounded-xl bg-white text-[#6771ab] font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
-                >
-                  Go to Your Dashboard
-                </Link>
-              ) : (
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link
-                    href="/signup"
-                    className="px-10 py-4 rounded-xl bg-white text-[#6771ab] font-bold text-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
-                  >
-                    Create Free Account
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="px-10 py-4 rounded-xl bg-white/20 border border-white/40 text-white font-semibold text-lg hover:bg-white/30 transition-all cursor-pointer"
-                  >
-                    Sign In
-                  </Link>
-                </div>
-              )}
-              <p className="text-white/60 text-xs mt-4">No credit card required. Free to get started.</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ─── FOOTER ─── */}
       <footer className="bg-[#2d336b] text-white py-12 px-6">
@@ -466,7 +310,7 @@ export default async function LandingPage() {
                 <ul className="space-y-2 text-white/70">
                   <li><a href="#features" className="hover:text-white transition-colors cursor-pointer">Features</a></li>
                   <li><a href="#how-it-works" className="hover:text-white transition-colors cursor-pointer">How It Works</a></li>
-                  <li><a href="#testimonials" className="hover:text-white transition-colors cursor-pointer">Testimonials</a></li>
+                  <li><Link href="/dashboard/docs" className="hover:text-white transition-colors cursor-pointer">Docs</Link></li>
                 </ul>
               </div>
               <div>

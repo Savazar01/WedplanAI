@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { eq, asc } from "drizzle-orm";
+import { eq, and, lt, asc } from "drizzle-orm";
 import DashboardWeddingCard from "@/components/dashboard/DashboardWeddingCard";
 import ShareWeddingCard from "@/components/dashboard/ShareWeddingCard";
 import { formatCurrency } from "@/lib/format";
@@ -45,12 +45,26 @@ export default async function DashboardPage() {
 
   const doneCol = weddingColumns.find((col) => col.type === "done");
 
-  // Task percentage
+  // Task calculations
   const totalTasks = weddingTasks.length;
   const doneTasks = weddingTasks.filter((t) => 
     doneCol ? (t.columnId === doneCol.id || t.status === "done") : t.status === "done"
   ).length;
+  const todoTasks = weddingTasks.filter((t) =>
+    doneCol ? (t.columnId !== doneCol.id && t.status !== "in_progress" && t.status !== "done") : t.status === "todo" || t.status === "backlog"
+  ).length;
+  const inProgressTasks = weddingTasks.filter((t) =>
+    doneCol ? (t.columnId !== doneCol.id && t.status === "in_progress") : t.status === "in_progress"
+  ).length;
   const taskPercentage = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+  // Overdue tasks: due date in the past and not done
+  const now = new Date();
+  const overdueTasks = weddingTasks.filter((t) => {
+    if (!t.dueDate) return false;
+    const isDone = doneCol ? (t.columnId === doneCol.id || t.status === "done") : t.status === "done";
+    return new Date(t.dueDate) < now && !isDone;
+  }).length;
 
   // Guest calculations
   const attendingGuests = weddingGuests
@@ -65,137 +79,159 @@ export default async function DashboardPage() {
   const paidAmount = weddingVendors.reduce((sum, v) => sum + v.paidAmount, 0);
   const outstandingBalance = contractedCost - paidAmount;
   const isBudgetBreached = contractedCost > totalBudget;
-
-  const navItems = [
-    { label: "Planning Board", path: "/dashboard/planning-board", desc: "Manage tasks", icon: "📋" },
-    { label: "Calendar", path: "/dashboard/calendar", desc: "Month calendar grid", icon: "🗓️" },
-    { label: "Event Itinerary", path: "/dashboard/event-itinerary", desc: "Ceremonies & timeline events", icon: "⏳" },
-    { label: "Guest RSVP", path: "/dashboard/guests", desc: "Track guest list", icon: "👥" },
-    { label: "Vendors & Budget", path: "/dashboard/vendors", desc: "Monitor expenses", icon: "💰" },
-    { label: "Build Showcase Page", path: "/dashboard/showcase", desc: "Customize showcase", icon: "🌐" },
-  ];
+  const budgetPercentage = totalBudget > 0 ? Math.round((contractedCost / totalBudget) * 100) : 0;
 
   return (
-    <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-6">
+    <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-8">
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card variant="cream" className="md:col-span-2 p-6 flex flex-col justify-between border-slate-200 shadow-sm relative overflow-hidden">
-          <DashboardWeddingCard wedding={wedding} />
-        </Card>
-
-        <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-widest text-[#6771ab] mb-4">Quick Navigation</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {navItems.map((item) => (
-                <Link key={item.path} href={item.path}>
-                  <div className="p-3 border border-slate-100 rounded-xl hover:border-[#6771ab] hover:bg-slate-50 transition-all hover:scale-[1.02] cursor-pointer text-center">
-                    <div className="text-xl mb-1">{item.icon}</div>
-                    <div className="text-xs font-bold text-slate-700">{item.label}</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-widest mb-4">Task Completion</h3>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-slate-800">{taskPercentage}%</span>
-              <span className="text-xs text-slate-400">({doneTasks}/{totalTasks} completed)</span>
-            </div>
-          </div>
-          <div className="mt-6 space-y-2">
-            <div className="w-full bg-slate-100 rounded-full h-2.5">
-              <div 
-                className="bg-[#22c55e] h-2.5 rounded-full transition-all duration-500" 
-                style={{ width: `${taskPercentage}%` }}
-              />
-            </div>
-            <p className="text-[10px] text-slate-400">Progress bar updates automatically based on Done tasks.</p>
-          </div>
-        </Card>
-
-        <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-widest mb-4">Guest RSVPs</h3>
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-emerald-50 border border-emerald-100 p-2 rounded-xl">
-                <div className="text-xl font-bold text-[#22c55e]">{attendingGuests}</div>
-                <div className="text-[9px] text-emerald-700 font-semibold uppercase">Attending</div>
-              </div>
-              <div className="bg-red-50 border border-red-100 p-2 rounded-xl">
-                <div className="text-xl font-bold text-[#ef4444]">{declinedGuests}</div>
-                <div className="text-[9px] text-red-700 font-semibold uppercase">Declined</div>
-              </div>
-              <div className="bg-amber-50 border border-amber-100 p-2 rounded-xl">
-                <div className="text-xl font-bold text-[#f59e0b]">{pendingGuests}</div>
-                <div className="text-[9px] text-amber-700 font-semibold uppercase">Pending</div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4">
-            <p className="text-[10px] text-slate-400 text-center font-sans">Attending count includes primary guests and plus-ones.</p>
-          </div>
-        </Card>
-
-        <Card 
-          variant="default" 
-          className={`p-6 border shadow-sm bg-white flex flex-col justify-between transition-all ${
-            isBudgetBreached ? "border-red-200 bg-red-50/20" : "border-slate-200"
-          }`}
-        >
-          <div>
-            <h3 className={`text-sm font-bold uppercase tracking-widest mb-4 ${
-              isBudgetBreached ? "text-red-500" : "text-[#6771ab]"
-            }`}>
-              Budget Depletion
-            </h3>
-            
-            <div className="flex flex-col gap-1 font-sans">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Total Budget:</span>
-                <span className="font-semibold text-slate-800">{formatCurrency(totalBudget, wedding.country)}</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Contracted Cost:</span>
-                <span className={`font-semibold ${isBudgetBreached ? "text-red-600" : "text-slate-800"}`}>
-                  {formatCurrency(contractedCost, wedding.country)}
-                </span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Paid So Far:</span>
-                <span className="font-semibold text-slate-800">{formatCurrency(paidAmount, wedding.country)}</span>
-              </div>
-              <div className="flex justify-between text-xs border-t border-slate-100 pt-1 mt-1">
-                <span className="text-slate-500">Outstanding:</span>
-                <span className="font-semibold text-slate-800">{formatCurrency(outstandingBalance, wedding.country)}</span>
-              </div>
-            </div>
-          </div>
-
-          {isBudgetBreached && (
-            <div className="mt-4 p-2 bg-red-100 border border-red-200 text-red-700 text-[10px] font-semibold text-center rounded-lg font-sans">
-              ⚠️ Budget breached! Contracted costs exceed limits.
-            </div>
-          )}
-        </Card>
-      </div>
-
-      {/* Wedding Showcase / Share link */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-3">
+      {/* ─── ROW 1: Wedding Card + Showcase ─── */}
+      <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
+        <DashboardWeddingCard wedding={wedding} />
+        <div className="mt-6 pt-6 border-t border-slate-200/60">
           <ShareWeddingCard
             weddingId={wedding.id}
             partnerA={wedding.partnerA}
             partnerB={wedding.partnerB}
           />
         </div>
-      </div>
+      </Card>
+
+      {/* ─── ROW 2: Task Completion (full width) ─── */}
+      <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+          <div className="flex-1 space-y-4">
+            <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-widest">Task Completion</h3>
+            <div className="flex items-baseline gap-3">
+              <span className="text-4xl font-bold text-slate-800">{taskPercentage}%</span>
+              <span className="text-sm text-slate-400">({doneTasks}/{totalTasks} completed)</span>
+            </div>
+            <div className="w-full bg-slate-100 rounded-full h-3">
+              <div 
+                className="bg-[#22c55e] h-3 rounded-full transition-all duration-500" 
+                style={{ width: `${taskPercentage}%` }}
+              />
+            </div>
+            <div className="flex items-center gap-6 flex-wrap text-sm">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#6771ab]" />
+                <span className="text-slate-600">To-Do: <strong>{todoTasks}</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#f59e0b]" />
+                <span className="text-slate-600">In Progress: <strong>{inProgressTasks}</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#22c55e]" />
+                <span className="text-slate-600">Done: <strong>{doneTasks}</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]" />
+                <span className="text-slate-600">Overdue: <strong className={overdueTasks > 0 ? "text-red-500" : ""}>{overdueTasks}</strong></span>
+              </div>
+            </div>
+          </div>
+          <div className="shrink-0 flex items-center gap-2 flex-wrap">
+            <Link href="/dashboard/planning-board">
+              <Button variant="secondary" size="sm" className="text-xs">Wedding Task Planner</Button>
+            </Link>
+            <Link href="/dashboard/event-itinerary">
+              <Button variant="secondary" size="sm" className="text-xs">Wedding Ceremonies</Button>
+            </Link>
+            <Link href="/dashboard/calendar">
+              <Button variant="secondary" size="sm" className="text-xs">Calendar View</Button>
+            </Link>
+          </div>
+        </div>
+      </Card>
+
+      {/* ─── ROW 3: Guest RSVPs ─── */}
+      <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-4 flex-1">
+            <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-widest">Guest RSVPs</h3>
+            <div className="flex items-center gap-6 flex-wrap">
+              <div className="bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                <div className="text-2xl font-bold text-[#22c55e]">{attendingGuests}</div>
+                <div className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider">Attending</div>
+              </div>
+              <div className="bg-red-50 border border-red-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                <div className="text-2xl font-bold text-[#ef4444]">{declinedGuests}</div>
+                <div className="text-[10px] text-red-700 font-semibold uppercase tracking-wider">Declined</div>
+              </div>
+              <div className="bg-amber-50 border border-amber-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                <div className="text-2xl font-bold text-[#f59e0b]">{pendingGuests}</div>
+                <div className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">Pending</div>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400">Attending count includes primary guests and plus-ones.</p>
+          </div>
+          <div className="shrink-0">
+            <Link href="/dashboard/guests">
+              <Button variant="secondary" size="sm" className="text-xs">Guest RSVP</Button>
+            </Link>
+          </div>
+        </div>
+      </Card>
+
+      {/* ─── ROW 4: Budget Depletion ─── */}
+      <Card 
+        variant="default" 
+        className={`p-6 border shadow-sm bg-white ${
+          isBudgetBreached ? "border-red-200 bg-red-50/20" : "border-slate-200"
+        }`}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-4 flex-1">
+            <h3 className={`text-sm font-bold uppercase tracking-widest ${
+              isBudgetBreached ? "text-red-500" : "text-[#6771ab]"
+            }`}>
+              Budget Depletion
+            </h3>
+
+            <div className="w-full bg-slate-100 rounded-full h-3">
+              <div 
+                className={`h-3 rounded-full transition-all duration-500 ${
+                  isBudgetBreached ? "bg-[#ef4444]" : budgetPercentage > 75 ? "bg-[#f59e0b]" : "bg-[#22c55e]"
+                }`}
+                style={{ width: `${Math.min(budgetPercentage, 100)}%` }}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Budget</span>
+                <span className="font-bold text-slate-800 text-sm">{formatCurrency(totalBudget, wedding.country)}</span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Contracted</span>
+                <span className={`font-bold text-sm ${isBudgetBreached ? "text-red-600" : "text-slate-800"}`}>
+                  {formatCurrency(contractedCost, wedding.country)}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Paid</span>
+                <span className="font-bold text-slate-800 text-sm">{formatCurrency(paidAmount, wedding.country)}</span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Outstanding</span>
+                <span className="font-bold text-slate-800 text-sm">{formatCurrency(outstandingBalance, wedding.country)}</span>
+              </div>
+            </div>
+
+            {isBudgetBreached && (
+              <div className="p-2.5 bg-red-100 border border-red-200 text-red-700 text-xs font-semibold text-center rounded-xl">
+                ⚠️ Budget breached! Contracted costs exceed limits.
+              </div>
+            )}
+          </div>
+          <div className="shrink-0">
+            <Link href="/dashboard/vendors">
+              <Button variant="secondary" size="sm" className="text-xs">Vendors</Button>
+            </Link>
+          </div>
+        </div>
+      </Card>
+
     </main>
   );
 }

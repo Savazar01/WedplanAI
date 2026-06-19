@@ -427,8 +427,8 @@ export default function WizardPage() {
                   {s === 2 && "Date & Place"}
                   {s === 3 && "Tradition"}
                   {s === 4 && "Budget & Guests"}
-                  {s === 5 && "Planning Tasks"}
-                  {s === 6 && "Event Itinerary"}
+                  {s === 5 && "Wedding Tasks Plan"}
+                  {s === 6 && "Wedding Ceremonies"}
                   {s === 7 && "Review"}
                 </span>
               </div>
@@ -634,9 +634,9 @@ export default function WizardPage() {
           {step === 5 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Planning Tasks</h2>
+                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Tasks Plan</h2>
                 <p className="text-sm text-slate-500">
-                  Customize the tasks for your wedding. Set due dates to keep your planning on track.
+                  Customize the tasks for your wedding. Set due dates to keep your planning on track. You can always manage these tasks from the Wedding Task Planner.
                 </p>
               </div>
 
@@ -751,9 +751,9 @@ export default function WizardPage() {
           {step === 6 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Event Itinerary</h2>
+                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Ceremonies</h2>
                 <p className="text-sm text-slate-500">
-                  Customize details, dates, times, and venues for each ceremony or event.
+                  Customize details, dates, times, and venues for each ceremony or event. You can always manage these ceremonies from the Wedding Ceremony Planner.
                 </p>
               </div>
 
@@ -978,7 +978,7 @@ export default function WizardPage() {
                   {/* Rituals Section */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-semibold text-[#2d336b]">Event Itinerary ({customRituals.length})</span>
+                      <span className="text-xs font-semibold text-[#2d336b]">Wedding Ceremonies ({customRituals.length})</span>
                     </div>
                     <div className="space-y-2 p-3 bg-white rounded-xl border border-slate-200 max-h-[200px] overflow-y-auto">
                       {customRituals.map((r, idx) => (

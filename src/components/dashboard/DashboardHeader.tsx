@@ -36,7 +36,7 @@ export default function DashboardHeader({ userName, userRole }: DashboardHeaderP
         {userRole === "admin" && (
           <Link href="/dashboard/admin/users">
             <Button variant="ghost" size="sm" className="text-[#6771ab] border border-violet-100 hover:bg-violet-50 font-semibold">
-              User Management
+              Manage Your Team
             </Button>
           </Link>
         )}

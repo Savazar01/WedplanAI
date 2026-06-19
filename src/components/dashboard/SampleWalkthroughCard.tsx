@@ -54,14 +54,14 @@ export default function SampleWalkthroughCard({
       {
         id: "welcome",
         title: "Welcome to WedPlanAI!",
-        description: "Welcome to WedPlanAI! This dashboard contains a fully populated sample Hindu wedding of Ananya & Kabir. Let's take a quick tour of the planning tools available at your fingertips.",
+        description: "Welcome to WedPlanAI! This dashboard contains a fully populated sample Hindu wedding of Rahul & Priya. Let's take a quick tour of the planning tools available at your fingertips.",
         icon: Sparkles,
         color: "text-amber-500 bg-amber-50 border-amber-100",
         path: "/dashboard",
       },
       {
         id: "planning-board",
-        title: "Planning Tasks",
+        title: "Wedding Task Planner",
         description: "Manage pre-wedding ceremonies like Haldi, Mehndi, Sangeet, and the main wedding events. Easily drag tasks across stages (To Do, In Progress, Done) to stay organized.",
         icon: ClipboardList,
         color: "text-blue-500 bg-blue-50 border-blue-100",
@@ -77,7 +77,7 @@ export default function SampleWalkthroughCard({
       },
       {
         id: "event-itinerary",
-        title: "Event Itinerary",
+        title: "Wedding Ceremony Planner",
         description: "Track the detailed, minute-by-minute itinerary of events on the wedding day to ensure seamless coordination.",
         icon: Clock,
         color: "text-violet-500 bg-violet-50 border-violet-100",
@@ -117,7 +117,7 @@ export default function SampleWalkthroughCard({
       },
       ...(userRole === "admin" ? [{
         id: "users",
-        title: "User Management",
+        title: "Manage Your Team",
         description: "Manage user roles, invite planners, assign permissions, and coordinate who can edit wedding details.",
         icon: ShieldCheck,
         color: "text-red-500 bg-red-50 border-red-100",
@@ -385,6 +385,38 @@ export default function SampleWalkthroughCard({
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              {currentStep < steps.length - 1 && (
+                <Button
+                  variant="ghost"
+                  onClick={handleSkip}
+                  className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-semibold text-xs h-9 px-3"
+                >
+                  Skip
+                </Button>
+              )}
+              {currentStep > 0 && (
+                <Button
+                  variant="ghost"
+                  onClick={handleBack}
+                  className="text-[#6771ab] hover:text-[#566198] hover:bg-slate-50 font-semibold text-xs h-9 px-3 flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back
+                </Button>
+              )}
+              <Button
+                variant="primary"
+                onClick={handleNext}
+                className="h-9 px-4 bg-[#6771ab] hover:bg-[#566198] text-white shadow-md hover:shadow-lg transition-all font-semibold text-xs flex items-center gap-1"
+              >
+                {currentStep === steps.length - 1 ? (
+                  <>Get Started <CheckCircle2 className="w-3.5 h-3.5" /></>
+                ) : (
+                  <>Next <ArrowRight className="w-3.5 h-3.5" /></>
+                )}
+              </Button>
+            </div>
+
             <div className="flex items-center gap-1.5">
               {steps.map((_, index) => (
                 <button
@@ -401,38 +433,6 @@ export default function SampleWalkthroughCard({
                   aria-label={`Go to step ${index + 1}`}
                 />
               ))}
-            </div>
-
-            <div className="flex items-center gap-2">
-              {currentStep < steps.length - 1 && (
-                <Button
-                  variant="ghost"
-                  onClick={handleSkip}
-                  className="text-slate-500 hover:text-slate-700 hover:bg-slate-50 font-semibold text-xs h-9 px-3.5"
-                >
-                  Skip Tour
-                </Button>
-              )}
-              {currentStep > 0 && (
-                <Button
-                  variant="ghost"
-                  onClick={handleBack}
-                  className="text-[#6771ab] hover:text-[#566198] hover:bg-slate-50 font-semibold text-xs h-9 px-3.5 flex items-center gap-1"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back
-                </Button>
-              )}
-              <Button
-                variant="primary"
-                onClick={handleNext}
-                className="h-9 px-4.5 bg-[#6771ab] hover:bg-[#566198] text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.97] transition-all duration-100 ease-out font-semibold text-xs flex items-center gap-1"
-              >
-                {currentStep === steps.length - 1 ? (
-                  <>Get Started <CheckCircle2 className="w-3.5 h-3.5" /></>
-                ) : (
-                  <>Next <ArrowRight className="w-3.5 h-3.5" /></>
-                )}
-              </Button>
             </div>
           </div>
         </div>

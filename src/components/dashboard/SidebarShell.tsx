@@ -107,9 +107,9 @@ export default function SidebarShell({
 
   const navItems: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/planning-board", label: "Planning Board", icon: KanbanSquare },
+    { href: "/dashboard/planning-board", label: "Wedding Task Planner", icon: KanbanSquare },
     { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
-    { href: "/dashboard/event-itinerary", label: "Event Itinerary", icon: Clock },
+    { href: "/dashboard/event-itinerary", label: "Wedding Ceremony Planner", icon: Clock },
     { href: "/dashboard/guests", label: "Guests", icon: Users },
     { href: "/dashboard/vendors", label: "Vendors", icon: Store },
   ];
@@ -234,7 +234,7 @@ export default function SidebarShell({
                     }`}
                   >
                     <UserCog className="h-3.5 w-3.5 text-slate-400" />
-                    User Management
+                    Manage Your Team
                   </Link>
                 </div>
               </div>
@@ -291,7 +291,7 @@ export default function SidebarShell({
                       }`}
                     >
                       <UserCog className="h-4 w-4 text-slate-400" />
-                      <span>User Management</span>
+                      <span>Manage Your Team</span>
                     </Link>
                   </div>
                 )}

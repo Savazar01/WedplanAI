@@ -412,6 +412,9 @@ export async function updateWeddingShowcaseAction(
     showcaseDescription?: string | null;
     showcaseRsvpTitle?: string | null;
     showcaseRsvpDescription?: string | null;
+    showcaseGiftUrl?: string | null;
+    showcaseGiftTitle?: string | null;
+    showcaseGiftDescription?: string | null;
   }
 ) {
   const session = await getServerSession();
@@ -444,6 +447,9 @@ export async function updateWeddingShowcaseAction(
       ...(data.showcaseDescription !== undefined && { showcaseDescription: data.showcaseDescription }),
       ...(data.showcaseRsvpTitle !== undefined && { showcaseRsvpTitle: data.showcaseRsvpTitle }),
       ...(data.showcaseRsvpDescription !== undefined && { showcaseRsvpDescription: data.showcaseRsvpDescription }),
+      ...(data.showcaseGiftUrl !== undefined && { showcaseGiftUrl: data.showcaseGiftUrl }),
+      ...(data.showcaseGiftTitle !== undefined && { showcaseGiftTitle: data.showcaseGiftTitle }),
+      ...(data.showcaseGiftDescription !== undefined && { showcaseGiftDescription: data.showcaseGiftDescription }),
       updatedAt: new Date(),
     }).where(eq(weddings.id, weddingId));
 

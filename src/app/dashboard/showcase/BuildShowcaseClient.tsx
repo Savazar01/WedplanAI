@@ -48,6 +48,9 @@ interface Wedding {
   showcaseDescription?: string | null;
   showcaseRsvpTitle?: string | null;
   showcaseRsvpDescription?: string | null;
+  showcaseGiftUrl?: string | null;
+  showcaseGiftTitle?: string | null;
+  showcaseGiftDescription?: string | null;
 }
 
 interface Ritual {
@@ -141,6 +144,10 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
   const [showcaseRsvpTitle, setShowcaseRsvpTitle] = React.useState(wedding.showcaseRsvpTitle || "");
   const [showcaseRsvpDescription, setShowcaseRsvpDescription] = React.useState(wedding.showcaseRsvpDescription || "");
 
+  const [showcaseGiftUrl, setShowcaseGiftUrl] = React.useState(wedding.showcaseGiftUrl || "");
+  const [showcaseGiftTitle, setShowcaseGiftTitle] = React.useState(wedding.showcaseGiftTitle || "");
+  const [showcaseGiftDescription, setShowcaseGiftDescription] = React.useState(wedding.showcaseGiftDescription || "");
+
   // Itinerary custom heading state (local preview only)
   const [itineraryHeading, setItineraryHeading] = React.useState("Wedding Itinerary");
   const [itineraryDescription, setItineraryDescription] = React.useState("The schedule of our celebration events.");
@@ -149,7 +156,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
   const [ritualsList, setRitualsList] = React.useState<Ritual[]>(initialRituals);
 
   // Modals state
-  const [activeModal, setActiveModal] = React.useState<"header" | "hero" | "story" | "itinerary" | "rsvp" | null>(null);
+  const [activeModal, setActiveModal] = React.useState<"header" | "hero" | "story" | "itinerary" | "rsvp" | "gift" | null>(null);
   
   // Ritual inline edit states inside Itinerary Modal
   const [editedRituals, setEditedRituals] = React.useState<Record<string, {
@@ -186,6 +193,9 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
     setShowcaseDetails(wedding.showcaseDetails || "");
     setShowcaseRsvpTitle(wedding.showcaseRsvpTitle || "");
     setShowcaseRsvpDescription(wedding.showcaseRsvpDescription || "");
+    setShowcaseGiftUrl(wedding.showcaseGiftUrl || "");
+    setShowcaseGiftTitle(wedding.showcaseGiftTitle || "");
+    setShowcaseGiftDescription(wedding.showcaseGiftDescription || "");
   }
 
   // Sync state on rituals prop change during rendering
@@ -247,6 +257,9 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
     setShowcaseDetails(wedding.showcaseDetails || "");
     setShowcaseRsvpTitle(wedding.showcaseRsvpTitle || "");
     setShowcaseRsvpDescription(wedding.showcaseRsvpDescription || "");
+    setShowcaseGiftUrl(wedding.showcaseGiftUrl || "");
+    setShowcaseGiftTitle(wedding.showcaseGiftTitle || "");
+    setShowcaseGiftDescription(wedding.showcaseGiftDescription || "");
     setItineraryHeading("Wedding Itinerary");
     setItineraryDescription("The schedule of our celebration events.");
     setToast({ message: "Changes discarded successfully.", type: "success" });
@@ -271,6 +284,9 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
         showcaseDescription: showcaseDescription || null,
         showcaseRsvpTitle: showcaseRsvpTitle || null,
         showcaseRsvpDescription: showcaseRsvpDescription || null,
+        showcaseGiftUrl: showcaseGiftUrl || null,
+        showcaseGiftTitle: showcaseGiftTitle || null,
+        showcaseGiftDescription: showcaseGiftDescription || null,
       });
 
       if (res?.error) {
@@ -823,6 +839,46 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
             </div>
           </section>
 
+          {/* F. Gift Registry Section */}
+          {(showcaseGiftUrl || showcaseGiftTitle || showcaseGiftDescription) && (
+            <section className="relative group w-full max-w-xl mx-auto px-6 pt-6 pb-4 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
+              <button
+                onClick={() => setActiveModal("gift")}
+                className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
+                title="Edit Gift Registry"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+
+              <div className="bg-white/95 backdrop-blur-md border border-rose-200 rounded-3xl p-6 md:p-8 shadow-xl max-w-xl mx-auto text-center relative overflow-hidden">
+                <div className="text-4xl mb-3">🎁</div>
+                <h3
+                  style={{ fontFamily: "var(--font-title)", color: "var(--color-primary)" }}
+                  className="text-xl font-bold mb-3 tracking-wide"
+                >
+                  {showcaseGiftTitle || "Gift Registry"}
+                </h3>
+                {showcaseGiftDescription && (
+                  <p className="text-sm text-slate-500 mb-5 font-light leading-relaxed">
+                    {showcaseGiftDescription}
+                  </p>
+                )}
+                {showcaseGiftUrl && (
+                  <a
+                    href={showcaseGiftUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--color-primary)] text-white shadow-md hover:opacity-90 transition-all text-sm font-semibold"
+                  >
+                    🎀 View Gift Registry
+                  </a>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* Footer */}
           <footer className="w-full bg-slate-100/30 border-t border-slate-200/50 text-center py-6 mt-auto">
             <p className="text-[10px] text-slate-400 tracking-widest uppercase font-semibold">
@@ -1277,6 +1333,67 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
               onClick={() => {
                 setActiveModal(null);
                 setToast({ message: "RSVP custom wording applied to preview!", type: "success" });
+              }}
+            >
+              Apply to Preview
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* F. Gift Registry Modal */}
+      <Dialog
+        isOpen={activeModal === "gift"}
+        onClose={() => setActiveModal(null)}
+        title="Edit Gift Registry"
+      >
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+              Gift Registry URL / Link
+            </label>
+            <Input
+              type="text"
+              value={showcaseGiftUrl}
+              onChange={(e) => setShowcaseGiftUrl(e.target.value)}
+              placeholder="e.g. https://www.amazon.com/wedding/registry/..."
+            />
+            <p className="text-[10px] text-slate-400 mt-1">Leave empty to hide the Gift Registry section.</p>
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+              Gift Registry Title
+            </label>
+            <Input
+              type="text"
+              value={showcaseGiftTitle}
+              onChange={(e) => setShowcaseGiftTitle(e.target.value)}
+              placeholder="e.g. Gift Registry"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+              Description <span className="text-slate-400 normal-case">(optional)</span>
+            </label>
+            <textarea
+              value={showcaseGiftDescription}
+              onChange={(e) => setShowcaseGiftDescription(e.target.value)}
+              rows={3}
+              placeholder="e.g. Your presence is the greatest gift, but if you wish to honour us with a gift..."
+              className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab] focus:border-[#6771ab]"
+            />
+          </div>
+
+          <div className="flex justify-end pt-4 gap-2">
+            <Button
+              type="button"
+              variant="primary"
+              className="bg-[#6771ab] hover:bg-[#566198] text-white"
+              onClick={() => {
+                setActiveModal(null);
+                setToast({ message: "Gift Registry settings applied to preview!", type: "success" });
               }}
             >
               Apply to Preview

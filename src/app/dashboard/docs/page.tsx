@@ -30,13 +30,13 @@ const sections = [
   },
   {
     id: "planning-board",
-    title: "Planning Board",
+    title: "Wedding Task Planner",
     icon: "📋",
     items: [
       {
         title: "What It Is",
         content:
-          "The Planning Board is a drag-and-drop kanban board for managing all your wedding tasks across four columns: Backlog, To-Do, In Progress, and Done. Tasks are pre-seeded based on your wedding tradition so you never start from a blank slate.",
+          "The Wedding Task Planner is a drag-and-drop kanban board for managing all your wedding tasks across four columns: Backlog, To-Do, In Progress, and Done. Tasks are pre-seeded based on your wedding tradition so you never start from a blank slate.",
       },
       {
         title: "Creating Tasks",
@@ -68,19 +68,19 @@ const sections = [
       {
         title: "Events",
         content:
-          "Each ritual from your Event Itinerary appears as an event card on its scheduled date. Tasks with due dates are also shown. Click on any event to see details.",
+          "Each ritual from your Wedding Ceremony Planner appears as an event card on its scheduled date. Tasks with due dates are also shown. Click on any event to see details.",
       },
     ],
   },
   {
     id: "event-itinerary",
-    title: "Event Itinerary",
+    title: "Wedding Ceremony Planner",
     icon: "⏱️",
     items: [
       {
         title: "Day-of Timeline",
         content:
-          "The Event Itinerary page shows all your wedding ceremonies and rituals in chronological order with precise timings. This is your wedding day run sheet — each ritual displays its name, date, time range, and location.",
+          "The Wedding Ceremony Planner page shows all your wedding ceremonies and rituals in chronological order with precise timings. This is your wedding day run sheet — each ritual displays its name, date, time range, and location.",
       },
       {
         title: "Adding Rituals",
@@ -246,7 +246,7 @@ const sections = [
       {
         title: "Auto-Seeding",
         content:
-          "When you create a wedding via the wizard and select a tradition, the system automatically generates relevant tasks for your Planning Board (e.g., 'Book the mandap' for Hindu weddings) and populates the Event Itinerary with tradition-specific ceremonies.",
+          "When you create a wedding via the wizard and select a tradition, the system automatically generates relevant tasks for your Wedding Task Planner (e.g., 'Book the mandap' for Hindu weddings) and populates the Wedding Ceremony Planner with tradition-specific ceremonies.",
       },
     ],
   },

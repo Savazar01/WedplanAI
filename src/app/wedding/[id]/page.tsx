@@ -189,6 +189,33 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
         />
       </section>
 
+      {/* Gift Registry Section */}
+      {(wedding.showcaseGiftUrl || wedding.showcaseGiftTitle || wedding.showcaseGiftDescription) && (
+        <section className="w-full max-w-xl mx-auto px-6 pb-16">
+          <div className="bg-white/95 backdrop-blur-md border border-rose-200 rounded-3xl p-6 md:p-8 shadow-xl text-center relative overflow-hidden">
+            <div className="text-4xl mb-3">🎁</div>
+            <h3 className="font-title text-xl font-bold text-[var(--color-primary)] mb-3 tracking-wide">
+              {wedding.showcaseGiftTitle || "Gift Registry"}
+            </h3>
+            {wedding.showcaseGiftDescription && (
+              <p className="text-sm text-slate-500 mb-5 font-light leading-relaxed">
+                {wedding.showcaseGiftDescription}
+              </p>
+            )}
+            {wedding.showcaseGiftUrl && (
+              <a
+                href={wedding.showcaseGiftUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--color-primary)] text-white shadow-md hover:opacity-90 transition-all text-sm font-semibold"
+              >
+                🎀 View Gift Registry
+              </a>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Footer */}
       <footer className="w-full bg-slate-100/50 border-t border-slate-200 text-center py-6 mt-auto">
         <p className="text-xs text-slate-400 tracking-widest uppercase font-semibold">

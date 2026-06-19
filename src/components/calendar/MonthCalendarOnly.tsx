@@ -56,8 +56,14 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
   // Active view tab state
   const [activeTab, setActiveTab] = React.useState<'month' | 'week' | 'day'>('month');
 
-  // Month navigation state
-  const [currentDate, setCurrentDate] = React.useState(new Date());
+  // Month navigation state - default to first ritual's date if available
+  const [currentDate, setCurrentDate] = React.useState(() => {
+    if (initialRituals.length > 0) {
+      const firstRitualDate = new Date(initialRituals.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())[0].startTime);
+      return firstRitualDate;
+    }
+    return new Date();
+  });
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth(); // 0-indexed
 

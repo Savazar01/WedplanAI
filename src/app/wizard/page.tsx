@@ -1041,7 +1041,15 @@ export default function WizardPage() {
             Cancel
           </Button>
 
-          <div className="flex-1" />
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.push("/dashboard")}
+            disabled={submitting}
+            className="text-slate-500"
+          >
+            Skip
+          </Button>
 
           <Button
             type="button"

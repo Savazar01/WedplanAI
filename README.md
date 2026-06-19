@@ -9,15 +9,15 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 ## ✨ Features
 
 | Feature | Description |
-|---|---|
+|---|---|---|
 | 🗂️ **Wedding Task Planner** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
-| 📅 **Calendar & Ceremony Planner** | Month-view calendar and ceremony timeline for all ceremonies and events |
-| 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP |
-| 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, and dynamic currency by country |
-| 🌐 **Build Showcase Page** | Auto-generated public wedding page with an interactive live builder, countdown, itinerary, and RSVP form |
-| 👩‍💼 **Multi-User Collaboration** | Role-based access — admins invite planners and coordinators |
-| 👥 **Manage Your Team** | Admin controls for user roles, permissions, and team access |
-| 🎉 **Guided Onboarding** | Interactive walkthrough tour and wizard to set up your first wedding event |
+| 📅 **Calendar** | Month-view calendar showing all ceremonies, rituals, and task due dates at a glance |
+| ⏱️ **Wedding Ceremony Planner** | Chronological timeline of ceremonies with precise timings — your wedding day run sheet |
+| 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP, bulk CSV import, and personal invitation links |
+| 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, outstanding balances, and dynamic currency by country |
+| 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, ceremony timeline, Gift Registry, and RSVP form |
+| 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
+| 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding and 7-step wizard to set up your first event |
 
 ### Wedding Traditions Supported
 Hindu · Muslim · Sikh · Christian · Secular (and more)
@@ -215,31 +215,53 @@ npm run db:reset
 ```
 src/
 ├── app/                    # Next.js App Router pages & API routes
-│   ├── actions/            # Server Actions (guests, vendors, weddings, auth)
-│   ├── api/auth/           # Better Auth API handler
+│   ├── actions/            # Server Actions (guests, vendors, weddings, auth, calendar)
+│   ├── api/                # Route handlers
+│   │   ├── auth/           # Better Auth API handler
+│   │   └── v1/             # REST API v1 (columns, guests, rituals, tasks, vendors, wedding)
+│   ├── calendar/           # Public calendar view
 │   ├── dashboard/          # Authenticated dashboard pages
-│   │   │   ├── calendar/       # Calendar view
-│   │   ├── event-itinerary/# Ceremony planner / timeline
-│   │   ├── guests/         # Guest management
+│   │   ├── admin/          # Admin-only pages (appearance, api-keys, users)
+│   │   ├── calendar/       # Calendar view
+│   │   ├── docs/           # Documentation
+│   │   ├── event-itinerary/# Wedding Ceremony Planner
+│   │   ├── guests/         # Guest RSVP Manager
 │   │   ├── planning-board/ # Wedding Task Planner
+│   │   ├── profile/        # User profile
 │   │   ├── settings/       # Workspace settings
-│   │   ├── showcase/       # Showcase builder
+│   │   ├── showcase/       # Build Showcase Page builder
 │   │   ├── users/          # Manage Your Team (admin only)
 │   │   └── vendors/        # Vendor & budget tracker
+│   ├── guests/             # Public guest RSVP page
 │   ├── login/              # Login page
 │   ├── planning-board/     # Public planning board
 │   ├── signup/             # Signup page
+│   ├── vendors/            # Public vendor page
 │   ├── wedding/[id]/       # Public wedding showcase page
-│   ├── wizard/             # Wedding setup wizard
+│   ├── wizard/             # Wedding setup wizard (7 steps)
 │   └── page.tsx            # Landing page (public)
 ├── components/
-│   ├── dashboard/          # Dashboard shell, sidebar, wedding switcher
-│   ├── kanban/             # Wedding Task Planner (Kanban) components
-│   └── ui/                 # shadcn/ui base components
+│   ├── calendar/           # Calendar, timeline, coordinator components
+│   ├── dashboard/          # Dashboard shell, sidebar, walkthrough, cards
+│   ├── guests/             # Guest list, CSV upload components
+│   ├── kanban/             # Wedding Task Planner (Kanban) board
+│   ├── theme/              # Theme/appearance utilities
+│   ├── ui/                 # shadcn/ui base components (Button, Card, Dialog, etc.)
+│   ├── vendors/            # Vendor manager components
+│   └── wedding/            # Public wedding page (countdown, RSVP form)
 ├── db/
+│   ├── client.ts           # Database client
+│   ├── migrate.ts          # Migration runner
 │   ├── schema.ts           # Drizzle database schema
-│   └── migrations/         # Auto-generated SQL migrations
-└── lib/                    # Utilities (auth, seed, helpers)
+│   ├── reset.ts            # Database reset script
+│   └── migrations/         # Auto-generated SQL migrations (0001–0008)
+└── lib/                    # Utilities
+    ├── auth-client.ts      # Better Auth client
+    ├── auth-server.ts      # Better Auth server helpers
+    ├── auth.ts             # Better Auth config
+    ├── format.ts           # Date, time, and currency formatters
+    ├── seed-sample-wedding.ts  # Sample wedding seeder
+    └── wedding-helper.ts   # Active wedding and column helpers
 ```
 
 ---

@@ -606,16 +606,15 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
           <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
 
           {/* A. Header Section (Subtitle, Title, Description, Countdown) */}
-          <section className="relative group w-full max-w-4xl mx-auto px-6 pt-12 pb-8 flex flex-col items-center text-center border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
-            {/* Hover Edit Pencil Icon */}
+          <section className="relative w-full max-w-4xl mx-auto px-6 pt-12 pb-8 flex flex-col items-center text-center border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
             <button
               onClick={() => setActiveModal("header")}
-              className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
-              title="Edit Header Section"
+              className="self-start mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300 active:bg-amber-400 text-amber-900 text-xs font-bold transition-all active:scale-95 shadow-sm border border-amber-300/50"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
+              Edit
             </button>
 
             <div className="inline-block px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider mb-6">
@@ -659,16 +658,15 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
           </section>
 
           {/* B. Hero Banner Section (Hero image) */}
-          <section className="relative group w-full max-w-4xl px-6 mb-8 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
-            {/* Hover Edit Pencil Icon */}
+          <section className="relative w-full max-w-4xl px-6 mb-8 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
             <button
               onClick={() => setActiveModal("hero")}
-              className="absolute top-4 right-10 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
-              title="Edit Hero Banner Image"
+              className="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300 active:bg-amber-400 text-amber-900 text-xs font-bold transition-all active:scale-95 shadow-sm border border-amber-300/50"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
+              Edit
             </button>
 
             {(showcaseHeroData || showcaseHeroUrl) ? (
@@ -682,22 +680,21 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
             ) : (
               <div className="w-full h-[200px] bg-slate-200/40 rounded-3xl flex flex-col items-center justify-center text-sm text-slate-400 border border-slate-300/40 border-dashed italic gap-2">
                 <span>📷 No Hero Image Selected</span>
-                <span className="text-xs text-slate-400 not-italic">Hover here & click the pencil to upload or add image URL</span>
+                <span className="text-xs text-slate-400 not-italic">Click Edit to upload or add an image URL</span>
               </div>
             )}
           </section>
 
           {/* C. Our Story / Welcome Section */}
-          <section className="relative group w-full max-w-2xl mx-auto px-6 py-6 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
-            {/* Hover Edit Pencil Icon */}
+          <section className="relative w-full max-w-2xl mx-auto px-6 py-6 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
             <button
               onClick={() => setActiveModal("story")}
-              className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
-              title="Edit Welcome & Story Details"
+              className="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300 active:bg-amber-400 text-amber-900 text-xs font-bold transition-all active:scale-95 shadow-sm border border-amber-300/50"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
+              Edit
             </button>
 
             <div className="bg-white border border-slate-200/60 p-6 sm:p-8 rounded-3xl shadow-xs text-center space-y-4">
@@ -712,7 +709,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
                   {showcaseWelcomeText}
                 </p>
               ) : (
-                <p className="text-sm text-slate-400 italic font-light">Welcome text is empty. Add details via the pencil icon.</p>
+                <p className="text-sm text-slate-400 italic font-light">Welcome text is empty. Click Edit to add details.</p>
               )}
               {showcaseDetails ? (
                 <p className="text-sm text-slate-500 font-light leading-relaxed whitespace-pre-wrap">
@@ -725,16 +722,15 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
           </section>
 
           {/* D. Itinerary Section */}
-          <section className="relative group w-full max-w-2xl mx-auto px-6 py-8 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
-            {/* Hover Edit Pencil Icon */}
+          <section className="relative w-full max-w-2xl mx-auto px-6 py-8 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
             <button
               onClick={openItineraryModal}
-              className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
-              title="Edit Wedding Itinerary & Events"
+              className="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300 active:bg-amber-400 text-amber-900 text-xs font-bold transition-all active:scale-95 shadow-sm border border-amber-300/50"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
+              Edit
             </button>
 
             <h3 
@@ -784,16 +780,15 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
           </section>
 
           {/* E. RSVP Form Section */}
-          <section className="relative group w-full max-w-xl mx-auto px-6 pt-6 pb-16 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
-            {/* Hover Edit Pencil Icon */}
+          <section className="relative w-full max-w-xl mx-auto px-6 pt-6 pb-16 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
             <button
               onClick={() => setActiveModal("rsvp")}
-              className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
-              title="Edit RSVP Form Custom Text"
+              className="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300 active:bg-amber-400 text-amber-900 text-xs font-bold transition-all active:scale-95 shadow-sm border border-amber-300/50"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
+              Edit
             </button>
 
             {/* Simulated RSVP Form Mock */}
@@ -840,15 +835,15 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
           </section>
 
           {/* F. Gift Registry Section */}
-          <section className="relative group w-full max-w-xl mx-auto px-6 pt-6 pb-4 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
+          <section className="relative w-full max-w-xl mx-auto px-6 pt-6 pb-4 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
             <button
               onClick={() => setActiveModal("gift")}
-              className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
-              title="Edit Gift Registry"
+              className="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200 hover:bg-amber-300 active:bg-amber-400 text-amber-900 text-xs font-bold transition-all active:scale-95 shadow-sm border border-amber-300/50"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
+              Edit
             </button>
 
             <div className="bg-white/95 backdrop-blur-md border border-rose-200 rounded-3xl p-6 md:p-8 shadow-xl max-w-xl mx-auto text-center relative overflow-hidden">
@@ -941,7 +936,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
               className="bg-[#6771ab] hover:bg-[#566198] text-white"
               onClick={() => {
                 setActiveModal(null);
-                setToast({ message: "Header changes applied to preview (remember to save)!", type: "success" });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setToast({ message: "Preview updated! Click 'Save Showcase Page' above to persist changes.", type: "success" });
               }}
             >
               Apply to Preview
@@ -1047,7 +1043,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
               className="bg-[#6771ab] hover:bg-[#566198] text-white"
               onClick={() => {
                 setActiveModal(null);
-                setToast({ message: "Hero and story details applied to preview!", type: "success" });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setToast({ message: "Preview updated! Click 'Save Showcase Page' above to persist changes.", type: "success" });
               }}
             >
               Apply to Preview
@@ -1095,7 +1092,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
               className="bg-[#6771ab] hover:bg-[#566198] text-white"
               onClick={() => {
                 setActiveModal(null);
-                setToast({ message: "Story details applied to preview!", type: "success" });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setToast({ message: "Preview updated! Click 'Save Showcase Page' above to persist changes.", type: "success" });
               }}
             >
               Apply to Preview
@@ -1332,7 +1330,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
               className="bg-[#6771ab] hover:bg-[#566198] text-white"
               onClick={() => {
                 setActiveModal(null);
-                setToast({ message: "RSVP custom wording applied to preview!", type: "success" });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setToast({ message: "Preview updated! Click 'Save Showcase Page' above to persist changes.", type: "success" });
               }}
             >
               Apply to Preview
@@ -1393,7 +1392,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
               className="bg-[#6771ab] hover:bg-[#566198] text-white"
               onClick={() => {
                 setActiveModal(null);
-                setToast({ message: "Gift Registry settings applied to preview!", type: "success" });
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setToast({ message: "Preview updated! Click 'Save Showcase Page' above to persist changes.", type: "success" });
               }}
             >
               Apply to Preview

@@ -10,6 +10,7 @@ interface PublicRsvpFormProps {
   weddingId: string;
   rsvpTitle?: string | null;
   rsvpDescription?: string | null;
+  scrollToOnAttending?: string;
 }
 
 interface Guest {
@@ -25,7 +26,8 @@ interface Guest {
 export default function PublicRsvpForm({ 
   weddingId,
   rsvpTitle,
-  rsvpDescription
+  rsvpDescription,
+  scrollToOnAttending
 }: PublicRsvpFormProps) {
   const [loginCode, setLoginCode] = React.useState("");
   const [guest, setGuest] = React.useState<Guest | null>(null);
@@ -36,6 +38,17 @@ export default function PublicRsvpForm({
 
   // RSVP Form state
   const [rsvpStatus, setRsvpStatus] = React.useState<"attending" | "declined">("attending");
+
+  React.useEffect(() => {
+    if (saveSuccess && rsvpStatus === "attending" && scrollToOnAttending) {
+      const el = document.getElementById(scrollToOnAttending);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 300);
+      }
+    }
+  }, [saveSuccess, rsvpStatus, scrollToOnAttending]);
   const [plusOneCount, setPlusOneCount] = React.useState(0);
   const [dietaryRestrictions, setDietaryRestrictions] = React.useState("");
 

@@ -43,7 +43,7 @@ export async function createRitualAction(data: {
     });
 
     revalidatePath("/calendar");
-    revalidatePath("/dashboard/event-itinerary");
+    revalidatePath("/dashboard/wedding-ceremony-planner");
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
@@ -88,7 +88,7 @@ export async function updateRitualAction(
       .where(eq(rituals.id, ritualId));
 
     revalidatePath("/calendar");
-    revalidatePath("/dashboard/event-itinerary");
+    revalidatePath("/dashboard/wedding-ceremony-planner");
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
@@ -108,7 +108,7 @@ export async function deleteRitualAction(ritualId: string) {
     await db.delete(rituals).where(eq(rituals.id, ritualId));
 
     revalidatePath("/calendar");
-    revalidatePath("/dashboard/event-itinerary");
+    revalidatePath("/dashboard/wedding-ceremony-planner");
     revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {

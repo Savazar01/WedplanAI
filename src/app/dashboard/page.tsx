@@ -153,7 +153,7 @@ export default async function DashboardPage() {
             </div>
           </div>
           <div className="shrink-0 flex items-center gap-2 flex-wrap">
-            <Link href="/dashboard/planning-board">
+            <Link href="/dashboard/wedding-task-planner">
               <Button variant="secondary" size="sm" className="text-xs gap-1.5">
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -161,7 +161,7 @@ export default async function DashboardPage() {
                 Wedding Task Planner
               </Button>
             </Link>
-            <Link href="/dashboard/event-itinerary">
+            <Link href="/dashboard/wedding-ceremony-planner">
               <Button variant="secondary" size="sm" className="text-xs gap-1.5">
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2" />

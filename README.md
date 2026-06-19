@@ -9,7 +9,7 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 ## ✨ Features
 
 | Feature | Description |
-|---|---|---|
+|---|---|
 | 🗂️ **Wedding Task Planner** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
 | 📅 **Calendar** | Month-view calendar showing all ceremonies, rituals, and task due dates at a glance |
 | ⏱️ **Wedding Ceremony Planner** | Chronological timeline of ceremonies with precise timings — your wedding day run sheet |
@@ -224,9 +224,9 @@ src/
 │   │   ├── admin/          # Admin-only pages (appearance, api-keys, users)
 │   │   ├── calendar/       # Calendar view
 │   │   ├── docs/           # Documentation
-│   │   ├── event-itinerary/# Wedding Ceremony Planner
+│   │   ├── wedding-ceremony-planner/ # Wedding Ceremony Planner
 │   │   ├── guests/         # Guest RSVP Manager
-│   │   ├── planning-board/ # Wedding Task Planner
+│   │   ├── wedding-task-planner/ # Wedding Task Planner
 │   │   ├── profile/        # User profile
 │   │   ├── settings/       # Workspace settings
 │   │   ├── showcase/       # Build Showcase Page builder
@@ -234,7 +234,7 @@ src/
 │   │   └── vendors/        # Vendor & budget tracker
 │   ├── guests/             # Public guest RSVP page
 │   ├── login/              # Login page
-│   ├── planning-board/     # Public planning board
+│   ├── wedding-task-planner/     # Public wedding task planner
 │   ├── signup/             # Signup page
 │   ├── vendors/            # Public vendor page
 │   ├── wedding/[id]/       # Public wedding showcase page

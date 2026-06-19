@@ -840,44 +840,44 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
           </section>
 
           {/* F. Gift Registry Section */}
-          {(showcaseGiftUrl || showcaseGiftTitle || showcaseGiftDescription) && (
-            <section className="relative group w-full max-w-xl mx-auto px-6 pt-6 pb-4 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
-              <button
-                onClick={() => setActiveModal("gift")}
-                className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
-                title="Edit Gift Registry"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
+          <section className="relative group w-full max-w-xl mx-auto px-6 pt-6 pb-4 border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
+            <button
+              onClick={() => setActiveModal("gift")}
+              className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white hover:bg-slate-50 text-[#6771ab] p-2.5 rounded-full border border-slate-200 shadow-md hover:shadow-lg active:scale-95 duration-200"
+              title="Edit Gift Registry"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
 
-              <div className="bg-white/95 backdrop-blur-md border border-rose-200 rounded-3xl p-6 md:p-8 shadow-xl max-w-xl mx-auto text-center relative overflow-hidden">
-                <div className="text-4xl mb-3">🎁</div>
-                <h3
-                  style={{ fontFamily: "var(--font-title)", color: "var(--color-primary)" }}
-                  className="text-xl font-bold mb-3 tracking-wide"
+            <div className="bg-white/95 backdrop-blur-md border border-rose-200 rounded-3xl p-6 md:p-8 shadow-xl max-w-xl mx-auto text-center relative overflow-hidden">
+              <div className="text-4xl mb-3">🎁</div>
+              <h3
+                style={{ fontFamily: "var(--font-title)", color: "var(--color-primary)" }}
+                className="text-xl font-bold mb-3 tracking-wide"
+              >
+                {showcaseGiftTitle || "Gift Registry"}
+              </h3>
+              <p className="text-sm text-slate-500 mb-5 font-light leading-relaxed">
+                {showcaseGiftDescription || "Your presence is the greatest gift, but if you wish to honor us with a token of love, we've curated a small registry below."}
+              </p>
+              {showcaseGiftUrl ? (
+                <a
+                  href={showcaseGiftUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--color-primary)] text-white shadow-md hover:opacity-90 transition-all text-sm font-semibold"
                 >
-                  {showcaseGiftTitle || "Gift Registry"}
-                </h3>
-                {showcaseGiftDescription && (
-                  <p className="text-sm text-slate-500 mb-5 font-light leading-relaxed">
-                    {showcaseGiftDescription}
-                  </p>
-                )}
-                {showcaseGiftUrl && (
-                  <a
-                    href={showcaseGiftUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[var(--color-primary)] text-white shadow-md hover:opacity-90 transition-all text-sm font-semibold"
-                  >
-                    🎀 View Gift Registry
-                  </a>
-                )}
-              </div>
-            </section>
-          )}
+                  🎀 View Gift Registry
+                </a>
+              ) : (
+                <p className="text-xs text-slate-400 italic">
+                  Add a registry URL in the edit dialog to enable the button.
+                </p>
+              )}
+            </div>
+          </section>
 
           {/* Footer */}
           <footer className="w-full bg-slate-100/30 border-t border-slate-200/50 text-center py-6 mt-auto">
@@ -1139,7 +1139,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
             <div className="flex justify-between items-center">
               <h4 className="text-sm font-bold text-slate-800">Ceremony / Ritual Schedule List</h4>
               <Link
-                href="/dashboard/event-itinerary"
+                href="/dashboard/wedding-ceremony-planner"
                 className="text-xs font-bold text-[#6771ab] hover:underline"
               >
                 Go to Scheduling Page (Add/Delete) →
@@ -1358,7 +1358,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
               onChange={(e) => setShowcaseGiftUrl(e.target.value)}
               placeholder="e.g. https://www.amazon.com/wedding/registry/..."
             />
-            <p className="text-[10px] text-slate-400 mt-1">Leave empty to hide the Gift Registry section.</p>
+            <p className="text-[10px] text-slate-400 mt-1">The section is always visible. Add a link to enable the View button.</p>
           </div>
 
           <div className="space-y-1">

@@ -29,7 +29,7 @@ const sections = [
     ],
   },
   {
-    id: "planning-board",
+    id: "wedding-task-planner",
     title: "Wedding Task Planner",
     icon: "📋",
     items: [
@@ -73,7 +73,7 @@ const sections = [
     ],
   },
   {
-    id: "event-itinerary",
+    id: "wedding-ceremony-planner",
     title: "Wedding Ceremony Planner",
     icon: "⏱️",
     items: [

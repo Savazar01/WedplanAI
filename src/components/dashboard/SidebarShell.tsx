@@ -107,9 +107,9 @@ export default function SidebarShell({
 
   const navItems: NavItem[] = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dashboard/planning-board", label: "Wedding Task Planner", icon: KanbanSquare },
+    { href: "/dashboard/wedding-task-planner", label: "Wedding Task Planner", icon: KanbanSquare },
     { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
-    { href: "/dashboard/event-itinerary", label: "Wedding Ceremony Planner", icon: Clock },
+    { href: "/dashboard/wedding-ceremony-planner", label: "Wedding Ceremony Planner", icon: Clock },
     { href: "/dashboard/guests", label: "Guests", icon: Users },
     { href: "/dashboard/vendors", label: "Vendors", icon: Store },
   ];

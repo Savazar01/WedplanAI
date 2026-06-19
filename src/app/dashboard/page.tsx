@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { eq, and, lt, asc } from "drizzle-orm";
 import DashboardWeddingCard from "@/components/dashboard/DashboardWeddingCard";
-import ShareWeddingCard from "@/components/dashboard/ShareWeddingCard";
 import { formatCurrency } from "@/lib/format";
 
 export default async function DashboardPage() {
@@ -84,15 +83,38 @@ export default async function DashboardPage() {
   return (
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-8">
 
-      {/* ─── ROW 1: Wedding Card + Showcase ─── */}
+      {/* ─── ROW 1: Wedding Card + Showcase Quick Nav ─── */}
       <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
         <DashboardWeddingCard wedding={wedding} />
         <div className="mt-6 pt-6 border-t border-slate-200/60">
-          <ShareWeddingCard
-            weddingId={wedding.id}
-            partnerA={wedding.partnerA}
-            partnerB={wedding.partnerB}
-          />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2">
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Your wedding showcase page lets guests view ceremony details, venue, and RSVP. Head over to the{" "}
+                <Link href="/dashboard/showcase" className="text-[#6771ab] font-semibold underline underline-offset-2 hover:text-[#2d336b]">
+                  Build Showcase Page
+                </Link>{" "}
+                to preview, update content, and see how it looks.
+              </p>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Personal invitation links — each guest receives a unique link with their login code pre-filled.
+                Manage and send them from the{" "}
+                <Link href="/dashboard/guests" className="text-[#6771ab] font-semibold underline underline-offset-2 hover:text-[#2d336b]">
+                  Guests
+                </Link>{" "}
+                section.
+              </p>
+            </div>
+            <Link href="/dashboard/showcase" className="shrink-0">
+              <Button variant="secondary" size="sm" className="text-xs gap-2 whitespace-nowrap">
+                <svg className="h-4 w-4 text-[#6771ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Build Showcase Page
+              </Button>
+            </Link>
+          </div>
         </div>
       </Card>
 
@@ -132,13 +154,29 @@ export default async function DashboardPage() {
           </div>
           <div className="shrink-0 flex items-center gap-2 flex-wrap">
             <Link href="/dashboard/planning-board">
-              <Button variant="secondary" size="sm" className="text-xs">Wedding Task Planner</Button>
+              <Button variant="secondary" size="sm" className="text-xs gap-1.5">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                Wedding Task Planner
+              </Button>
             </Link>
             <Link href="/dashboard/event-itinerary">
-              <Button variant="secondary" size="sm" className="text-xs">Wedding Ceremonies</Button>
+              <Button variant="secondary" size="sm" className="text-xs gap-1.5">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2" />
+                  <circle cx="12" cy="12" r="10" />
+                </svg>
+                Wedding Ceremonies
+              </Button>
             </Link>
             <Link href="/dashboard/calendar">
-              <Button variant="secondary" size="sm" className="text-xs">Calendar View</Button>
+              <Button variant="secondary" size="sm" className="text-xs gap-1.5">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Calendar View
+              </Button>
             </Link>
           </div>
         </div>
@@ -167,7 +205,12 @@ export default async function DashboardPage() {
           </div>
           <div className="shrink-0">
             <Link href="/dashboard/guests">
-              <Button variant="secondary" size="sm" className="text-xs">Guest RSVP</Button>
+              <Button variant="secondary" size="sm" className="text-xs gap-1.5">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Guest RSVP
+              </Button>
             </Link>
           </div>
         </div>
@@ -226,7 +269,12 @@ export default async function DashboardPage() {
           </div>
           <div className="shrink-0">
             <Link href="/dashboard/vendors">
-              <Button variant="secondary" size="sm" className="text-xs">Vendors</Button>
+              <Button variant="secondary" size="sm" className="text-xs gap-1.5">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Vendors
+              </Button>
             </Link>
           </div>
         </div>

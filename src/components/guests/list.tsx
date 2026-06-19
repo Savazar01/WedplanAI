@@ -273,18 +273,42 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
           <table className="min-w-full divide-y divide-slate-100">
             <thead className="bg-slate-50">
               <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Actions</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Name</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Contact Info</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Login Code</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">RSVP Status</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Plus Ones</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Dietary Restrictions</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {filteredGuests.map((g) => (
                 <tr key={g.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm flex gap-1">
+                    <Button
+                      variant="ghost"
+                      onClick={() => { setInviteGuest(g); }}
+                      className="text-emerald-600 hover:text-emerald-800 text-xs font-semibold"
+                      title="Send Invitation"
+                    >
+                      Send
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleStartEdit(g)}
+                      className="text-[#6771ab] hover:text-[#566198] text-xs font-semibold"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleDeleteGuest(g.id)}
+                      className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                    >
+                      Del
+                    </Button>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{g.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     <div className="flex flex-col text-xs font-sans">
@@ -321,30 +345,6 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-bold">{g.plusOneCount}</td>
                   <td className="px-6 py-4 text-sm text-slate-500 max-w-xs truncate" title={g.dietaryRestrictions || ""}>
                     {g.dietaryRestrictions || "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm flex gap-1">
-                    <Button
-                      variant="ghost"
-                      onClick={() => { setInviteGuest(g); }}
-                      className="text-emerald-600 hover:text-emerald-800 text-xs font-semibold"
-                      title="Send Invitation"
-                    >
-                      Send
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleStartEdit(g)}
-                      className="text-[#6771ab] hover:text-[#566198] text-xs font-semibold"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleDeleteGuest(g.id)}
-                      className="text-red-500 hover:text-red-700 text-xs font-semibold"
-                    >
-                      Del
-                    </Button>
                   </td>
                 </tr>
               ))}

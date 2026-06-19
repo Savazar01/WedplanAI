@@ -148,7 +148,7 @@ export default function EventItineraryOnly({ initialRituals }: EventItineraryOnl
       } else {
         setIsFormOpen(false);
         setRitualsList((prev) => prev.filter((r) => r.id !== deleteConfirm));
-        setToast({ message: "Itinerary Event deleted.", type: "success" });
+        setToast({ message: "Ceremony deleted.", type: "success" });
         router.refresh();
       }
     } catch (err) {
@@ -169,10 +169,10 @@ export default function EventItineraryOnly({ initialRituals }: EventItineraryOnl
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Wedding Ceremony Planner</h1>
-          <p className="text-xs text-slate-500">Chronological order of your itinerary events and ceremonies.</p>
+          <p className="text-xs text-slate-500">Chronological order of your ceremonies and events.</p>
         </div>
         <Button onClick={openCreateModal} variant="primary">
-          + Add Itinerary Event
+          + Add Ceremony
         </Button>
       </div>
 
@@ -230,13 +230,13 @@ export default function EventItineraryOnly({ initialRituals }: EventItineraryOnl
 
         {sortedTimelineRituals.length === 0 && (
           <div className="text-center py-12 text-slate-400 text-sm bg-white rounded-xl border border-slate-100">
-            No itinerary events scheduled yet. Click &quot;Add Itinerary Event&quot; to get started.
+            No ceremonies scheduled yet. Click &quot;Add Ceremony&quot; to get started.
           </div>
         )}
       </div>
 
       {/* Create / Edit Dialog Form */}
-      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedRitual ? "Edit Itinerary Event" : "Add Itinerary Event"}>
+      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedRitual ? "Edit Ceremony" : "Add Ceremony"}>
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Ceremony Name</label>
@@ -314,8 +314,8 @@ export default function EventItineraryOnly({ initialRituals }: EventItineraryOnl
         isOpen={!!deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
         onConfirm={confirmDeleteRitual}
-        title="Delete Itinerary Event"
-        message="Are you sure you want to delete this itinerary event? This action cannot be undone."
+        title="Delete Ceremony"
+        message="Are you sure you want to delete this ceremony? This action cannot be undone."
         confirmLabel="Delete"
         cancelLabel="Cancel"
         variant="danger"

@@ -9,7 +9,7 @@ const sections = [
       {
         title: "Creating Your Account",
         content:
-          "Visit the Sign Up page to register as the first admin. The first user to sign up is automatically designated as the administrator. If other users already exist, public registration closes and new users must be created by an admin via User Management.",
+          "Visit the Sign Up page to register as the first admin. The first user to sign up is automatically designated as the administrator. If other users already exist, public registration closes and new users must be created by an admin via Manage Your Team.",
       },
       {
         title: "Sample Wedding",
@@ -24,7 +24,7 @@ const sections = [
       {
         title: "Dashboard Overview",
         content:
-          "The main dashboard shows your active wedding at a glance: task completion percentage, guest RSVP breakdown (attending, declined, pending), budget status with breach alerts, and quick-access navigation to all features.",
+          "The main dashboard shows your active wedding at a glance: task completion percentage (with To-Do, In Progress, Done, and Overdue counts), guest RSVP breakdown (attending, declined, pending), budget status with color-coded depletion bar and breach alerts, and a Build Showcase Page quick-navigation button with guidance on personal invitation links available in the Guests section.",
       },
     ],
   },
@@ -85,7 +85,7 @@ const sections = [
       {
         title: "Adding Rituals",
         content:
-          "Click 'Add Ritual' to add a new ceremony or event to your itinerary. Provide the name, date, start time, end time, and location. Dates are formatted as DD-Month-YYYY (e.g., 26-June-2026).",
+          "Click 'Add Ceremony' to add a new ceremony or event. Provide the name, date, start time, end time, and location. Dates are formatted as DD-Month-YYYY (e.g., 26-June-2026).",
       },
       {
         title: "Editing Rituals",
@@ -168,6 +168,11 @@ const sections = [
         content:
           "Copy your showcase page URL from the dashboard overview and share it with guests. They can view the wedding details and submit their RSVP directly on the public page.",
       },
+      {
+        title: "Gift Registry",
+        content:
+          "Add a Gift Registry section to your showcase page with a URL, title, and description. When all three fields are filled in, the registry appears on your public wedding page for guests to view and access.",
+      },
     ],
   },
   {
@@ -209,7 +214,7 @@ const sections = [
           "Create and manage API keys for programmatic access to your wedding data via the REST API v1 endpoints. Each key can be labeled and revoked individually.",
       },
       {
-        title: "User Management",
+        title: "Manage Your Team",
         content:
           "View all registered users in the system. Create new user accounts when public registration is closed. Each user can be assigned a role (admin or user).",
       },
@@ -258,12 +263,12 @@ const sections = [
       {
         title: "Multi-User Access",
         content:
-          "Invite wedding coordinators, family members, and planners to collaborate. Each team member gets secure access with role-based permissions. Admins can create user accounts via Admin > User Management.",
+          "Invite wedding coordinators, family members, and planners to collaborate. Each team member gets secure access with role-based permissions. Admins can create user accounts via Admin > Manage Your Team.",
       },
       {
         title: "Role-Based Permissions",
         content:
-          "Admin users have access to all features including admin panel (Appearance, API Keys, User Management). Regular users can access all planning features but cannot modify system settings.",
+          "Admin users have access to all features including admin panel (Appearance, API Keys, Manage Your Team). Regular users can access all planning features but cannot modify system settings.",
       },
     ],
   },

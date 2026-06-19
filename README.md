@@ -1,6 +1,6 @@
 # WedPlanAI
 
-> **AI-powered wedding planning platform** — manage every detail of your wedding with Kanban boards, a live calendar, guest RSVP tracking, vendor budgets, and a beautiful public showcase website.
+> **AI-powered wedding planning platform** — manage every detail of your wedding with a Wedding Task Planner, live calendar, Wedding Ceremony Planner, guest RSVP tracking, vendor budgets, and a beautiful public showcase website.
 
 Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**. Deployed via **Docker Compose**.
 
@@ -10,13 +10,13 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 
 | Feature | Description |
 |---|---|
-| 🗂️ **Planning Board** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
-| 📅 **Calendar & Event Itinerary** | Month-view calendar and day-of event itinerary for all ceremonies and events |
+| 🗂️ **Wedding Task Planner** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
+| 📅 **Calendar & Ceremony Planner** | Month-view calendar and ceremony timeline for all ceremonies and events |
 | 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP |
 | 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, and dynamic currency by country |
 | 🌐 **Build Showcase Page** | Auto-generated public wedding page with an interactive live builder, countdown, itinerary, and RSVP form |
 | 👩‍💼 **Multi-User Collaboration** | Role-based access — admins invite planners and coordinators |
-| ⚙️ **Settings & User Management** | Admin controls for workspace configuration and team access |
+| 👥 **Manage Your Team** | Admin controls for user roles, permissions, and team access |
 | 🎉 **Guided Onboarding** | Interactive walkthrough tour and wizard to set up your first wedding event |
 
 ### Wedding Traditions Supported
@@ -218,13 +218,13 @@ src/
 │   ├── actions/            # Server Actions (guests, vendors, weddings, auth)
 │   ├── api/auth/           # Better Auth API handler
 │   ├── dashboard/          # Authenticated dashboard pages
-│   │   ├── calendar/       # Calendar view
-│   │   ├── event-itinerary/# Event itinerary / ceremonies
+│   │   │   ├── calendar/       # Calendar view
+│   │   ├── event-itinerary/# Ceremony planner / timeline
 │   │   ├── guests/         # Guest management
-│   │   ├── planning-board/ # Planning board (tasks)
+│   │   ├── planning-board/ # Wedding Task Planner
 │   │   ├── settings/       # Workspace settings
 │   │   ├── showcase/       # Showcase builder
-│   │   ├── users/          # User management (admin only)
+│   │   ├── users/          # Manage Your Team (admin only)
 │   │   └── vendors/        # Vendor & budget tracker
 │   ├── login/              # Login page
 │   ├── planning-board/     # Public planning board
@@ -234,7 +234,7 @@ src/
 │   └── page.tsx            # Landing page (public)
 ├── components/
 │   ├── dashboard/          # Dashboard shell, sidebar, wedding switcher
-│   ├── kanban/             # Planning board (Kanban) components
+│   ├── kanban/             # Wedding Task Planner (Kanban) components
 │   └── ui/                 # shadcn/ui base components
 ├── db/
 │   ├── schema.ts           # Drizzle database schema

@@ -121,7 +121,7 @@ export default async function LandingPage() {
                 icon: (
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
                 ),
-                title: "Smart Planning Board",
+                title: "Wedding Task Planner",
                 desc: "Drag-and-drop task management across Backlog, To-Do, In Progress and Done columns. Pre-seeded with tradition-specific tasks for Hindu, Muslim, Sikh, and more.",
                 color: "from-violet-500/10 to-violet-50",
                 border: "border-violet-100",
@@ -131,8 +131,8 @@ export default async function LandingPage() {
                 icon: (
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 ),
-                title: "Calendar & Event Itinerary",
-                desc: "View all ceremonies and itinerary events in a beautiful month calendar grid or a day-of event itinerary. Never miss an itinerary event with visual scheduling.",
+                title: "Calendar & Ceremony Planner",
+                desc: "View all ceremonies in a beautiful month calendar grid or a day-of ceremony timeline. Never miss a ceremony with visual scheduling.",
                 color: "from-rose-500/10 to-rose-50",
                 border: "border-rose-100",
                 iconBg: "bg-rose-100 text-[#c484b0]",
@@ -264,7 +264,7 @@ export default async function LandingPage() {
             Every Tradition, Beautifully Supported
           </h2>
           <p className="text-slate-500 mb-12 max-w-2xl mx-auto text-base leading-relaxed">
-            WedPlanAI pre-populates your tasks, itinerary events, and schedule based on your wedding tradition — so you start with a smart foundation, not a blank slate.
+            WedPlanAI pre-populates your tasks, ceremonies, and schedule based on your wedding tradition — so you start with a smart foundation, not a blank slate.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {[

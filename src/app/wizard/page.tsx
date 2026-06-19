@@ -840,7 +840,7 @@ export default function WizardPage() {
 
               {/* Add New Ritual Form */}
               <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-xl border">
-                <h4 className="text-xs font-semibold text-[#6771ab] uppercase tracking-wider mb-2">Add New Custom Itinerary Event</h4>
+                <h4 className="text-xs font-semibold text-[#6771ab] uppercase tracking-wider mb-2">Add New Custom Ceremony</h4>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                   <div className="md:col-span-4">
                     <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Event Name</label>

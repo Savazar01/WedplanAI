@@ -57,7 +57,7 @@ Rules:
 
 ## WEDDING PLATFORM SPECIFIC RULES
 
-- **Vocabulary**: Always use "Planning Board" instead of "Kanban Board" and "Event Itinerary" instead of "Timeline" or "Rituals" across all routes, sidebar menus, onboarding steps, seeding files, and user-facing copy.
+- **Vocabulary**: Always use "Wedding Task Planner" instead of "Kanban Board" and "Wedding Ceremony Planner" instead of "Timeline" or "Rituals" across all routes, sidebar menus, onboarding steps, seeding files, and user-facing copy. Use "Ceremony" instead of "Itinerary Event" in all user-facing UI (buttons, dialogs, toast messages). Use "Manage Your Team" instead of "User Management".
 - **Client Component State Synchronization**: When syncing props to local state in client components, **never** perform raw object or array reference comparisons (e.g. `wedding !== prevWedding` or `rituals !== prevRituals`). Parent re-renders and `router.refresh()` generate new references even if the properties are identical. Always compare unique identifiers or structural values (e.g. `wedding.id !== prevWedding.id` or deep property checks) to prevent local inputs from resetting.
 - **Server Actions Body Limit**: Next.js Server Actions `bodySizeLimit` is configured at `50mb` in `next.config.ts`. Be mindful of this limit when sending base64-encoded file uploads or large payloads via server actions.
 - **Coolify Deployment**: The application is configured to run on port `3044` inside the Docker container. Ensure PostgreSQL migrations are run automatically during container startup using the custom migration scripts.

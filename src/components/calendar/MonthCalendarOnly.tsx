@@ -289,7 +289,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
         setIsDetailOpen(false);
         setIsFormOpen(false);
         setRitualsList((prev) => prev.filter((r) => r.id !== deleteConfirm));
-        setToast({ message: "Itinerary Event deleted.", type: "success" });
+        setToast({ message: "Ceremony deleted.", type: "success" });
         router.refresh();
       }
     } catch (err) {
@@ -330,7 +330,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
       apparel: "👗 Apparel & Styling",
       invitations: "✉️ Invitations & Stationery",
       music: "🎵 Music & Entertainment",
-      rituals: "✨ Itinerary Events",
+      rituals: "✨ Ceremonies",
       other: "📋 Other Task",
     };
     return mapping[category] || category.toUpperCase();
@@ -369,7 +369,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
           <p className="text-xs text-slate-500">Visualize your scheduled ceremonies and task deadlines.</p>
         </div>
         <Button onClick={openCreateModal} variant="primary">
-          + Add Itinerary Event
+          + Add Ceremony
         </Button>
       </div>
 
@@ -606,9 +606,9 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
             {/* Left Side: Ceremonies & Rituals */}
             <div className="lg:col-span-7 space-y-4">
               <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-wider flex items-center gap-2">
-                  <span>✨</span> Itinerary Events
-                </h3>
+                  <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-wider flex items-center gap-2">
+                    <span>✨</span> Ceremonies
+                  </h3>
                 <span className="text-xs bg-violet-100 text-[#2d336b] px-2 py-0.5 rounded-full font-bold">
                   {currentDayRituals.length} Scheduled
                 </span>
@@ -618,7 +618,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
                 <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
                   <span className="text-3xl mb-2">🌸</span>
                   <h4 className="text-sm font-bold text-slate-700">No Ceremonies Scheduled</h4>
-                  <p className="text-xs text-slate-400 mt-1">Keep it relaxing or add an itinerary event for today.</p>
+                  <p className="text-xs text-slate-400 mt-1">Keep it relaxing or add a ceremony for today.</p>
                   <Button onClick={() => openCreateModalForDate(currentDate.getDate())} variant="ghost" className="text-xs mt-3 text-[#6771ab] font-bold">
                     + Schedule Ceremony
                   </Button>
@@ -711,7 +711,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
       </Card>
 
       {/* Detail Popup Modal */}
-      <Dialog isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} title="Itinerary Event Details">
+      <Dialog isOpen={isDetailOpen} onClose={() => setIsDetailOpen(false)} title="Ceremony Details">
         {detailRitual && (
           <div className="space-y-4">
             <div>
@@ -822,7 +822,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
       </Dialog>
 
       {/* Create / Edit Dialog Form */}
-      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedRitual ? "Edit Itinerary Event" : "Add Itinerary Event"}>
+      <Dialog isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={selectedRitual ? "Edit Ceremony" : "Add Ceremony"}>
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Ceremony Name</label>
@@ -900,8 +900,8 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
         isOpen={!!deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
         onConfirm={confirmDeleteRitual}
-        title="Delete Itinerary Event"
-        message="Are you sure you want to delete this itinerary event? This action cannot be undone."
+        title="Delete Ceremony"
+        message="Are you sure you want to delete this ceremony? This action cannot be undone."
         confirmLabel="Delete"
         cancelLabel="Cancel"
         variant="danger"

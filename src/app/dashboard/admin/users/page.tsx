@@ -1,5 +1,6 @@
 import { db } from "@/db/client";
-import { users } from "@/db/schema";
+import { users, weddings } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
@@ -16,6 +17,7 @@ export default async function UsersManagementPage() {
   // Ensure active wedding logic is executed (redirects to wizard if no wedding is found)
   await getActiveWedding(session.user.id);
 
+  const adminWeddings = await db.select().from(weddings).where(eq(weddings.userId, session.user.id));
   const allUsers = await db.select().from(users).orderBy(users.createdAt);
 
   return (
@@ -25,7 +27,11 @@ export default async function UsersManagementPage() {
           <h2 className="text-lg font-bold text-[#6771ab] mb-2">Add Team Member</h2>
           <p className="text-xs text-slate-500 mb-6">Add subsequent team member credentials. Note that public signup is locked.</p>
           
-          <CreateUserFormClient createAction={createSubsequentUserAction} />
+          <CreateUserFormClient 
+            createAction={createSubsequentUserAction}
+            adminPersona={session.user.persona}
+            weddings={adminWeddings}
+          />
         </Card>
       </div>
 

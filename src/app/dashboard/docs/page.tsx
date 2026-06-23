@@ -100,6 +100,33 @@ const sections = [
     ],
   },
   {
+    id: "catering-menu-planner",
+    title: "Catering Menu Planner",
+    icon: "🍴",
+    items: [
+      {
+        title: "Overview",
+        content:
+          "The Catering Menu Planner allows you to design and manage food & beverage menus for ceremonies that serve food. Access it via the 'Menu Plan' item in the sidebar navigation.",
+      },
+      {
+        title: "Planning a Menu",
+        content:
+          "Click the 'Plan A Menu' button to create a catering menu. Choose a ceremony (ceremonies with food served are marked for convenience), and specify the cuisine type, expected guest count, and catering vendor. Fill in the details for Appetizers, Main Courses, Desserts, and Drinks.",
+      },
+      {
+        title: "Linking to Tasks",
+        content:
+          "For tasks of category 'Catering', you can link them directly to a specific planned catering menu from the task details dialog in the Wedding Task Planner. This lets you access the menu directly from your task list.",
+      },
+      {
+        title: "Timeline Integration",
+        content:
+          "In the Wedding Ceremony Planner, any ceremony marked as serving food will display a 'Plan Menu' button, allowing you to jump straight into designing the menu for that ceremony with one click.",
+      },
+    ],
+  },
+  {
     id: "guests",
     title: "Guests & RSVPs",
     icon: "👥",

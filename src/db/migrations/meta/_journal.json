@@ -78,6 +78,13 @@
       "when": 1782181271336,
       "tag": "0010_good_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1782201138061,
+      "tag": "0011_foamy_whizzer",
+      "breakpoints": true
     }
   ]
 }

@@ -29,6 +29,7 @@ interface Task {
   ceremonyId: string | null;
   assignedUserId: string | null;
   categoryData: string | null;
+  cateringMenuId?: string | null;
 }
 
 interface Column {
@@ -47,6 +48,7 @@ interface BoardProps {
   initialColumns?: Column[];
   ceremonies?: { id: string; name: string }[];
   teamMembers?: { id: string; name: string; email: string }[];
+  cateringMenus?: any[];
 }
 
 const DEFAULT_COLUMNS: Column[] = [
@@ -175,11 +177,16 @@ export default function PlanningBoard({
   initialTasks, 
   initialColumns = DEFAULT_COLUMNS,
   ceremonies = [],
-  teamMembers = []
+  teamMembers = [],
+  cateringMenus = [],
 }: BoardProps) {
   const [tasksList, setTasksList] = React.useState<Task[]>(initialTasks);
   const [columnsList, setColumnsList] = React.useState<Column[]>(initialColumns);
   const [activeMobileCol, setActiveMobileCol] = React.useState<string>(initialColumns[0]?.id || "todo");
+
+  const getCeremonyName = (cId: string) => {
+    return ceremonies.find(c => c.id === cId)?.name || "Unknown Ceremony";
+  };
 
   const [dbCategories, setDbCategories] = React.useState<{ key: string; name: string; followUpQuestions: string | null }[]>([]);
   React.useEffect(() => {
@@ -234,6 +241,7 @@ export default function PlanningBoard({
   const [ceremonyId, setCeremonyId] = React.useState("");
   const [assignedUserId, setAssignedUserId] = React.useState("");
   const [categoryAnswers, setCategoryAnswers] = React.useState<Record<string, string>>({});
+  const [cateringMenuId, setCateringMenuId] = React.useState("");
 
   // Edit Form State
   const [editTitle, setEditTitle] = React.useState("");
@@ -244,6 +252,7 @@ export default function PlanningBoard({
   const [editCeremonyId, setEditCeremonyId] = React.useState("");
   const [editAssignedUserId, setEditAssignedUserId] = React.useState("");
   const [editCategoryAnswers, setEditCategoryAnswers] = React.useState<Record<string, string>>({});
+  const [editCateringMenuId, setEditCateringMenuId] = React.useState("");
 
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -257,7 +266,7 @@ export default function PlanningBoard({
         (t) =>
           `${t.id}-${t.status}-${t.title}-${t.category}-${t.dueDate?.getTime() || ""}-${t.ceremonyId || ""}-${
             t.assignedUserId || ""
-          }-${t.categoryData || ""}`
+          }-${t.categoryData || ""}-${t.cateringMenuId || ""}`
       )
       .join("|");
   }, [initialTasks]);
@@ -338,7 +347,8 @@ export default function PlanningBoard({
         dueDate: dueDate || undefined,
         ceremonyId: ceremonyId || null,
         assignedUserId: assignedUserId || null,
-        categoryData: Object.keys(categoryAnswers).length > 0 ? JSON.stringify(categoryAnswers) : null
+        categoryData: Object.keys(categoryAnswers).length > 0 ? JSON.stringify(categoryAnswers) : null,
+        cateringMenuId: cateringMenuId || null,
       });
       if (res?.error) { setError(res.error); }
       else { 
@@ -351,6 +361,7 @@ export default function PlanningBoard({
         setCeremonyId("");
         setAssignedUserId("");
         setCategoryAnswers({});
+        setCateringMenuId("");
         window.location.reload(); 
       }
     } catch { setError("An unexpected error occurred."); }
@@ -381,7 +392,8 @@ export default function PlanningBoard({
         dueDate: editDueDate || undefined,
         ceremonyId: editCeremonyId || null,
         assignedUserId: editAssignedUserId || null,
-        categoryData: Object.keys(editCategoryAnswers).length > 0 ? JSON.stringify(editCategoryAnswers) : null
+        categoryData: Object.keys(editCategoryAnswers).length > 0 ? JSON.stringify(editCategoryAnswers) : null,
+        cateringMenuId: editCateringMenuId || null,
       });
       if (res?.error) { setError(res.error); }
       else {
@@ -396,7 +408,8 @@ export default function PlanningBoard({
                   dueDate: editDueDate ? new Date(editDueDate) : null,
                   ceremonyId: editCeremonyId || null,
                   assignedUserId: editAssignedUserId || null,
-                  categoryData: Object.keys(editCategoryAnswers).length > 0 ? JSON.stringify(editCategoryAnswers) : null
+                  categoryData: Object.keys(editCategoryAnswers).length > 0 ? JSON.stringify(editCategoryAnswers) : null,
+                  cateringMenuId: editCateringMenuId || null,
                 } 
               : t
           )
@@ -722,6 +735,7 @@ export default function PlanningBoard({
                         setEditDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "");
                         setEditCeremonyId(task.ceremonyId || "");
                         setEditAssignedUserId(task.assignedUserId || "");
+                        setEditCateringMenuId(task.cateringMenuId || "");
                         try {
                           setEditCategoryAnswers(task.categoryData ? JSON.parse(task.categoryData) : {});
                         } catch {
@@ -955,6 +969,34 @@ export default function PlanningBoard({
             </div>
           </div>
 
+          {category === "catering" && (
+            <div>
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Link to Catering Menu</label>
+              {cateringMenus.length > 0 ? (
+                <select
+                  value={cateringMenuId}
+                  onChange={(e) => setCateringMenuId(e.target.value)}
+                  disabled={loading}
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                >
+                  <option value="">Do not link (General Catering Task)</option>
+                  {cateringMenus.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.cuisine || "Catering Menu"} (Ceremony: {getCeremonyName(m.ceremonyId)})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-xs text-slate-500 font-sans">
+                  No catering menus have been planned yet. You can plan one in the{" "}
+                  <a href="/dashboard/menu-plan" className="text-[#6771ab] hover:underline font-semibold">
+                    Catering Menu Planner
+                  </a>.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Dynamic Follow-up Questions */}
           {createQuestions.length > 0 && (
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
@@ -1090,6 +1132,43 @@ export default function PlanningBoard({
               </select>
             </div>
           </div>
+
+          {editCategory === "catering" && (
+            <div className="space-y-2">
+              <div>
+                <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Link to Catering Menu</label>
+                {cateringMenus.length > 0 ? (
+                  <select
+                    value={editCateringMenuId}
+                    onChange={(e) => setEditCateringMenuId(e.target.value)}
+                    disabled={loading}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                  >
+                    <option value="">Do not link (General Catering Task)</option>
+                    {cateringMenus.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.cuisine || "Catering Menu"} (Ceremony: {getCeremonyName(m.ceremonyId)})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-xs text-slate-500 font-sans">
+                    No catering menus have been planned yet. You can plan one in the{" "}
+                    <a href="/dashboard/menu-plan" className="text-[#6771ab] hover:underline font-semibold">
+                      Catering Menu Planner
+                    </a>.
+                  </p>
+                )}
+              </div>
+              {editCateringMenuId && (
+                <div className="text-xs">
+                  <a href="/dashboard/menu-plan" className="text-[#6771ab] hover:underline font-semibold">
+                    → View Linked Menu Plan
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Dynamic Follow-up Questions */}
           {editQuestions.length > 0 && (

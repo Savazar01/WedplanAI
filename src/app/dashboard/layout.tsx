@@ -21,10 +21,32 @@ export default async function DashboardLayout({ children }: LayoutProps) {
 
   const activeWedding = await getActiveWedding(session.user.id);
 
-  const allWeddings = await db
-    .select()
-    .from(weddings)
-    .where(eq(weddings.userId, session.user.id));
+  const user = session.user as any;
+  const userRole = user.role || "user";
+  const userWeddingAccess = user.weddingAccess || "all";
+
+  let allWeddings: typeof weddings.$inferSelect[] = [];
+
+  if (userRole === "admin") {
+    allWeddings = await db
+      .select()
+      .from(weddings)
+      .where(eq(weddings.userId, session.user.id));
+  } else {
+    if (userWeddingAccess === "all") {
+      if (activeWedding) {
+        allWeddings = await db
+          .select()
+          .from(weddings)
+          .where(eq(weddings.userId, activeWedding.userId));
+      }
+    } else {
+      allWeddings = await db
+        .select()
+        .from(weddings)
+        .where(eq(weddings.id, userWeddingAccess));
+    }
+  }
 
   return (
     <>

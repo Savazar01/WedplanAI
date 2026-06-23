@@ -131,6 +131,7 @@ export async function createTaskAction(data: {
   ceremonyId?: string | null;
   assignedUserId?: string | null;
   categoryData?: string | null;
+  cateringMenuId?: string | null;
 }) {
   const session = await getServerSession();
   if (!session || !session.user) {
@@ -172,6 +173,7 @@ export async function createTaskAction(data: {
       ceremonyId: data.ceremonyId || null,
       assignedUserId: data.assignedUserId || null,
       categoryData: data.categoryData || null,
+      cateringMenuId: data.cateringMenuId || null,
     });
 
     revalidatePath("/wedding-task-planner");
@@ -276,6 +278,7 @@ export async function updateTaskAction(
     ceremonyId?: string | null;
     assignedUserId?: string | null;
     categoryData?: string | null;
+    cateringMenuId?: string | null;
   }
 ) {
   const session = await getServerSession();
@@ -294,6 +297,7 @@ export async function updateTaskAction(
         ceremonyId: data.ceremonyId || null,
         assignedUserId: data.assignedUserId || null,
         categoryData: data.categoryData || null,
+        cateringMenuId: data.cateringMenuId !== undefined ? data.cateringMenuId : null,
         updatedAt: new Date(),
       })
       .where(eq(tasks.id, taskId));

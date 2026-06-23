@@ -15,6 +15,7 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 | ⏱️ **Wedding Ceremony Planner** | Chronological timeline of ceremonies with precise timings — date, dress code, food served, checklist, and assignee per ceremony |
 | 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP, bulk CSV import, ceremony-level guest invitations, `invited_ceremonies` CSV column, and personal invitation links that filter the Wedding Program by invited ceremonies |
 | 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, outstanding balances, dynamic currency by country, vendor-ceremony linking, and downloadable Budget & Vendors CSV Report |
+| 🍴 **Catering Menu Planner** | Design food & beverage menus for ceremonies. Link them directly to catering tasks and view them right from your day-of timeline planner |
 | 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, Wedding Program (filtered by guest's invited ceremonies via personal link), Gift Registry, and RSVP form |
 | 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
 | 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding and 7-step wizard to set up your first event |

@@ -11,6 +11,7 @@ import {
   KanbanSquare,
   Calendar,
   Clock,
+  UtensilsCrossed,
   Users,
   Store,
   UserCog,
@@ -127,6 +128,7 @@ export default function SidebarShell({
       { href: "/dashboard/wedding-task-planner", label: "Wedding Task Planner", icon: KanbanSquare },
       { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
       { href: "/dashboard/wedding-ceremony-planner", label: "Wedding Ceremony Planner", icon: Clock },
+      { href: "/dashboard/menu-plan", label: "Menu Plan", icon: UtensilsCrossed },
       { href: "/dashboard/guests", label: "Guests", icon: Users },
       { href: "/dashboard/vendors", label: "Vendors", icon: Store },
     ];

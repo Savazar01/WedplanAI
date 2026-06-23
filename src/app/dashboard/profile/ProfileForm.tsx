@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toast } from "@/components/ui/toast";
 
+import { Select } from "@/components/ui/select";
+
 interface ProfileFormProps {
   initialName: string;
   initialStreet?: string | null;
@@ -14,6 +16,8 @@ interface ProfileFormProps {
   initialCountry?: string | null;
   initialPincode?: string | null;
   initialLanguages?: string | null;
+  isAdmin?: boolean;
+  initialPersona?: string | null;
 }
 
 export default function ProfileForm({
@@ -24,6 +28,8 @@ export default function ProfileForm({
   initialCountry,
   initialPincode,
   initialLanguages,
+  isAdmin = false,
+  initialPersona,
 }: ProfileFormProps) {
   const [name, setName] = React.useState(initialName || "");
   const [street, setStreet] = React.useState(initialStreet || "");
@@ -32,6 +38,7 @@ export default function ProfileForm({
   const [country, setCountry] = React.useState(initialCountry || "");
   const [pincode, setPincode] = React.useState(initialPincode || "");
   const [languages, setLanguages] = React.useState(initialLanguages || "");
+  const [persona, setPersona] = React.useState(initialPersona || "diy");
   const [isPending, setIsPending] = React.useState(false);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -47,6 +54,7 @@ export default function ProfileForm({
         country,
         pincode,
         languages,
+        persona,
       });
       if (result?.error) {
         setToast({ message: result.error, type: "error" });
@@ -94,6 +102,21 @@ export default function ProfileForm({
             />
             <p className="text-[10px] text-slate-400">Separate multiple languages with commas</p>
           </div>
+          {isAdmin && (
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                User Persona
+              </label>
+              <Select
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
+                disabled={isPending}
+              >
+                <option value="diy">Plan My Wedding (DIY)</option>
+                <option value="wedding_planner">Wedding Planner</option>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* Address */}

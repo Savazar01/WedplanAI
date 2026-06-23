@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { weddings, tasks, rituals, kanbanColumns, weddingTraditions, taskCategories } from "@/db/schema";
+import { weddings, tasks, rituals, kanbanColumns, weddingTraditions, taskCategories, cateringMenus } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
@@ -292,6 +292,11 @@ export async function createWeddingAction(data: {
             endTime.setHours(r.endHour ?? 17, r.endMin ?? 0, 0, 0);
           }
 
+          const hasFood = r.name.toLowerCase().includes("reception") || 
+                          r.name.toLowerCase().includes("valima") || 
+                          r.name.toLowerCase().includes("pheras") ||
+                          r.name.toLowerCase().includes("feast");
+
           return {
             weddingId: weddingId,
             name: r.name,
@@ -299,9 +304,27 @@ export async function createWeddingAction(data: {
             startTime,
             endTime,
             location: r.location || location || "",
+            isFoodServed: hasFood,
           };
         });
-        await tx.insert(rituals).values(ritualsToInsert);
+        const insertedRituals = await tx.insert(rituals).values(ritualsToInsert).returning();
+
+        // Seed a default catering menu for each ceremony where food is served
+        for (const ritual of insertedRituals) {
+          if (ritual.isFoodServed) {
+            await tx.insert(cateringMenus).values({
+              weddingId: weddingId,
+              ceremonyId: ritual.id,
+              cuisine: "Traditional Buffet",
+              guestCount: guestCount || 150,
+              appetizers: "Assorted Starters",
+              mainCourses: "Signature Main Course Dishes, Breads, and Rice",
+              desserts: "Traditional Dessert Specialties",
+              drinks: "Juices, Mocktails, and Water",
+              notes: "Default seeded menu. Edit this to customize your menu.",
+            });
+          }
+        }
       }
     });
 

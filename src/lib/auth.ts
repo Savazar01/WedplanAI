@@ -28,6 +28,10 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      weddingAccess: {
+        type: "string",
+        defaultValue: "all",
+      },
     },
   },
   advanced: {

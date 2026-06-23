@@ -65,4 +65,6 @@ Rules:
 - **Category Follow-up Questions**: The `followUpQuestions` DB column stores a JSON array of `{id, label, type}` objects. However, the UI must ALWAYS use the visual checklist builder (label inputs + type selects + add/remove rows) — never expose raw JSON to users.
 - **Wedding Program**: The public showcase page's ceremony section is called "Wedding Program" (not "Itinerary"). When a guest opens a personal invitation link (`?code=xxx`), the Wedding Program is filtered to show only their invited ceremonies.
 - **Personal Invitation UX**: The invitation dialog has two separate actions: "Copy Link" (copies URL only) and "Save Ceremonies" (persists ceremony assignments to DB). The Save button is disabled until at least one ceremony is selected.
+- **Catering Menu Planner**: Always use "Menu Plan" for the sidebar navigation and "Catering Menu Planner" for the page heading. Ensure catering-category tasks can link to catering menus, and food-served ceremonies are linked directly to the menu planner using query params.
+
 

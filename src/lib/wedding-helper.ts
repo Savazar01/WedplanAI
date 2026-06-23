@@ -7,47 +7,115 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function getActiveWedding(userId: string) {
-  // First check if the user has an assigned weddingId in the users table
+  // First check the user details
   const userResult = await db
-    .select({ weddingId: users.weddingId })
+    .select({ 
+      weddingId: users.weddingId, 
+      weddingAccess: users.weddingAccess,
+      role: users.role
+    })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
 
-  if (userResult.length > 0 && userResult[0].weddingId) {
-    const assignedWedding = await db
-      .select()
+  if (userResult.length === 0) return null;
+
+  const user = userResult[0];
+  const weddingAccess = user.weddingAccess;
+  const userAssignedWeddingId = user.weddingId;
+  const role = user.role;
+
+  // Define helper to get allowed admin user ID for a team member/client
+  let allowedAdminUserId: string | null = null;
+  if (role !== "admin" && userAssignedWeddingId) {
+    const [assignedWedding] = await db
+      .select({ userId: weddings.userId })
       .from(weddings)
-      .where(eq(weddings.id, userResult[0].weddingId))
+      .where(eq(weddings.id, userAssignedWeddingId))
       .limit(1);
-    if (assignedWedding.length > 0) {
-      return assignedWedding[0];
+    if (assignedWedding) {
+      allowedAdminUserId = assignedWedding.userId;
+    }
+  }
+
+  // Helper function to check if a wedding is allowed for this user
+  async function isWeddingAllowed(weddingId: string): Promise<boolean> {
+    if (role === "admin") {
+      const [w] = await db
+        .select({ id: weddings.id })
+        .from(weddings)
+        .where(and(eq(weddings.id, weddingId), eq(weddings.userId, userId)))
+        .limit(1);
+      return !!w;
+    } else {
+      if (weddingAccess !== "all") {
+        return weddingId === weddingAccess;
+      } else {
+        if (!allowedAdminUserId) return false;
+        const [w] = await db
+          .select({ id: weddings.id })
+          .from(weddings)
+          .where(and(eq(weddings.id, weddingId), eq(weddings.userId, allowedAdminUserId)))
+          .limit(1);
+        return !!w;
+      }
     }
   }
 
   const cookieStore = await cookies();
   const activeWeddingId = cookieStore.get("active_wedding_id")?.value;
 
-  if (activeWeddingId) {
-    const weddingResult = await db
+  // 1. If cookie wedding is set and allowed, use it
+  if (activeWeddingId && await isWeddingAllowed(activeWeddingId)) {
+    const [w] = await db
       .select()
       .from(weddings)
-      .where(and(eq(weddings.id, activeWeddingId), eq(weddings.userId, userId)))
+      .where(eq(weddings.id, activeWeddingId))
       .limit(1);
+    if (w) return w;
+  }
 
-    if (weddingResult.length > 0) {
-      return weddingResult[0];
+  // 2. If user has an assigned/default weddingId and it is allowed, use it
+  if (userAssignedWeddingId && await isWeddingAllowed(userAssignedWeddingId)) {
+    const [w] = await db
+      .select()
+      .from(weddings)
+      .where(eq(weddings.id, userAssignedWeddingId))
+      .limit(1);
+    if (w) {
+      return w;
     }
   }
 
-  const firstWeddingResult = await db
-    .select()
-    .from(weddings)
-    .where(eq(weddings.userId, userId))
-    .limit(1);
+  // 3. Otherwise, fallback to the first allowed wedding ID
+  let fallbackWedding: typeof weddings.$inferSelect | null = null;
+  if (role === "admin") {
+    const [w] = await db
+      .select()
+      .from(weddings)
+      .where(eq(weddings.userId, userId))
+      .limit(1);
+    if (w) fallbackWedding = w;
+  } else {
+    if (weddingAccess !== "all") {
+      const [w] = await db
+        .select()
+        .from(weddings)
+        .where(eq(weddings.id, weddingAccess))
+        .limit(1);
+      if (w) fallbackWedding = w;
+    } else if (allowedAdminUserId) {
+      const [w] = await db
+        .select()
+        .from(weddings)
+        .where(eq(weddings.userId, allowedAdminUserId))
+        .limit(1);
+      if (w) fallbackWedding = w;
+    }
+  }
 
-  if (firstWeddingResult.length > 0) {
-    return firstWeddingResult[0];
+  if (fallbackWedding) {
+    return fallbackWedding;
   }
 
   return null;
@@ -60,7 +128,7 @@ export async function switchWeddingAction(weddingId: string) {
 }
 
 export async function ensureDefaultColumns(weddingId: string) {
-  const { kanbanColumns, tasks, ceremonies, weddingTraditions } = await import("@/db/schema");
+  const { kanbanColumns, tasks, ceremonies, weddingTraditions, cateringMenus } = await import("@/db/schema");
   
   let columnsList = await db
     .select()
@@ -284,6 +352,11 @@ export async function ensureDefaultColumns(weddingId: string) {
               endTime.setHours(r.endHour ?? 17, r.endMin ?? 0, 0, 0);
             }
 
+            const hasFood = r.name.toLowerCase().includes("reception") || 
+                            r.name.toLowerCase().includes("valima") || 
+                            r.name.toLowerCase().includes("pheras") ||
+                            r.name.toLowerCase().includes("feast");
+
             return {
               weddingId: weddingId,
               name: r.name,
@@ -291,9 +364,27 @@ export async function ensureDefaultColumns(weddingId: string) {
               startTime,
               endTime,
               location: r.location || location || "",
+              isFoodServed: hasFood,
             };
           });
-          await tx.insert(ceremonies).values(ritualsToInsert);
+          const insertedCeremonies = await tx.insert(ceremonies).values(ritualsToInsert).returning();
+
+          // Seed a default catering menu for each ceremony where food is served
+          for (const ritual of insertedCeremonies) {
+            if (ritual.isFoodServed) {
+              await tx.insert(cateringMenus).values({
+                weddingId: weddingId,
+                ceremonyId: ritual.id,
+                cuisine: "Traditional Buffet",
+                guestCount: wedding.guestCount || 150,
+                appetizers: "Assorted Starters",
+                mainCourses: "Signature Main Course Dishes, Breads, and Rice",
+                desserts: "Traditional Dessert Specialties",
+                drinks: "Juices, Mocktails, and Water",
+                notes: "Default seeded menu. Edit this to customize your menu.",
+              });
+            }
+          }
         }
       });
     }

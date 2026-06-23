@@ -8,16 +8,24 @@ import * as React from "react";
 
 interface CreateUserFormClientProps {
   createAction: (prevState: { success?: boolean; error?: string } | null, formData: FormData) => Promise<{ success?: boolean; error?: string }>;
+  adminPersona?: string;
+  weddings?: any[];
 }
 
-export default function CreateUserFormClient({ createAction }: CreateUserFormClientProps) {
+export default function CreateUserFormClient({ 
+  createAction,
+  adminPersona = "diy",
+  weddings = [],
+}: CreateUserFormClientProps) {
   const formRef = React.useRef<HTMLFormElement>(null);
+  const [role, setRole] = React.useState("user");
 
   async function handleSubmitAction(prevState: { success?: boolean; error?: string } | null, formData: FormData) {
     const res = await createAction(prevState, formData);
     if (res?.success) {
       if (formRef.current) {
         formRef.current.reset();
+        setRole("user");
       }
     }
     return res;
@@ -80,12 +88,45 @@ export default function CreateUserFormClient({ createAction }: CreateUserFormCli
         <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
           Assign Role
         </label>
-        <Select name="role" required disabled={isPending}>
+        <Select 
+          name="role" 
+          value={role} 
+          onChange={(e) => setRole(e.target.value)} 
+          required 
+          disabled={isPending}
+        >
           <option value="user">User</option>
-          <option value="client">Client</option>
+          {adminPersona !== "diy" && <option value="client">Client</option>}
           <option value="admin">Admin</option>
         </Select>
       </div>
+
+      {role !== "admin" && (
+        <div>
+          <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
+            Assigned Wedding(s)
+          </label>
+          {role === "client" ? (
+            <Select name="weddingAccess" required disabled={isPending}>
+              <option value="">Select a Wedding</option>
+              {weddings.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.partnerA} & {w.partnerB}
+                </option>
+              ))}
+            </Select>
+          ) : (
+            <Select name="weddingAccess" defaultValue="all" required disabled={isPending}>
+              <option value="all">All Weddings</option>
+              {weddings.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.partnerA} & {w.partnerB}
+                </option>
+              ))}
+            </Select>
+          )}
+        </div>
+      )}
 
       {state?.error && (
         <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">

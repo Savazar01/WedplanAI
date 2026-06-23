@@ -58,7 +58,7 @@ export default function SignupFormClient({ signupAction }: SignupFormClientProps
         </label>
         <Select 
           name="persona" 
-          defaultValue="diy"
+          defaultValue="wedding_planner"
           disabled={isPending}
           required
         >

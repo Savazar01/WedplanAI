@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { weddings, tasks, rituals, guests, vendors, kanbanColumns } from "@/db/schema";
+import { weddings, tasks, rituals, guests, vendors, kanbanColumns, cateringMenus } from "@/db/schema";
 
 export async function seedSampleWedding(userId: string): Promise<string> {
   const weddingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -64,6 +64,99 @@ export async function seedSampleWedding(userId: string): Promise<string> {
     const doneColId = doneCol.id;
 
     const now = new Date();
+
+    const location = "Udaipur, Rajasthan";
+
+    const mehndiStart = new Date(weddingDate);
+    mehndiStart.setDate(mehndiStart.getDate() - 2);
+    mehndiStart.setHours(14, 0, 0, 0);
+    const mehndiEnd = new Date(mehndiStart);
+    mehndiEnd.setHours(18, 0, 0, 0);
+
+    const haldiStart = new Date(weddingDate);
+    haldiStart.setDate(haldiStart.getDate() - 1);
+    haldiStart.setHours(10, 0, 0, 0);
+    const haldiEnd = new Date(haldiStart);
+    haldiEnd.setHours(13, 0, 0, 0);
+
+    const sangeetStart = new Date(weddingDate);
+    sangeetStart.setDate(sangeetStart.getDate() - 1);
+    sangeetStart.setHours(18, 0, 0, 0);
+    const sangeetEnd = new Date(sangeetStart);
+    sangeetEnd.setHours(22, 0, 0, 0);
+
+    const pherasStart = new Date(weddingDate);
+    pherasStart.setHours(10, 0, 0, 0);
+    const pherasEnd = new Date(pherasStart);
+    pherasEnd.setHours(14, 0, 0, 0);
+
+    const receptionStart = new Date(weddingDate);
+    receptionStart.setHours(19, 0, 0, 0);
+    const receptionEnd = new Date(receptionStart);
+    receptionEnd.setHours(23, 0, 0, 0);
+
+    const [mehndi, haldi, sangeet, pheras, reception] = await tx.insert(rituals).values([
+      {
+        weddingId: id,
+        name: "Mehndi",
+        description: "Traditional henna ceremony with family and friends",
+        startTime: mehndiStart,
+        endTime: mehndiEnd,
+        location,
+        isCustom: false,
+      },
+      {
+        weddingId: id,
+        name: "Haldi",
+        description: "Traditional turmeric cleansing ceremony",
+        startTime: haldiStart,
+        endTime: haldiEnd,
+        location,
+        isCustom: false,
+      },
+      {
+        weddingId: id,
+        name: "Sangeet",
+        description: "Musical celebration with dance performances",
+        startTime: sangeetStart,
+        endTime: sangeetEnd,
+        location,
+        isCustom: false,
+      },
+      {
+        weddingId: id,
+        name: "Mandap Pheras",
+        description: "Main Vedic wedding ceremony around the holy fire",
+        startTime: pherasStart,
+        endTime: pherasEnd,
+        location,
+        isCustom: false,
+        isFoodServed: true,
+      },
+      {
+        weddingId: id,
+        name: "Reception",
+        description: "Grand wedding dinner reception",
+        startTime: receptionStart,
+        endTime: receptionEnd,
+        location,
+        isCustom: false,
+        isFoodServed: true,
+      },
+    ]).returning();
+
+    // Insert catering menu
+    const [sampleMenu] = await tx.insert(cateringMenus).values({
+      weddingId: id,
+      ceremonyId: reception.id,
+      cuisine: "North Indian Royal Buffet",
+      guestCount: 250,
+      appetizers: "Paneer Tikka, Hara Bhara Kebab, Chicken Tikka",
+      mainCourses: "Butter Chicken, Dal Makhani, Paneer Butter Masala, Assorted Naans, Biryani",
+      desserts: "Gulab Jamun with Vanilla Ice Cream, Moong Dal Halwa",
+      drinks: "Virgin Mojitos, Masala Cola, Mineral Water",
+      notes: "10% purely vegan options required. Jain counter to be set up separately.",
+    }).returning();
 
     await tx.insert(tasks).values([
       {
@@ -145,6 +238,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         isCustom: false,
         position: 7,
         dueDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000),
+        cateringMenuId: sampleMenu.id,
       },
       {
         weddingId: id,
@@ -165,84 +259,6 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         isCustom: false,
         position: 9,
         dueDate: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000),
-      },
-    ]);
-
-    const location = "Udaipur, Rajasthan";
-
-    const mehndiStart = new Date(weddingDate);
-    mehndiStart.setDate(mehndiStart.getDate() - 2);
-    mehndiStart.setHours(14, 0, 0, 0);
-    const mehndiEnd = new Date(mehndiStart);
-    mehndiEnd.setHours(18, 0, 0, 0);
-
-    const haldiStart = new Date(weddingDate);
-    haldiStart.setDate(haldiStart.getDate() - 1);
-    haldiStart.setHours(10, 0, 0, 0);
-    const haldiEnd = new Date(haldiStart);
-    haldiEnd.setHours(13, 0, 0, 0);
-
-    const sangeetStart = new Date(weddingDate);
-    sangeetStart.setDate(sangeetStart.getDate() - 1);
-    sangeetStart.setHours(18, 0, 0, 0);
-    const sangeetEnd = new Date(sangeetStart);
-    sangeetEnd.setHours(22, 0, 0, 0);
-
-    const pherasStart = new Date(weddingDate);
-    pherasStart.setHours(10, 0, 0, 0);
-    const pherasEnd = new Date(pherasStart);
-    pherasEnd.setHours(14, 0, 0, 0);
-
-    const receptionStart = new Date(weddingDate);
-    receptionStart.setHours(19, 0, 0, 0);
-    const receptionEnd = new Date(receptionStart);
-    receptionEnd.setHours(23, 0, 0, 0);
-
-    await tx.insert(rituals).values([
-      {
-        weddingId: id,
-        name: "Mehndi",
-        description: "Traditional henna ceremony with family and friends",
-        startTime: mehndiStart,
-        endTime: mehndiEnd,
-        location,
-        isCustom: false,
-      },
-      {
-        weddingId: id,
-        name: "Haldi",
-        description: "Traditional turmeric cleansing ceremony",
-        startTime: haldiStart,
-        endTime: haldiEnd,
-        location,
-        isCustom: false,
-      },
-      {
-        weddingId: id,
-        name: "Sangeet",
-        description: "Musical celebration with dance performances",
-        startTime: sangeetStart,
-        endTime: sangeetEnd,
-        location,
-        isCustom: false,
-      },
-      {
-        weddingId: id,
-        name: "Mandap Pheras",
-        description: "Main Vedic wedding ceremony around the holy fire",
-        startTime: pherasStart,
-        endTime: pherasEnd,
-        location,
-        isCustom: false,
-      },
-      {
-        weddingId: id,
-        name: "Reception",
-        description: "Grand wedding dinner reception",
-        startTime: receptionStart,
-        endTime: receptionEnd,
-        location,
-        isCustom: false,
       },
     ]);
 

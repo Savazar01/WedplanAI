@@ -14,6 +14,7 @@ export interface UpdateProfileInput {
   country?: string;
   pincode?: string;
   languages?: string;
+  persona?: string;
 }
 
 export async function updateProfileAction(input: UpdateProfileInput) {
@@ -22,25 +23,32 @@ export async function updateProfileAction(input: UpdateProfileInput) {
     return { error: "Unauthorized" };
   }
 
-  const { name, street, city, state, country, pincode, languages } = input;
+  const { name, street, city, state, country, pincode, languages, persona } = input;
 
   if (!name || name.trim().length === 0) {
     return { error: "Name is required." };
   }
 
   try {
+    const isAdmin = session.user.role === "admin";
+    const updateData: Record<string, any> = {
+      name: name.trim(),
+      street: street?.trim() || null,
+      city: city?.trim() || null,
+      state: state?.trim() || null,
+      country: country?.trim() || null,
+      pincode: pincode?.trim() || null,
+      languages: languages?.trim() || null,
+      updatedAt: new Date(),
+    };
+
+    if (isAdmin && persona) {
+      updateData.persona = persona;
+    }
+
     await db
       .update(users)
-      .set({
-        name: name.trim(),
-        street: street?.trim() || null,
-        city: city?.trim() || null,
-        state: state?.trim() || null,
-        country: country?.trim() || null,
-        pincode: pincode?.trim() || null,
-        languages: languages?.trim() || null,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(users.id, session.user.id));
 
     revalidatePath("/dashboard/profile");

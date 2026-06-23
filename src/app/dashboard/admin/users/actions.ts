@@ -37,6 +37,7 @@ export async function createSubsequentUserAction(prevState: { success?: boolean;
     }
 
     const wedding = await getActiveWedding(session.user.id);
+    const weddingAccess = (formData.get("weddingAccess") as string) || "all";
 
     const result = await auth.api.signUpEmail({
       body: {
@@ -55,7 +56,10 @@ export async function createSubsequentUserAction(prevState: { success?: boolean;
       .set({ 
         role: role,
         persona: persona,
-        weddingId: (role === "client" || role === "user") ? (wedding?.id || null) : null
+        weddingAccess: weddingAccess,
+        weddingId: (role === "client" || role === "user")
+          ? (weddingAccess === "all" ? (wedding?.id || null) : weddingAccess)
+          : null
       })
       .where(eq(users.id, result.user.id));
 

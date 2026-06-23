@@ -15,6 +15,7 @@ export const users = pgTable("user", {
   pincode: text("pincode"),
   languages: text("languages"),
   persona: text("persona").default("diy").notNull(),
+  weddingAccess: text("wedding_access").default("all").notNull(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   weddingId: uuid("wedding_id").references((): any => weddings.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -118,6 +119,22 @@ export const kanbanColumns = pgTable("kanban_column", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const cateringMenus = pgTable("catering_menu", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  ceremonyId: uuid("ceremony_id").notNull().references(() => ceremonies.id, { onDelete: "cascade" }),
+  vendorId: uuid("vendor_id").references(() => vendors.id, { onDelete: "set null" }),
+  cuisine: text("cuisine"),
+  guestCount: integer("guest_count").default(0).notNull(),
+  appetizers: text("appetizers"),
+  mainCourses: text("main_courses"),
+  desserts: text("desserts"),
+  drinks: text("drinks"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const tasks = pgTable("task", {
   id: uuid("id").defaultRandom().primaryKey(),
   weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
@@ -132,6 +149,7 @@ export const tasks = pgTable("task", {
   ceremonyId: uuid("ceremony_id").references(() => ceremonies.id, { onDelete: "set null" }),
   assignedUserId: text("assigned_user_id").references(() => users.id, { onDelete: "set null" }),
   categoryData: text("category_data"),
+  cateringMenuId: uuid("catering_menu_id").references((): any => cateringMenus.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

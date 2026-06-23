@@ -47,6 +47,8 @@ export default async function ProfilePage() {
           initialCountry={profile?.country}
           initialPincode={profile?.pincode}
           initialLanguages={profile?.languages}
+          isAdmin={session.user.role === "admin"}
+          initialPersona={profile?.persona || session.user.persona || "diy"}
         />
       </div>
 

@@ -307,6 +307,19 @@ export default function EventItineraryOnly({ initialRituals, teamMembers = [] }:
                 </div>
 
                 <div className="flex items-center gap-2 self-end sm:self-start">
+                  {r.isFoodServed && (
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/dashboard/menu-plan?ceremonyId=${r.id}`);
+                      }} 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-[#10b981] font-bold text-xs hover:text-[#059669]"
+                    >
+                      Plan Menu
+                    </Button>
+                  )}
                   <Button onClick={(e) => openEditModal(r, e)} variant="ghost" size="sm" className="text-[#6771ab] font-bold text-xs">
                     Edit
                   </Button>

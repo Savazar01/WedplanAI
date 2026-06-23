@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getProfileAction } from "@/app/actions/profile";
 import ChangePasswordForm from "./ChangePasswordForm";
 import ProfileForm from "./ProfileForm";
+import ThemePreferences from "./ThemePreferences";
 
 export default async function ProfilePage() {
   const session = await getServerSession();
@@ -51,6 +52,9 @@ export default async function ProfilePage() {
           initialPersona={profile?.persona || session.user.persona || "diy"}
         />
       </div>
+
+      {/* Theme Preferences */}
+      <ThemePreferences />
 
       {/* Change Password */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">

@@ -152,24 +152,26 @@ export default function SidebarShell({
     return (
       <div className="flex flex-col h-full overflow-y-auto min-h-0">
         {/* Brand Header */}
-        <div className={`mb-6 px-2 ${showCollapsed ? "flex justify-center" : ""}`}>
-          <Link href="/dashboard" className="flex items-center" onClick={() => isMobile && setIsMobileMenuOpen(false)}>
-            {showCollapsed ? (
-              <span className="text-2xl" title="Savazar Dashboard">💒</span>
-            ) : (
-              <img
-                src={logoSource}
-                alt="Savazar.com Logo"
-                className="h-10 w-auto object-contain"
-                onError={(e) => {
-                  if (e.currentTarget.src !== DEFAULT_LOGO) {
-                    e.currentTarget.src = DEFAULT_LOGO;
-                  }
-                }}
-              />
-            )}
-          </Link>
-        </div>
+        {!isMobile && (
+          <div className={`mb-6 px-2 ${showCollapsed ? "flex justify-center" : ""}`}>
+            <Link href="/dashboard" className="flex items-center" onClick={() => isMobile && setIsMobileMenuOpen(false)}>
+              {showCollapsed ? (
+                <span className="text-2xl" title="Savazar Dashboard">💒</span>
+              ) : (
+                <img
+                  src={logoSource}
+                  alt="Savazar.com Logo"
+                  className="h-10 w-auto object-contain"
+                  onError={(e) => {
+                    if (e.currentTarget.src !== DEFAULT_LOGO) {
+                      e.currentTarget.src = DEFAULT_LOGO;
+                    }
+                  }}
+                />
+              )}
+            </Link>
+          </div>
+        )}
 
         {/* Wedding Switcher */}
         <div className="mb-6">
@@ -456,19 +458,7 @@ export default function SidebarShell({
             />
             {/* Drawer */}
             <aside className="fixed inset-y-0 left-0 w-64 bg-white shadow-2xl p-5 flex flex-col z-50 animate-in slide-in-from-left duration-200">
-              <div className="flex items-center justify-between mb-6">
-                <Link href="/dashboard" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
-                  <img
-                    src={logoSource}
-                    alt="Savazar Logo"
-                    className="h-8 w-auto object-contain"
-                    onError={(e) => {
-                      if (e.currentTarget.src !== DEFAULT_LOGO) {
-                        e.currentTarget.src = DEFAULT_LOGO;
-                      }
-                    }}
-                  />
-                </Link>
+              <div className="flex items-center justify-end mb-6">
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-1 rounded-xl hover:bg-slate-100 text-slate-500"

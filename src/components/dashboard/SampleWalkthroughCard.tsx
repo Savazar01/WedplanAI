@@ -291,24 +291,6 @@ export default function SampleWalkthroughCard({
                 )}
               </Button>
             </div>
-
-            <div className="flex items-center gap-1">
-              {steps.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentStep(index);
-                    router.push(steps[index].path);
-                  }}
-                  className={`h-1.5 transition-all duration-300 rounded-full cursor-pointer ${
-                    index === currentStep 
-                      ? "w-4 bg-[#6771ab]" 
-                      : "w-1.5 bg-slate-200 hover:bg-slate-300"
-                  }`}
-                  aria-label={`Go to step ${index + 1}`}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -418,24 +400,6 @@ export default function SampleWalkthroughCard({
                   <>Next <ArrowRight className="w-3.5 h-3.5" /></>
                 )}
               </Button>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {steps.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setCurrentStep(index);
-                    router.push(steps[index].path);
-                  }}
-                  className={`h-2 transition-all duration-300 rounded-full cursor-pointer ${
-                    index === currentStep 
-                      ? "w-6 bg-[#6771ab]" 
-                      : "w-2 bg-slate-200 hover:bg-slate-300"
-                  }`}
-                  aria-label={`Go to step ${index + 1}`}
-                />
-              ))}
             </div>
           </div>
         </div>

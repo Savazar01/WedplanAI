@@ -402,6 +402,9 @@ export async function updateWeddingAppearanceAction(
     themePrimary: string;
     themeSecondary: string;
     themeBackground: string;
+    themeDarkPrimary: string;
+    themeDarkSecondary: string;
+    themeDarkBackground: string;
     logoUrl?: string | null;
     logoData?: string | null;
   }
@@ -426,6 +429,9 @@ export async function updateWeddingAppearanceAction(
       themePrimary: data.themePrimary,
       themeSecondary: data.themeSecondary,
       themeBackground: data.themeBackground,
+      themeDarkPrimary: data.themeDarkPrimary,
+      themeDarkSecondary: data.themeDarkSecondary,
+      themeDarkBackground: data.themeDarkBackground,
       logoUrl: data.logoUrl || null,
       logoData: data.logoData || null,
       updatedAt: new Date(),

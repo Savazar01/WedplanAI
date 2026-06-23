@@ -59,3 +59,111 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* Premium Dark Theme Overrides */
+.dark {
+  --background: var(--color-background);
+  --foreground: #f8fafc;
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: var(--color-background) !important;
+  color: #f8fafc !important;
+}
+
+.dark .bg-white {
+  background-color: var(--color-surface) !important;
+}
+
+.dark .bg-\[\#f8fafc\] {
+  background-color: var(--color-background) !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-200\/80,
+.dark .border-slate-200\/60,
+.dark .border-slate-200\/50,
+.dark .border-slate-100,
+.dark .border-t,
+.dark .border-b,
+.dark .border-r,
+.dark .border-l {
+  border-color: var(--color-outline) !important;
+}
+
+.dark .text-slate-800,
+.dark .text-slate-900,
+.dark .text-slate-700,
+.dark .text-slate-800\/80 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+.dark .text-\[\#2d336b\],
+.dark .text-\[\#3d4580\] {
+  color: #e2e8f0 !important;
+}
+
+.dark .bg-\[\#eef0f7\],
+.dark .bg-\[\#eef0f7\]\/40 {
+  background-color: #242f47 !important;
+}
+
+.dark .hover\:bg-\[\#f0f1fa\]:hover {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-\[\#fefce8\]\/60 {
+  background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: var(--color-surface) !important;
+  color: #f8fafc !important;
+  border-color: var(--color-outline) !important;
+}
+
+.dark select option {
+  background-color: var(--color-surface) !important;
+  color: #f8fafc !important;
+}
+
+.dark .fixed.inset-0.bg-white,
+.dark [role="dialog"],
+.dark .bg-slate-50,
+.dark .bg-slate-50\/50 {
+  background-color: var(--color-surface) !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: var(--color-background) !important;
+}
+
+.dark img[src*="cropped-Transparent_Image_2"],
+.dark img[alt*="Savazar"],
+.dark .logo-img {
+  filter: invert(1) brightness(1.2) !important;
+}
+
+/* Handle walkthrough gradient panels on dashboard */
+.dark .from-violet-50\/60 {
+  --tw-gradient-from: rgba(23, 29, 47, 0.6) !important;
+}
+.dark .to-rose-50\/40 {
+  --tw-gradient-to: rgba(23, 29, 47, 0.4) !important;
+}
+.dark .bg-gradient-to-r {
+  background-image: linear-gradient(to right, rgba(23, 29, 47, 0.6), rgba(36, 47, 71, 0.4)) !important;
+}
+

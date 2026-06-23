@@ -17,6 +17,9 @@ interface Wedding {
   themePrimary: string;
   themeSecondary: string;
   themeBackground: string;
+  themeDarkPrimary: string;
+  themeDarkSecondary: string;
+  themeDarkBackground: string;
   logoUrl?: string | null;
   logoData?: string | null;
 }
@@ -39,11 +42,15 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
   const [themePrimary, setThemePrimary] = React.useState(wedding.themePrimary || "#6771ab");
   const [themeSecondary, setThemeSecondary] = React.useState(wedding.themeSecondary || "#8b93c5");
   const [themeBackground, setThemeBackground] = React.useState(wedding.themeBackground || "#f8fafc");
+  const [themeDarkPrimary, setThemeDarkPrimary] = React.useState(wedding.themeDarkPrimary || "#808bc6");
+  const [themeDarkSecondary, setThemeDarkSecondary] = React.useState(wedding.themeDarkSecondary || "#9fa7d6");
+  const [themeDarkBackground, setThemeDarkBackground] = React.useState(wedding.themeDarkBackground || "#0b0f19");
   const [logoUrl, setLogoUrl] = React.useState(wedding.logoUrl || "");
   const [logoData, setLogoData] = React.useState(wedding.logoData || "");
   const [logoName, setLogoName] = React.useState("");
 
   const [isPending, setIsPending] = React.useState(false);
+  const [previewMode, setPreviewMode] = React.useState<"light" | "dark">("light");
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
   const [prevWeddingId, setPrevWeddingId] = React.useState(wedding.id);
 
@@ -53,6 +60,9 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
     setThemePrimary(wedding.themePrimary || "#6771ab");
     setThemeSecondary(wedding.themeSecondary || "#8b93c5");
     setThemeBackground(wedding.themeBackground || "#f8fafc");
+    setThemeDarkPrimary(wedding.themeDarkPrimary || "#808bc6");
+    setThemeDarkSecondary(wedding.themeDarkSecondary || "#9fa7d6");
+    setThemeDarkBackground(wedding.themeDarkBackground || "#0b0f19");
     setLogoUrl(wedding.logoUrl || "");
     setLogoData(wedding.logoData || "");
   }
@@ -78,6 +88,9 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
         themePrimary,
         themeSecondary,
         themeBackground,
+        themeDarkPrimary,
+        themeDarkSecondary,
+        themeDarkBackground,
         logoUrl: logoUrl || null,
         logoData: logoData || null,
       });
@@ -144,13 +157,13 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
 
               {/* Color Palette Section */}
               <div className="space-y-4 pt-4 border-t border-slate-100">
-                <h4 className="text-sm font-bold text-slate-700">Brand Color Palette</h4>
+                <h4 className="text-sm font-bold text-slate-700">Brand Color Palette (Light Theme)</h4>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Primary Color */}
                   <div className="space-y-1">
                     <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Primary Color
+                      Primary Color (Light)
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -176,7 +189,7 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                   {/* Secondary Color */}
                   <div className="space-y-1">
                     <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Secondary Color
+                      Secondary Color (Light)
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -202,7 +215,7 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                   {/* Background Color */}
                   <div className="space-y-1">
                     <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Background Color
+                      Background Color (Light)
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -219,6 +232,91 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                         disabled={isPending}
                         className="font-mono text-sm"
                         placeholder="#f8fafc"
+                        pattern="^#[0-9A-Fa-f]{6}$"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dark Theme Color Palette Section */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <h4 className="text-sm font-bold text-slate-700">Brand Color Palette (Dark Theme)</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Primary Color (Dark) */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      Primary Color (Dark)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={themeDarkPrimary}
+                        onChange={(e) => setThemeDarkPrimary(e.target.value)}
+                        disabled={isPending}
+                        className="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-1 bg-white"
+                      />
+                      <Input
+                        type="text"
+                        value={themeDarkPrimary}
+                        onChange={(e) => setThemeDarkPrimary(e.target.value)}
+                        disabled={isPending}
+                        className="font-mono text-sm"
+                        placeholder="#808bc6"
+                        pattern="^#[0-9A-Fa-f]{6}$"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Secondary Color (Dark) */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      Secondary Color (Dark)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={themeDarkSecondary}
+                        onChange={(e) => setThemeDarkSecondary(e.target.value)}
+                        disabled={isPending}
+                        className="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-1 bg-white"
+                      />
+                      <Input
+                        type="text"
+                        value={themeDarkSecondary}
+                        onChange={(e) => setThemeDarkSecondary(e.target.value)}
+                        disabled={isPending}
+                        className="font-mono text-sm"
+                        placeholder="#9fa7d6"
+                        pattern="^#[0-9A-Fa-f]{6}$"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Background Color (Dark) */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
+                      Background Color (Dark)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={themeDarkBackground}
+                        onChange={(e) => setThemeDarkBackground(e.target.value)}
+                        disabled={isPending}
+                        className="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-1 bg-white"
+                      />
+                      <Input
+                        type="text"
+                        value={themeDarkBackground}
+                        onChange={(e) => setThemeDarkBackground(e.target.value)}
+                        disabled={isPending}
+                        className="font-mono text-sm"
+                        placeholder="#0b0f19"
                         pattern="^#[0-9A-Fa-f]{6}$"
                         required
                       />
@@ -307,43 +405,84 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
         {/* Live Preview Column */}
         <div className="lg:col-span-1 space-y-6">
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">App Preview</h4>
+            <div className="flex items-center justify-between px-1">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">App Preview</h4>
+              <div className="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-semibold border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode("light")}
+                  className={`px-2 py-1 rounded-md transition-all ${
+                    previewMode === "light"
+                      ? "bg-white text-slate-800 shadow-xs"
+                      : "text-slate-400 hover:text-slate-600"
+                  }`}
+                >
+                  Light
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode("dark")}
+                  className={`px-2 py-1 rounded-md transition-all ${
+                    previewMode === "dark"
+                      ? "bg-slate-800 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-600"
+                  }`}
+                >
+                  Dark
+                </button>
+              </div>
+            </div>
+
             <Card 
-              className="p-5 border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between min-h-[280px] rounded-2xl"
+              className={`p-5 overflow-hidden shadow-sm flex flex-col justify-between min-h-[280px] rounded-2xl border transition-colors duration-300 ${
+                previewMode === "dark" 
+                  ? "border-[#242f47]" 
+                  : "border-slate-200"
+              }`}
               style={{ 
-                backgroundColor: themeBackground, 
+                backgroundColor: previewMode === "dark" ? themeDarkBackground : themeBackground, 
                 fontFamily: `"${themeFont}", sans-serif` 
               }}
             >
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200/50">
+                <div className={`flex items-center justify-between pb-2 border-b transition-colors duration-300 ${
+                  previewMode === "dark" ? "border-slate-800/80" : "border-slate-200/50"
+                }`}>
                   {logoData ? (
                     <img
                       src={logoData}
                       alt="Logo Preview"
                       className="max-h-6 max-w-[100px] object-contain"
+                      style={previewMode === "dark" && !wedding.logoData ? { filter: "invert(1) brightness(1.2)" } : undefined}
                     />
                   ) : logoUrl ? (
                     <img
                       src={logoUrl}
                       alt="Logo Preview"
                       className="max-h-6 max-w-[100px] object-contain"
+                      style={previewMode === "dark" && !wedding.logoUrl ? { filter: "invert(1) brightness(1.2)" } : undefined}
                     />
                   ) : (
-                    <span className="text-xs font-bold" style={{ color: themePrimary }}>
+                    <span className="text-xs font-bold" style={{ color: previewMode === "dark" ? themeDarkPrimary : themePrimary }}>
                       💒 Wedding App
                     </span>
                   )}
-                  <span className="text-[9px] uppercase font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-sm">
+                  <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-sm transition-colors duration-300 ${
+                    previewMode === "dark" ? "text-slate-400 bg-slate-800" : "text-slate-400 bg-slate-100"
+                  }`}>
                     Dashboard
                   </span>
                 </div>
 
                 <div className="space-y-2">
-                  <h5 className="text-sm font-extrabold text-slate-800">
+                  <h5 className={`text-sm font-extrabold transition-colors duration-300 ${
+                    previewMode === "dark" ? "text-slate-100" : "text-slate-800"
+                  }`}>
                     Guest Invitation Manager
                   </h5>
-                  <p className="text-[10px] text-slate-500">
+                  <p className={`text-[10px] leading-relaxed transition-colors duration-300 ${
+                    previewMode === "dark" ? "text-slate-400" : "text-slate-500"
+                  }`}>
                     Configure your guest lists, print customized RSVP cards, and monitor attendance updates.
                   </p>
                 </div>
@@ -352,17 +491,17 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
               <div className="flex gap-2 pt-4 mt-auto">
                 <button
                   type="button"
-                  className="flex-1 text-[10px] font-bold py-2 px-3 rounded-lg text-white"
-                  style={{ backgroundColor: themePrimary }}
+                  className="flex-1 text-[10px] font-bold py-2 px-3 rounded-lg text-white transition-all"
+                  style={{ backgroundColor: previewMode === "dark" ? themeDarkPrimary : themePrimary }}
                 >
                   Primary Action
                 </button>
                 <button
                   type="button"
-                  className="flex-1 text-[10px] font-bold py-2 px-3 rounded-lg border bg-transparent"
+                  className="flex-1 text-[10px] font-bold py-2 px-3 rounded-lg border bg-transparent transition-all"
                   style={{ 
-                    borderColor: themeSecondary, 
-                    color: themeSecondary 
+                    borderColor: previewMode === "dark" ? themeDarkSecondary : themeSecondary, 
+                    color: previewMode === "dark" ? themeDarkSecondary : themeSecondary 
                   }}
                 >
                   Secondary

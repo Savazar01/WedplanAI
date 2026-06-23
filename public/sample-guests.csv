@@ -1,4 +1,4 @@
-name,email,phone,rsvpStatus,plusOneCount,dietaryRestrictions
-"Aarav Sharma",aarav@example.com,9876543210,pending,0,None
-"Diya Patel",diya@example.com,8765432109,attending,1,Vegetarian
-"Rohan Mehta",rohan@example.com,7654321098,declined,0,Gluten-free
+name,email,phone,rsvpStatus,plusOneCount,dietaryRestrictions,invited_ceremonies
+"Aarav Sharma",aarav@example.com,9876543210,pending,0,None,All
+"Diya Patel",diya@example.com,8765432109,attending,1,Vegetarian,"Mehendi,Wedding Ceremony"
+"Rohan Mehta",rohan@example.com,7654321098,declined,0,Gluten-free,All

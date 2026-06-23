@@ -399,9 +399,7 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
       if (res?.error) {
         setError(res.error);
       } else {
-        const text = `You're invited to our wedding!\n\nView all details and RSVP:\n${showcaseLink}?code=${inviteGuest.loginCode}\n\nWe can't wait to celebrate with you!`;
-        await navigator.clipboard.writeText(text);
-        setToast({ message: "Invitation copied and ceremonies saved!", type: "success" });
+        setToast({ message: "Guest ceremonies saved!", type: "success" });
         setInviteGuest(null);
         window.location.reload();
       }
@@ -411,6 +409,12 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyLink = () => {
+    if (!inviteGuest) return;
+    navigator.clipboard.writeText(`${showcaseLink}?code=${inviteGuest.loginCode}`);
+    setToast({ message: "Invitation link copied!", type: "success" });
   };
 
   return (
@@ -707,9 +711,9 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
             </div>
 
             <div className="p-3 bg-[#eef0f7] border border-[#6771ab]/20 rounded-xl">
-              <p className="text-xs font-semibold text-[#2d336b] mb-1">Preview message:</p>
-              <p className="text-xs text-slate-600 italic">
-                You&apos;re invited to our wedding! View the details at {showcaseLink} and your personal code <span className="font-mono font-bold">{inviteGuest.loginCode}</span> will be pre-filled automatically.
+              <p className="text-xs font-semibold text-[#2d336b] mb-1">📋 Personal Link (click Copy Link to share):</p>
+              <p className="text-xs text-slate-600 font-mono break-all">
+                {showcaseLink}?code={inviteGuest.loginCode}
               </p>
             </div>
 
@@ -721,17 +725,26 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
               <Button variant="ghost" onClick={() => setInviteGuest(null)} disabled={loading}>
                 Close
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleSaveSendInvitedCeremonies}
-                disabled={loading}
-              >
-                {loading ? "Saving..." : "Save & Copy Invite"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={handleCopyLink}
+                  className="border-slate-200"
+                >
+                  📋 Copy Link
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleSaveSendInvitedCeremonies}
+                  disabled={loading || sendInvitedCeremonies.length === 0}
+                >
+                  {loading ? "Saving..." : "Save Ceremonies"}
+                </Button>
+              </div>
             </div>
           </div>
         )}

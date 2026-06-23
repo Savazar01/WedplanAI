@@ -71,7 +71,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         columnId: todoColId,
         title: "Book Mehndi Artist",
         status: "todo",
-        category: "rituals",
+        category: "ceremonies",
         isCustom: false,
         position: 0,
         dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),

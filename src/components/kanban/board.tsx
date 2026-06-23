@@ -92,7 +92,7 @@ const DEFAULT_COLUMNS: Column[] = [
   }
 ];
 
-const categories = ["venue", "catering", "decor", "apparel", "invitations", "music", "rituals", "other"] as const;
+const categories = ["venue", "catering", "decor", "apparel", "invitations", "music", "ceremonies", "other"] as const;
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
   venue:       { bg: "bg-amber-100",   text: "text-amber-800",   dot: "bg-amber-400" },
@@ -101,7 +101,7 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; dot: string }>
   apparel:     { bg: "bg-indigo-100",  text: "text-indigo-800",  dot: "bg-indigo-400" },
   invitations: { bg: "bg-purple-100",  text: "text-purple-800",  dot: "bg-purple-400" },
   music:       { bg: "bg-pink-100",    text: "text-pink-800",    dot: "bg-pink-400" },
-  rituals:     { bg: "bg-violet-100",  text: "text-violet-800",  dot: "bg-violet-400" },
+  ceremonies:  { bg: "bg-violet-100",  text: "text-violet-800",  dot: "bg-violet-400" },
   other:       { bg: "bg-slate-100",   text: "text-slate-700",   dot: "bg-slate-400" },
 };
 
@@ -534,11 +534,11 @@ export default function PlanningBoard({
   };
 
   const isPredefinedCategory = (cat: string) => {
-    return ["venue", "catering", "decor", "apparel", "invitations", "music", "rituals"].includes(cat);
+    return ["venue", "catering", "decor", "apparel", "invitations", "music", "ceremonies"].includes(cat);
   };
 
   const getCategoryDisplayName = (cat: string) => {
-    if (cat === "rituals") return "Ceremonies";
+    if (cat === "ceremonies") return "Ceremonies";
     if (cat === "decor") return "Decoration";
     const dbCat = dbCategories.find(c => c.key === cat);
     if (dbCat) return dbCat.name;
@@ -888,7 +888,7 @@ export default function PlanningBoard({
               >
                 {categories.map((c) => (
                   <option key={c} value={c}>
-                    {c === "rituals" ? "Ceremonies" : (c === "decor" ? "Decoration" : c.charAt(0).toUpperCase() + c.slice(1))}
+                    {c === "ceremonies" ? "Ceremonies" : (c === "decor" ? "Decoration" : c.charAt(0).toUpperCase() + c.slice(1))}
                   </option>
                 ))}
                 {dbCategories.map((c) => (
@@ -1024,7 +1024,7 @@ export default function PlanningBoard({
               >
                 {categories.map((c) => (
                   <option key={c} value={c}>
-                    {c === "rituals" ? "Ceremonies" : (c === "decor" ? "Decoration" : c.charAt(0).toUpperCase() + c.slice(1))}
+                    {c === "ceremonies" ? "Ceremonies" : (c === "decor" ? "Decoration" : c.charAt(0).toUpperCase() + c.slice(1))}
                   </option>
                 ))}
                 {dbCategories.map((c) => (

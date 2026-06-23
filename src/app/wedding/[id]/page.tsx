@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { weddings, rituals } from "@/db/schema";
+import { weddings, rituals, guests } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Countdown from "@/components/wedding/countdown";
@@ -11,10 +11,12 @@ import DynamicTheme from "@/components/theme/DynamicTheme";
 // Define the async params type for Next.js 16
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ code?: string }>;
 }
 
-export default async function WeddingShowcasePage({ params }: PageProps) {
+export default async function WeddingShowcasePage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { code } = await searchParams;
 
   // Retrieve wedding details
   const weddingList = await db
@@ -35,6 +37,25 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
     .from(rituals)
     .where(eq(rituals.weddingId, wedding.id))
     .orderBy(rituals.startTime);
+
+  // If accessed via personal invitation link, filter ceremonies to only those the guest is invited to
+  let visibleRituals = dbRituals;
+  if (code) {
+    const guestList = await db
+      .select()
+      .from(guests)
+      .where(eq(guests.loginCode, code))
+      .limit(1);
+    if (guestList.length > 0) {
+      const guestRecord = guestList[0];
+      const invitedCeremonies = guestRecord.invitedCeremonies;
+      if (invitedCeremonies && invitedCeremonies !== "all") {
+        const invitedIds = invitedCeremonies.split(",").map((s: string) => s.trim());
+        visibleRituals = dbRituals.filter((r) => invitedIds.includes(r.id));
+      }
+      // if invitedCeremonies === "all" or null, show everything
+    }
+  }
 
   const weddingDateStr = formatDate(wedding.weddingDate);
 
@@ -139,12 +160,12 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
       {/* Itinerary Rituals Section */}
       <section className="w-full max-w-2xl mx-auto px-6 py-8">
         <h3 className="font-title text-2xl sm:text-3xl font-bold text-[var(--color-primary)] text-center mb-8 tracking-wide">
-          Wedding Itinerary
+          Wedding Program
         </h3>
 
-        {dbRituals.length > 0 ? (
+        {visibleRituals.length > 0 ? (
           <div className="relative border-l border-slate-200 ml-4 sm:ml-8 space-y-6">
-            {dbRituals.map((ritual) => {
+            {visibleRituals.map((ritual) => {
               const startStr = formatDateTime(ritual.startTime);
               const endStr = new Date(ritual.endTime);
               const endTimeStr = endStr.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -178,7 +199,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
           </div>
         ) : (
           <div className="bg-amber-50/40 border border-amber-200/40 rounded-2xl p-6 text-center text-sm text-slate-500 font-light font-sans">
-             ✨ Itinerary details are currently being finalized. Please check back soon! ✨
+             ✨ Program details are currently being finalized. Please check back soon! ✨
           </div>
         )}
       </section>
@@ -190,7 +211,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
           rsvpTitle={wedding.showcaseRsvpTitle}
           rsvpDescription={wedding.showcaseRsvpDescription}
           scrollToOnAttending="gift-registry"
-          ceremonies={dbRituals}
+          ceremonies={visibleRituals}
         />
       </section>
 

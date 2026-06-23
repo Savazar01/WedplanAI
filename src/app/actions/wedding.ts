@@ -164,7 +164,7 @@ export async function createWeddingAction(data: {
       } else {
         if (tradition === "hindu") {
           seedTasks = [
-            { title: "Book Mehndi Artist", category: "rituals" },
+            { title: "Book Mehndi Artist", category: "ceremonies" },
             { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
             { title: "Hire Dhol Players & DJ", category: "music" },
             { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
@@ -172,7 +172,7 @@ export async function createWeddingAction(data: {
           ];
         } else if (tradition === "muslim") {
           seedTasks = [
-            { title: "Coordinate with Qazi & Print Nikah Nama", category: "rituals" },
+            { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
             { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
             { title: "Select Stage & Floral Decorator", category: "decor" },
             { title: "Book Catering Menu for Valima Feast", category: "catering" },
@@ -180,7 +180,7 @@ export async function createWeddingAction(data: {
         } else if (tradition === "sikh") {
           seedTasks = [
             { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
-            { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "rituals" },
+            { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
             { title: "Finalize Langar or Catering Menu", category: "catering" },
             { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
           ];
@@ -193,7 +193,7 @@ export async function createWeddingAction(data: {
           ];
         } else if (tradition === "secular") {
           seedTasks = [
-            { title: "Select Secular Celebrant", category: "rituals" },
+            { title: "Select Secular Celebrant", category: "ceremonies" },
             { title: "Write Wedding Vows", category: "other" },
             { title: "Arrange Catering & Open Bar", category: "catering" },
             { title: "Coordinate Photographer/Videographer Contracts", category: "other" },

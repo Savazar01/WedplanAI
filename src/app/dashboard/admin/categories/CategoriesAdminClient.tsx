@@ -38,7 +38,7 @@ export default function CategoriesAdminClient({
   // Form fields
   const [key, setKey] = React.useState("");
   const [name, setName] = React.useState("");
-  const [followUpQuestions, setFollowUpQuestions] = React.useState("[]");
+  const [questionItems, setQuestionItems] = React.useState<Array<{ label: string; type: string }>>([]);
 
   // Sync state with props using a structural ID comparison to avoid raw reference check and render ref write.
   const [prevInitialCategories, setPrevInitialCategories] = React.useState(initialCategories);
@@ -53,7 +53,7 @@ export default function CategoriesAdminClient({
     setSelectedCategory(null);
     setKey("");
     setName("");
-    setFollowUpQuestions("[]");
+    setQuestionItems([]);
     setError(null);
     setIsFormOpen(true);
   };
@@ -62,7 +62,16 @@ export default function CategoriesAdminClient({
     setSelectedCategory(c);
     setKey(c.key);
     setName(c.name);
-    setFollowUpQuestions(c.followUpQuestions || "[]");
+    try {
+      const parsed = JSON.parse(c.followUpQuestions || "[]");
+      if (Array.isArray(parsed)) {
+        setQuestionItems(parsed.map((q: { label: string; type: string }) => ({ label: q.label, type: q.type })));
+      } else {
+        setQuestionItems([]);
+      }
+    } catch {
+      setQuestionItems([]);
+    }
     setError(null);
     setIsFormOpen(true);
   };
@@ -77,10 +86,20 @@ export default function CategoriesAdminClient({
     setLoading(true);
     setError(null);
 
+    const serialized = JSON.stringify(
+      questionItems
+        .filter((q) => q.label.trim() !== "")
+        .map((q, i) => ({
+          id: `q${i + 1}`,
+          label: q.label.trim(),
+          type: q.type,
+        }))
+    );
+
     const data = {
       key: key.toLowerCase().replace(/[^a-z0-9_-]/g, ""),
       name: name.trim(),
-      followUpQuestions: followUpQuestions.trim() || undefined,
+      followUpQuestions: serialized || undefined,
     };
 
     if (!data.key || !data.name) {
@@ -242,17 +261,49 @@ export default function CategoriesAdminClient({
             )}
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-              Follow-Up Questions (JSON Array)
-            </label>
-            <textarea
-              className="w-full h-48 p-3 text-xs font-mono border border-slate-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#6771ab] transition-all bg-slate-50"
-              value={followUpQuestions}
-              onChange={(e) => setFollowUpQuestions(e.target.value)}
-              placeholder='[{"id":"food_served","label":"Is food served?","type":"boolean"},{"id":"dress_code","label":"Dress code","type":"text"}]'
-            />
-            <p className="text-[10px] text-slate-400">JSON array of question definitions containing &quot;id&quot;, &quot;label&quot;, and &quot;type&quot; (e.g. &quot;text&quot;, &quot;boolean&quot;, &quot;number&quot;, etc.).</p>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Follow-Up Questions (Checklist)</label>
+            <p className="text-[10px] text-slate-400">Add checklist questions guests or planners answer when this category is selected on a task.</p>
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              {questionItems.map((q, idx) => (
+                <div key={idx} className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#6771ab] bg-white"
+                    placeholder="e.g. Is food served?"
+                    value={q.label}
+                    onChange={(e) => setQuestionItems(prev => prev.map((item, i) => i === idx ? { ...item, label: e.target.value } : item))}
+                  />
+                  <select
+                    className="px-2 py-2 text-xs border border-slate-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#6771ab] bg-white"
+                    value={q.type}
+                    onChange={(e) => setQuestionItems(prev => prev.map((item, i) => i === idx ? { ...item, type: e.target.value } : item))}
+                  >
+                    <option value="text">Text Answer</option>
+                    <option value="boolean">Yes / No</option>
+                    <option value="number">Number</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setQuestionItems(prev => prev.filter((_, i) => i !== idx))}
+                    className="text-red-400 hover:text-red-600 transition-colors text-base shrink-0"
+                    title="Remove question"
+                  >
+                    🗑
+                  </button>
+                </div>
+              ))}
+            </div>
+            {questionItems.length === 0 && (
+              <p className="text-xs text-slate-400 text-center py-2 italic">No questions yet. Click below to add some.</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setQuestionItems(prev => [...prev, { label: "", type: "text" }])}
+              className="w-full mt-1 py-2 text-xs font-semibold border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-[#6771ab] hover:text-[#6771ab] transition-colors"
+            >
+              + Add Question
+            </button>
           </div>
 
           <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">

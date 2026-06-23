@@ -142,7 +142,7 @@ export default async function LandingPage() {
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 ),
                 title: "Guest RSVP Management",
-                desc: "Track every guest with unique login codes for self-service RSVP. Monitor attending, declined, and pending counts in real time.",
+                desc: "Track every guest with unique login codes for self-service RSVP. Send ceremony-specific invitations and monitor attending/declined/pending counts per ceremony in real time.",
                 color: "from-amber-500/10 to-amber-50",
                 border: "border-amber-100",
                 iconBg: "bg-amber-100 text-amber-700",
@@ -162,7 +162,7 @@ export default async function LandingPage() {
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                 ),
                 title: "Public Showcase Website",
-                desc: "Every wedding gets a stunning public page with a live countdown, ceremony itinerary, and guest RSVP form. Share the link with your guests.",
+                desc: "Every wedding gets a stunning public page with a live countdown, Wedding Program ceremonies timeline, and guest RSVP form. Share the link with your guests.",
                 color: "from-sky-500/10 to-sky-50",
                 border: "border-sky-100",
                 iconBg: "bg-sky-100 text-sky-700",
@@ -172,7 +172,7 @@ export default async function LandingPage() {
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 ),
                 title: "Multi-User Team Collaboration",
-                desc: "Admins invite wedding coordinators and planners. Every team member gets secure access with role-based permissions, working together seamlessly.",
+                desc: "Invite wedding planners, coordinators, and clients. Supports Wedding Planner mode to manage multiple weddings with onboarding links and restricted couple views.",
                 color: "from-purple-500/10 to-purple-50",
                 border: "border-purple-100",
                 iconBg: "bg-purple-100 text-purple-700",

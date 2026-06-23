@@ -10,14 +10,17 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 
 | Feature | Description |
 |---|---|
-| 🗂️ **Wedding Task Planner** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition |
-| 📅 **Calendar** | Month-view calendar showing all ceremonies, rituals, and task due dates at a glance |
-| ⏱️ **Wedding Ceremony Planner** | Chronological timeline of ceremonies with precise timings — your wedding day run sheet |
-| 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP, bulk CSV import, and personal invitation links |
-| 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, outstanding balances, and dynamic currency by country |
-| 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, ceremony timeline, Gift Registry, and RSVP form |
+| 🗂️ **Wedding Task Planner** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition. Dynamic per-category follow-up question checklist |
+| 📅 **Calendar** | Month-view calendar showing all ceremonies and task due dates at a glance, with a ceremony/task filter bar |
+| ⏱️ **Wedding Ceremony Planner** | Chronological timeline of ceremonies with precise timings — date, dress code, food served, checklist, and assignee per ceremony |
+| 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP, bulk CSV import, ceremony-level guest invitations, `invited_ceremonies` CSV column, and personal invitation links that filter the Wedding Program by invited ceremonies |
+| 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, outstanding balances, dynamic currency by country, vendor-ceremony linking, and downloadable Budget & Vendors CSV Report |
+| 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, Wedding Program (filtered by guest's invited ceremonies via personal link), Gift Registry, and RSVP form |
 | 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
 | 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding and 7-step wizard to set up your first event |
+| 👤 **Personas** | Wedding Planner mode (manage multiple couples with client role + onboarding links) and DIY (Plan My Wedding) |
+| ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — no raw JSON |
+| 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` |
 
 ### Wedding Traditions Supported
 Hindu · Muslim · Sikh · Christian · Secular (and more)
@@ -218,7 +221,7 @@ src/
 │   ├── actions/            # Server Actions (guests, vendors, weddings, auth, calendar)
 │   ├── api/                # Route handlers
 │   │   ├── auth/           # Better Auth API handler
-│   │   └── v1/             # REST API v1 (columns, guests, rituals, tasks, vendors, wedding)
+│   │   └── v1/             # REST API v1 (columns, guests, ceremonies, tasks, vendors, wedding)
 │   ├── calendar/           # Public calendar view
 │   ├── dashboard/          # Authenticated dashboard pages
 │   │   ├── admin/          # Admin-only pages (appearance, api-keys, users)

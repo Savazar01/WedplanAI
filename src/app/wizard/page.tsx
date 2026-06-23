@@ -20,21 +20,21 @@ const traditions = [
 
 const defaultTasks = {
   hindu: [
-    { title: "Book Mehndi Artist", category: "rituals" },
+    { title: "Book Mehndi Artist", category: "ceremonies" },
     { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
     { title: "Hire Dhol Players & DJ", category: "music" },
     { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
     { title: "Select Mandap Decorator", category: "decor" },
   ],
   muslim: [
-    { title: "Coordinate with Qazi & Print Nikah Nama", category: "rituals" },
+    { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
     { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
     { title: "Select Stage & Floral Decorator", category: "decor" },
     { title: "Book Catering Menu for Valima Feast", category: "catering" },
   ],
   sikh: [
     { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
-    { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "rituals" },
+    { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
     { title: "Finalize Langar or Catering Menu", category: "catering" },
     { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
   ],
@@ -45,7 +45,7 @@ const defaultTasks = {
     { title: "Hire Wedding Choir & Organist", category: "music" },
   ],
   secular: [
-    { title: "Select Secular Celebrant", category: "rituals" },
+    { title: "Select Secular Celebrant", category: "ceremonies" },
     { title: "Write Wedding Vows", category: "other" },
     { title: "Arrange Catering & Open Bar", category: "catering" },
     { title: "Coordinate Photographer/Videographer Contracts", category: "other" },

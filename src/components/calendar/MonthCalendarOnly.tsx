@@ -359,7 +359,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
       apparel: "👗 Apparel & Styling",
       invitations: "✉️ Invitations & Stationery",
       music: "🎵 Music & Entertainment",
-      rituals: "✨ Ceremonies",
+      ceremonies: "✨ Ceremonies",
       other: "📋 Other Task",
     };
     return mapping[category] || category.toUpperCase();

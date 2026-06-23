@@ -24,7 +24,7 @@ const sections = [
       {
         title: "Dashboard Overview",
         content:
-          "The main dashboard shows your active wedding at a glance: task completion percentage (with To-Do, In Progress, Done, and Overdue counts), guest RSVP breakdown (attending, declined, pending), budget status with color-coded depletion bar and breach alerts, and a Build Showcase Page quick-navigation button with guidance on personal invitation links available in the Guests section.",
+          "The main dashboard shows your active wedding at a glance: task completion percentage (with To-Do, In Progress, Done, and Overdue counts), guest RSVP breakdown (attending, declined, pending — broken down per ceremony), budget status with color-coded depletion bar and breach alerts, and a Build Showcase Page quick-navigation button. The Guests section provides personal invitation links — each link has a separate 'Copy Link' button (to copy the URL) and a 'Save Ceremonies' button (to persist which ceremonies the guest is invited to).",
       },
     ],
   },
@@ -68,7 +68,7 @@ const sections = [
       {
         title: "Events",
         content:
-          "Each ritual from your Wedding Ceremony Planner appears as an event card on its scheduled date. Tasks with due dates are also shown. Click on any event to see details.",
+          "Each ceremony from your Wedding Ceremony Planner appears as an event card on its scheduled date. Tasks with due dates are also shown. Use the filter bar to toggle between showing only tasks, only ceremonies, or all events. Click on any event to see details.",
       },
     ],
   },
@@ -83,14 +83,14 @@ const sections = [
           "The Wedding Ceremony Planner page shows all your wedding ceremonies in chronological order with precise timings. This is your wedding day run sheet — each ceremony displays its name, date, time range, and location.",
       },
       {
-        title: "Adding Rituals",
+        title: "Adding Ceremonies",
         content:
-          "Click 'Add Ceremony' to add a new ceremony or event. Provide the name, date, start time, end time, and location. Dates are formatted as DD-Month-YYYY (e.g., 26-June-2026).",
+          "Click 'Add Ceremony' to add a new ceremony. Provide the name, date, start time, end time, location, dress code, whether food is served, and an optional assignee. You can also add checklist items to each ceremony to track preparation tasks.",
       },
       {
-        title: "Editing Rituals",
+        title: "Editing Ceremonies",
         content:
-          "Click the edit icon on any ritual to update its details — change the time, date, or location as your planning evolves.",
+          "Click the edit icon on any ceremony to update its details — change the time, date, dress code, location, or assignee as your planning evolves.",
       },
     ],
   },
@@ -112,12 +112,12 @@ const sections = [
       {
         title: "CSV Bulk Import",
         content:
-          "Use the CSV import feature to add hundreds of guests at once. Download the template, populate it with your guest data, and upload. The system will create guest entries and generate unique invitation codes for each.",
+          "Use the CSV import feature to add hundreds of guests at once. Download the template, populate it with your guest data, and upload. Supported columns include `invited_ceremonies`: use \"All\" to invite the guest to every ceremony, or a comma-separated list of ceremony names like \"Mehendi,Wedding Ceremony\". The system will create guest entries and generate unique invitation codes for each.",
       },
       {
         title: "Guest Invitation Codes",
         content:
-          "Each guest gets a unique invitation code. Click the 'Send' button next to any guest to generate their personal RSVP URL with the code pre-filled. Share this link via WhatsApp, email, or SMS.",
+          "Each guest gets a unique invitation code. Click the 'Send' button next to any guest to open the invitation dialog. Select the ceremonies this guest is invited to, then click 'Save Ceremonies' to persist their ceremony assignments. Use the 'Copy Link' button to copy their personal RSVP URL — share it via WhatsApp, SMS, or email. When a guest opens their personal link, the Wedding Program on the public showcase page automatically filters to show only their invited ceremonies.",
       },
       {
         title: "RSVP Tracking",
@@ -274,10 +274,94 @@ const sections = [
   },
 ];
 
+const personasSection = {
+  id: "personas",
+  title: "User Personas & Roles",
+  icon: "👥",
+  items: [
+    {
+      title: "Wedding Planner Mode",
+      content:
+        "When signing up, choose 'Wedding Planner' to manage weddings on behalf of couples. You can create Client accounts for the couple, share onboarding links at /couple/onboarding/[weddingId], and see all tasks, budget, and activities in one place.",
+    },
+    {
+      title: "Plan My Wedding (DIY)",
+      content:
+        "Choose 'Plan My Wedding' to manage your own wedding. All features are available — Task Planner, Guests, Vendors, Ceremonies, and Calendar.",
+    },
+    {
+      title: "Client Role",
+      content:
+        "Users created with the 'Client' role have restricted access. They can view the Guests page and the Showcase page only. This is ideal for the couple (bride/groom) who need visibility without full admin access.",
+    },
+    {
+      title: "Manage Your Team",
+      content:
+        "Admins can invite team members and clients from the 'Manage Your Team' page under Admin Settings. Assign roles (Admin, User, Client) and personas to each person.",
+    },
+  ],
+};
+
+const weddingProgramSection = {
+  id: "wedding-program",
+  title: "Wedding Program",
+  icon: "🎊",
+  items: [
+    {
+      title: "Public Showcase Page",
+      content:
+        "Your wedding has a public showcase page at /wedding/[id] showing countdown, Wedding Program (ceremonies), story, RSVP form, and gift registry.",
+    },
+    {
+      title: "Wedding Program (Filtered View)",
+      content:
+        "When a guest opens their personal invitation link, the Wedding Program on the showcase page automatically filters to show only the ceremonies they are invited to — so each guest sees a personalized program.",
+    },
+  ],
+};
+
+const adminConfigSection = {
+  id: "admin-config",
+  title: "Admin Configuration",
+  icon: "⚙️",
+  admin: true,
+  items: [
+    {
+      title: "Traditions Admin",
+      content:
+        "Manage the wedding traditions available on the platform at /dashboard/admin/traditions. Add custom traditions or disable unused ones.",
+    },
+    {
+      title: "Categories Admin",
+      content:
+        "Manage task categories and their follow-up questions at /dashboard/admin/categories. Use the visual checklist builder to define questions — choose a label and answer type (Text, Yes/No, Number) for each. Questions appear when a planner creates a task in that category.",
+    },
+  ],
+};
+
+interface DocSection {
+  id: string;
+  title: string;
+  icon: string;
+  admin?: boolean;
+  items: {
+    title: string;
+    content: string;
+  }[];
+}
+
+const allSections: DocSection[] = [
+  ...sections.slice(0, 1),
+  personasSection,
+  ...sections.slice(1),
+  weddingProgramSection,
+  adminConfigSection,
+];
+
 function SectionCard({
   section,
 }: {
-  section: (typeof sections)[number];
+  section: DocSection;
 }) {
   return (
     <div id={section.id} className="scroll-mt-20">
@@ -330,7 +414,7 @@ export default function DocsPage() {
       <div className="bg-white border border-slate-200 rounded-xl p-5 mb-10 shadow-sm">
         <h2 className="font-bold text-[#2d336b] text-base mb-3">On this page</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
-          {sections.map((section) => (
+          {allSections.map((section) => (
             <Link
               key={section.id}
               href={`#${section.id}`}
@@ -349,7 +433,7 @@ export default function DocsPage() {
       </div>
 
       {/* Sections */}
-      {sections.map((section) => (
+      {allSections.map((section) => (
         <SectionCard key={section.id} section={section} />
       ))}
 

@@ -195,7 +195,6 @@ export async function ensureDefaultColumns(weddingId: string) {
     .limit(1);
 
   if (wedding) {
-    // Query count of existing tasks and ceremonies
     const existingTasks = await db
       .select()
       .from(tasks)
@@ -206,188 +205,204 @@ export async function ensureDefaultColumns(weddingId: string) {
       .from(ceremonies)
       .where(eq(ceremonies.weddingId, weddingId));
 
-    if (existingTasks.length === 0 && existingCeremonies.length === 0) {
-      console.log(`[Self-Healing] Seeding default tasks and ceremonies for wedding ${weddingId}`);
-      const todoColumn = columnsList.find(col => col.type === "todo") || columnsList[0];
-      const todoColumnId = todoColumn ? todoColumn.id : null;
+    const todoColumn = columnsList.find(col => col.type === "todo") || columnsList[0];
+    const todoColumnId = todoColumn ? todoColumn.id : null;
 
-      const tradition = wedding.tradition;
-      const location = wedding.location;
-      const weddingDateObj = new Date(wedding.weddingDate);
+    const tradition = wedding.tradition;
+    const location = wedding.location;
+    const weddingDateObj = new Date(wedding.weddingDate);
 
-      await db.transaction(async (tx) => {
-        let seedTasks: { title: string; category: string; dueDate?: string | null }[] = [];
-        let seedRituals: {
-          name: string;
-          description?: string;
-          offsetDays?: number;
-          startHour?: number;
-          startMin?: number;
-          endHour?: number;
-          endMin?: number;
-          location?: string;
-          startTime?: string | null;
-          endTime?: string | null;
-        }[] = [];
+    let seedTasks: { title: string; category: string; dueDate?: string | null }[] = [];
+    let seedRituals: {
+      name: string;
+      description?: string;
+      offsetDays?: number;
+      startHour?: number;
+      startMin?: number;
+      endHour?: number;
+      endMin?: number;
+      location?: string;
+      startTime?: string | null;
+      endTime?: string | null;
+      isFoodServed?: boolean;
+    }[] = [];
 
-        if (tradition === "hindu") {
-          seedTasks = [
-            { title: "Book Mehndi Artist", category: "ceremonies" },
-            { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
-            { title: "Hire Dhol Players & DJ", category: "music" },
-            { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
-            { title: "Select Mandap Decorator", category: "decor" },
-          ];
-          seedRituals = [
-            { name: "Mehndi", description: "Traditional henna pre-wedding celebration", offsetDays: -2, startHour: 14, startMin: 0, endHour: 18, endMin: 0, location: location },
-            { name: "Haldi", description: "Traditional cleansing ceremony", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location },
-            { name: "Sangeet", description: "Musical celebration night", offsetDays: -1, startHour: 18, startMin: 0, endHour: 22, endMin: 0, location: location },
-            { name: "Mandap Pheras", description: "Main Vedic wedding ceremony rituals around the holy fire", offsetDays: 0, startHour: 10, startMin: 0, endHour: 14, endMin: 0, location: location },
-            { name: "Reception", description: "Grand wedding dinner reception", offsetDays: 0, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location },
-          ];
-        } else if (tradition === "muslim") {
-          seedTasks = [
-            { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
-            { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
-            { title: "Select Stage & Floral Decorator", category: "decor" },
-            { title: "Book Catering Menu for Valima Feast", category: "catering" },
-          ];
-          seedRituals = [
-            { name: "Manjha", description: "Traditional pre-wedding ceremonies", offsetDays: -2, startHour: 16, startMin: 0, endHour: 20, endMin: 0, location: location },
-            { name: "Nikah", description: "Official marriage contract ceremony", offsetDays: 0, startHour: 11, startMin: 0, endHour: 13, endMin: 0, location: location },
-            { name: "Valima", description: "Post-wedding grand feast reception", offsetDays: 1, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location },
-          ];
-        } else if (tradition === "sikh") {
-          seedTasks = [
-            { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
-            { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
-            { title: "Finalize Langar or Catering Menu", category: "catering" },
-            { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
-          ];
-          seedRituals = [
-            { name: "Maiya", description: "Traditional pre-wedding cleansing ceremonies", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location },
-            { name: "Anand Karaj", description: "Holy wedding ceremony at the Gurdwara", offsetDays: 0, startHour: 9, startMin: 0, endHour: 13, endMin: 0, location: location },
-            { name: "Reception", description: "Post-wedding dinner party celebration", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location },
-          ];
-        } else if (tradition === "christian") {
-          seedTasks = [
-            { title: "Secure Church Venue & Priest", category: "venue" },
-            { title: "Purchase Wedding Dress & Tuxedo", category: "apparel" },
-            { title: "Order Wedding Cake & Floral Bouquets", category: "catering" },
-            { title: "Hire Wedding Choir & Organist", category: "music" },
-          ];
-          seedRituals = [
-            { name: "Rehearsal Dinner", description: "Formal dinner with family and bridal party", offsetDays: -1, startHour: 18, startMin: 0, endHour: 21, endMin: 0, location: location },
-            { name: "Church Ceremony", description: "Marriage ceremony in the church", offsetDays: 0, startHour: 14, startMin: 0, endHour: 16, endMin: 0, location: location },
-            { name: "Reception", description: "Evening reception celebration with cake and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location },
-          ];
-        } else if (tradition === "secular") {
-          seedTasks = [
-            { title: "Select Secular Celebrant", category: "ceremonies" },
-            { title: "Write Wedding Vows", category: "other" },
-            { title: "Arrange Catering & Open Bar", category: "catering" },
-            { title: "Coordinate Photographer/Videographer Contracts", category: "other" },
-          ];
-          seedRituals = [
-            { name: "Toast", description: "Ice-breaker drinks with incoming guests", offsetDays: -1, startHour: 18, startMin: 0, endHour: 20, endMin: 0, location: location },
-            { name: "Vows", description: "Ceremonial reading of wedding vows", offsetDays: 0, startHour: 16, startMin: 0, endHour: 17, endMin: 30, location: location },
-            { name: "Reception", description: "Dinner, toast, and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 30, location: location },
-          ];
-        } else {
-          const dbTradList = await tx
-            .select()
-            .from(weddingTraditions)
-            .where(eq(weddingTraditions.key, tradition))
-            .limit(1);
-          if (dbTradList.length > 0) {
-            if (dbTradList[0].seedTasks) {
-              try {
-                seedTasks = JSON.parse(dbTradList[0].seedTasks);
-              } catch (e) {
-                console.error("Failed to parse db tradition seedTasks:", e);
-              }
-            }
-            if (dbTradList[0].seedCeremonies) {
-              try {
-                seedRituals = JSON.parse(dbTradList[0].seedCeremonies);
-              } catch (e) {
-                console.error("Failed to parse db tradition seedCeremonies:", e);
-              }
-            }
+    if (tradition === "hindu") {
+      seedTasks = [
+        { title: "Book Mehndi Artist", category: "ceremonies" },
+        { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
+        { title: "Hire Dhol Players & DJ", category: "music" },
+        { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
+        { title: "Select Mandap Decorator", category: "decor" },
+      ];
+      seedRituals = [
+        { name: "Mehndi", description: "Traditional henna pre-wedding celebration", offsetDays: -2, startHour: 14, startMin: 0, endHour: 18, endMin: 0, location: location, isFoodServed: false },
+        { name: "Haldi", description: "Traditional cleansing ceremony", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: false },
+        { name: "Sangeet", description: "Musical celebration night", offsetDays: -1, startHour: 18, startMin: 0, endHour: 22, endMin: 0, location: location, isFoodServed: false },
+        { name: "Mandap Pheras", description: "Main Vedic wedding ceremony rituals around the holy fire", offsetDays: 0, startHour: 10, startMin: 0, endHour: 14, endMin: 0, location: location, isFoodServed: true },
+        { name: "Reception", description: "Grand wedding dinner reception", offsetDays: 0, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+      ];
+    } else if (tradition === "muslim") {
+      seedTasks = [
+        { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
+        { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
+        { title: "Select Stage & Floral Decorator", category: "decor" },
+        { title: "Book Catering Menu for Valima Feast", category: "catering" },
+      ];
+      seedRituals = [
+        { name: "Manjha", description: "Traditional pre-wedding ceremonies", offsetDays: -2, startHour: 16, startMin: 0, endHour: 20, endMin: 0, location: location, isFoodServed: false },
+        { name: "Nikah", description: "Official marriage contract ceremony", offsetDays: 0, startHour: 11, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: true },
+        { name: "Valima", description: "Post-wedding grand feast reception", offsetDays: 1, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+      ];
+    } else if (tradition === "sikh") {
+      seedTasks = [
+        { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
+        { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
+        { title: "Finalize Langar or Catering Menu", category: "catering" },
+        { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
+      ];
+      seedRituals = [
+        { name: "Maiya", description: "Traditional pre-wedding cleansing ceremonies", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: false },
+        { name: "Anand Karaj", description: "Holy wedding ceremony at the Gurdwara", offsetDays: 0, startHour: 9, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: true },
+        { name: "Reception", description: "Post-wedding dinner party celebration", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+      ];
+    } else if (tradition === "christian") {
+      seedTasks = [
+        { title: "Secure Church Venue & Priest", category: "venue" },
+        { title: "Purchase Wedding Dress & Tuxedo", category: "apparel" },
+        { title: "Order Wedding Cake & Floral Bouquets", category: "catering" },
+        { title: "Hire Wedding Choir & Organist", category: "music" },
+      ];
+      seedRituals = [
+        { name: "Rehearsal Dinner", description: "Formal dinner with family and bridal party", offsetDays: -1, startHour: 18, startMin: 0, endHour: 21, endMin: 0, location: location, isFoodServed: true },
+        { name: "Church Ceremony", description: "Marriage ceremony in the church", offsetDays: 0, startHour: 14, startMin: 0, endHour: 16, endMin: 0, location: location, isFoodServed: false },
+        { name: "Reception", description: "Evening reception celebration with cake and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+      ];
+    } else if (tradition === "secular") {
+      seedTasks = [
+        { title: "Select Secular Celebrant", category: "ceremonies" },
+        { title: "Write Wedding Vows", category: "other" },
+        { title: "Arrange Catering & Open Bar", category: "catering" },
+        { title: "Coordinate Photographer/Videographer Contracts", category: "other" },
+      ];
+      seedRituals = [
+        { name: "Toast", description: "Ice-breaker drinks with incoming guests", offsetDays: -1, startHour: 18, startMin: 0, endHour: 20, endMin: 0, location: location, isFoodServed: true },
+        { name: "Vows", description: "Ceremonial reading of wedding vows", offsetDays: 0, startHour: 16, startMin: 0, endHour: 17, endMin: 30, location: location, isFoodServed: false },
+        { name: "Reception", description: "Dinner, toast, and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 30, location: location, isFoodServed: true },
+      ];
+    } else {
+      const dbTradList = await db
+        .select()
+        .from(weddingTraditions)
+        .where(eq(weddingTraditions.key, tradition))
+        .limit(1);
+      if (dbTradList.length > 0) {
+        if (dbTradList[0].seedTasks) {
+          try {
+            seedTasks = JSON.parse(dbTradList[0].seedTasks);
+          } catch (e) {
+            console.error("Failed to parse db tradition seedTasks:", e);
           }
         }
-
-        // Batch insert tasks
-        if (seedTasks.length > 0 && todoColumnId) {
-          const tasksToInsert = seedTasks.map((t, idx) => ({
-            weddingId: weddingId,
-            columnId: todoColumnId,
-            title: t.title,
-            status: "todo",
-            category: t.category,
-            position: idx,
-            dueDate: t.dueDate ? new Date(t.dueDate) : null,
-          }));
-          await tx.insert(tasks).values(tasksToInsert);
-        }
-
-        // Batch insert ceremonies
-        if (seedRituals.length > 0) {
-          const ritualsToInsert = seedRituals.map((r) => {
-            let startTime: Date;
-            let endTime: Date;
-
-            if (r.startTime && r.endTime) {
-              startTime = new Date(r.startTime);
-              endTime = new Date(r.endTime);
-            } else {
-              const baseDate = new Date(weddingDateObj);
-              const offsetDays = r.offsetDays ?? 0;
-              baseDate.setDate(baseDate.getDate() + offsetDays);
-              
-              startTime = new Date(baseDate);
-              startTime.setHours(r.startHour ?? 9, r.startMin ?? 0, 0, 0);
-
-              endTime = new Date(baseDate);
-              endTime.setHours(r.endHour ?? 17, r.endMin ?? 0, 0, 0);
-            }
-
-            const hasFood = r.name.toLowerCase().includes("reception") || 
-                            r.name.toLowerCase().includes("valima") || 
-                            r.name.toLowerCase().includes("pheras") ||
-                            r.name.toLowerCase().includes("feast");
-
-            return {
-              weddingId: weddingId,
-              name: r.name,
-              description: r.description || "",
-              startTime,
-              endTime,
-              location: r.location || location || "",
-              isFoodServed: hasFood,
-            };
-          });
-          const insertedCeremonies = await tx.insert(ceremonies).values(ritualsToInsert).returning();
-
-          // Seed a default catering menu for each ceremony where food is served
-          for (const ritual of insertedCeremonies) {
-            if (ritual.isFoodServed) {
-              await tx.insert(cateringMenus).values({
-                weddingId: weddingId,
-                ceremonyId: ritual.id,
-                cuisine: "Traditional Buffet",
-                guestCount: wedding.guestCount || 150,
-                appetizers: "Assorted Starters",
-                mainCourses: "Signature Main Course Dishes, Breads, and Rice",
-                desserts: "Traditional Dessert Specialties",
-                drinks: "Juices, Mocktails, and Water",
-                notes: "Default seeded menu. Edit this to customize your menu.",
-              });
-            }
+        if (dbTradList[0].seedCeremonies) {
+          try {
+            seedRituals = JSON.parse(dbTradList[0].seedCeremonies);
+          } catch (e) {
+            console.error("Failed to parse db tradition seedCeremonies:", e);
           }
         }
-      });
+      }
     }
+
+    await db.transaction(async (tx) => {
+      // 1. Seed ceremonies if missing
+      if (existingCeremonies.length === 0 && seedRituals.length > 0) {
+        console.log(`[Self-Healing] Seeding missing ceremonies for wedding ${weddingId}`);
+        const ritualsToInsert = seedRituals.map((r) => {
+          let startTime: Date;
+          let endTime: Date;
+
+          if (r.startTime && r.endTime) {
+            startTime = new Date(r.startTime);
+            endTime = new Date(r.endTime);
+          } else {
+            const baseDate = new Date(weddingDateObj);
+            const offsetDays = r.offsetDays ?? 0;
+            baseDate.setDate(baseDate.getDate() + offsetDays);
+            
+            startTime = new Date(baseDate);
+            startTime.setHours(r.startHour ?? 9, r.startMin ?? 0, 0, 0);
+
+            endTime = new Date(baseDate);
+            endTime.setHours(r.endHour ?? 17, r.endMin ?? 0, 0, 0);
+          }
+
+          const hasFood = typeof r.isFoodServed === "boolean"
+            ? r.isFoodServed
+            : (r.name.toLowerCase().includes("reception") || 
+               r.name.toLowerCase().includes("valima") || 
+               r.name.toLowerCase().includes("pheras") ||
+               r.name.toLowerCase().includes("feast"));
+
+          return {
+            weddingId: weddingId,
+            name: r.name,
+            description: r.description || "",
+            startTime,
+            endTime,
+            location: r.location || location || "",
+            isFoodServed: hasFood,
+          };
+        });
+        await tx.insert(ceremonies).values(ritualsToInsert);
+      }
+
+      // 2. Seed tasks if missing
+      if (existingTasks.length === 0 && seedTasks.length > 0 && todoColumnId) {
+        console.log(`[Self-Healing] Seeding missing tasks for wedding ${weddingId}`);
+        const tasksToInsert = seedTasks.map((t, idx) => ({
+          weddingId: weddingId,
+          columnId: todoColumnId,
+          title: t.title,
+          status: "todo",
+          category: t.category,
+          position: idx,
+          dueDate: t.dueDate ? new Date(t.dueDate) : null,
+        }));
+        await tx.insert(tasks).values(tasksToInsert);
+      }
+
+      // 3. Re-query current ceremonies and seed missing catering menus if needed
+      const currentCeremonies = await tx
+        .select()
+        .from(ceremonies)
+        .where(eq(ceremonies.weddingId, weddingId));
+
+      const existingCateringMenus = await tx
+        .select()
+        .from(cateringMenus)
+        .where(eq(cateringMenus.weddingId, weddingId));
+
+      for (const ritual of currentCeremonies) {
+        if (ritual.isFoodServed) {
+          const hasMenu = existingCateringMenus.some(menu => menu.ceremonyId === ritual.id);
+          if (!hasMenu) {
+            console.log(`[Self-Healing] Seeding missing catering menu for ceremony ${ritual.name} (${ritual.id})`);
+            await tx.insert(cateringMenus).values({
+              weddingId: weddingId,
+              ceremonyId: ritual.id,
+              cuisine: "Traditional Buffet",
+              guestCount: wedding.guestCount || 150,
+              appetizers: "Assorted Starters",
+              mainCourses: "Signature Main Course Dishes, Breads, and Rice",
+              desserts: "Traditional Dessert Specialties",
+              drinks: "Juices, Mocktails, and Water",
+              notes: "Default seeded menu. Edit this to customize your menu.",
+            });
+          }
+        }
+      }
+    });
   }
 
   return columnsList;

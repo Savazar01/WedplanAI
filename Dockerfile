@@ -17,7 +17,9 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src/db/migrations ./src/db/migrations
+COPY --from=builder /app/src/db/migrate-prod.js ./src/db/migrate-prod.js
 
 EXPOSE 3044
 
-CMD node server.js
+CMD ["sh", "-c", "node src/db/migrate-prod.js && node server.js"]
+

@@ -400,8 +400,14 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
         setError(res.error);
       } else {
         setToast({ message: "Guest ceremonies saved!", type: "success" });
-        setInviteGuest(null);
-        window.location.reload();
+        // Update local state in-place to avoid full page reload
+        setGuestsList((prev) =>
+          prev.map((g) =>
+            g.id === inviteGuest.id ? { ...g, invitedCeremonies: updatedValue } : g
+          )
+        );
+        // Also update inviteGuest representation locally so state aligns
+        setInviteGuest((prev) => prev ? { ...prev, invitedCeremonies: updatedValue } : null);
       }
     } catch (err) {
       console.error(err);
@@ -495,7 +501,7 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Name</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Contact Info</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Login Code</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">RSVP Status</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest min-w-[160px]">RSVP Status</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Plus Ones</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Dietary Restrictions</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Invited Ceremonies</th>
@@ -540,7 +546,7 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
                       </svg>
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm min-w-[160px]">
                     <Select
                       value={g.rsvpStatus}
                       onChange={(e) => handleStatusChange(g.id, e.target.value as "pending" | "attending" | "declined")}

@@ -16,7 +16,8 @@ import {
   Globe,
   Settings,
   ShieldCheck,
-  UserCog
+  UserCog,
+  UtensilsCrossed
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,14 @@ export default function SampleWalkthroughCard({
         icon: Clock,
         color: "text-violet-500 bg-violet-50 border-violet-100",
         path: "/dashboard/wedding-ceremony-planner",
+      },
+      {
+        id: "menu-plan",
+        title: "Catering Menu Planner",
+        description: "Plan and customize the food and drink menus for each of your food-served ceremonies. Link recipes, assign dishes, and manage buffet courses in one place.",
+        icon: UtensilsCrossed,
+        color: "text-amber-600 bg-amber-50 border-amber-100",
+        path: "/dashboard/menu-plan",
       },
       {
         id: "guests",

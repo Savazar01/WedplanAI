@@ -41,6 +41,7 @@ const createWeddingSchema = z.object({
     location: z.string().optional(),
     startTime: z.string().optional().nullable(),
     endTime: z.string().optional().nullable(),
+    isFoodServed: z.boolean().optional(),
   })).optional(),
 });
 
@@ -71,6 +72,7 @@ export async function createWeddingAction(data: {
     location?: string;
     startTime?: string | null;
     endTime?: string | null;
+    isFoodServed?: boolean;
   }[];
 }) {
   const session = await getServerSession();
@@ -157,6 +159,7 @@ export async function createWeddingAction(data: {
         location?: string;
         startTime?: string | null;
         endTime?: string | null;
+        isFoodServed?: boolean;
       }[] = [];
 
       if (customTasks) {
@@ -292,10 +295,12 @@ export async function createWeddingAction(data: {
             endTime.setHours(r.endHour ?? 17, r.endMin ?? 0, 0, 0);
           }
 
-          const hasFood = r.name.toLowerCase().includes("reception") || 
-                          r.name.toLowerCase().includes("valima") || 
-                          r.name.toLowerCase().includes("pheras") ||
-                          r.name.toLowerCase().includes("feast");
+          const hasFood = typeof r.isFoodServed === "boolean"
+            ? r.isFoodServed
+            : (r.name.toLowerCase().includes("reception") || 
+               r.name.toLowerCase().includes("valima") || 
+               r.name.toLowerCase().includes("pheras") ||
+               r.name.toLowerCase().includes("feast"));
 
           return {
             weddingId: weddingId,

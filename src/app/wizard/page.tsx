@@ -54,31 +54,31 @@ const defaultTasks = {
 
 const defaultRituals = {
   hindu: [
-    { name: "Mehndi", description: "Traditional henna pre-wedding celebration", offsetDays: -2, startHour: 14, startMin: 0, endHour: 18, endMin: 0 },
-    { name: "Haldi", description: "Traditional cleansing ceremony", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0 },
-    { name: "Sangeet", description: "Musical celebration night", offsetDays: -1, startHour: 18, startMin: 0, endHour: 22, endMin: 0 },
-    { name: "Mandap Pheras", description: "Main Vedic wedding ceremony rituals around the holy fire", offsetDays: 0, startHour: 10, startMin: 0, endHour: 14, endMin: 0 },
-    { name: "Reception", description: "Grand wedding dinner reception", offsetDays: 0, startHour: 19, startMin: 0, endHour: 23, endMin: 0 },
+    { name: "Mehndi", description: "Traditional henna pre-wedding celebration", offsetDays: -2, startHour: 14, startMin: 0, endHour: 18, endMin: 0, isFoodServed: false },
+    { name: "Haldi", description: "Traditional cleansing ceremony", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, isFoodServed: false },
+    { name: "Sangeet", description: "Musical celebration night", offsetDays: -1, startHour: 18, startMin: 0, endHour: 22, endMin: 0, isFoodServed: false },
+    { name: "Mandap Pheras", description: "Main Vedic wedding ceremony rituals around the holy fire", offsetDays: 0, startHour: 10, startMin: 0, endHour: 14, endMin: 0, isFoodServed: true },
+    { name: "Reception", description: "Grand wedding dinner reception", offsetDays: 0, startHour: 19, startMin: 0, endHour: 23, endMin: 0, isFoodServed: true },
   ],
   muslim: [
-    { name: "Manjha", description: "Traditional pre-wedding ceremonies", offsetDays: -2, startHour: 16, startMin: 0, endHour: 20, endMin: 0 },
-    { name: "Nikah", description: "Official marriage contract ceremony", offsetDays: 0, startHour: 11, startMin: 0, endHour: 13, endMin: 0 },
-    { name: "Valima", description: "Post-wedding grand feast reception", offsetDays: 1, startHour: 19, startMin: 0, endHour: 23, endMin: 0 },
+    { name: "Manjha", description: "Traditional pre-wedding ceremonies", offsetDays: -2, startHour: 16, startMin: 0, endHour: 20, endMin: 0, isFoodServed: false },
+    { name: "Nikah", description: "Official marriage contract ceremony", offsetDays: 0, startHour: 11, startMin: 0, endHour: 13, endMin: 0, isFoodServed: true },
+    { name: "Valima", description: "Post-wedding grand feast reception", offsetDays: 1, startHour: 19, startMin: 0, endHour: 23, endMin: 0, isFoodServed: true },
   ],
   sikh: [
-    { name: "Maiya", description: "Traditional pre-wedding cleansing ceremonies", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0 },
-    { name: "Anand Karaj", description: "Holy wedding ceremony at the Gurdwara", offsetDays: 0, startHour: 9, startMin: 0, endHour: 13, endMin: 0 },
-    { name: "Reception", description: "Post-wedding dinner party celebration", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0 },
+    { name: "Maiya", description: "Traditional pre-wedding cleansing ceremonies", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, isFoodServed: false },
+    { name: "Anand Karaj", description: "Holy wedding ceremony at the Gurdwara", offsetDays: 0, startHour: 9, startMin: 0, endHour: 13, endMin: 0, isFoodServed: true },
+    { name: "Reception", description: "Post-wedding dinner party celebration", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, isFoodServed: true },
   ],
   christian: [
-    { name: "Rehearsal Dinner", description: "Formal dinner with family and bridal party", offsetDays: -1, startHour: 18, startMin: 0, endHour: 21, endMin: 0 },
-    { name: "Church Ceremony", description: "Marriage ceremony in the church", offsetDays: 0, startHour: 14, startMin: 0, endHour: 16, endMin: 0 },
-    { name: "Reception", description: "Evening reception celebration with cake and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0 },
+    { name: "Rehearsal Dinner", description: "Formal dinner with family and bridal party", offsetDays: -1, startHour: 18, startMin: 0, endHour: 21, endMin: 0, isFoodServed: true },
+    { name: "Church Ceremony", description: "Marriage ceremony in the church", offsetDays: 0, startHour: 14, startMin: 0, endHour: 16, endMin: 0, isFoodServed: false },
+    { name: "Reception", description: "Evening reception celebration with cake and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, isFoodServed: true },
   ],
   secular: [
-    { name: "Toast", description: "Ice-breaker drinks with incoming guests", offsetDays: -1, startHour: 18, startMin: 0, endHour: 20, endMin: 0 },
-    { name: "Vows", description: "Ceremonial reading of wedding vows", offsetDays: 0, startHour: 16, startMin: 0, endHour: 17, endMin: 30 },
-    { name: "Reception", description: "Dinner, toast, and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 30 },
+    { name: "Toast", description: "Ice-breaker drinks with incoming guests", offsetDays: -1, startHour: 18, startMin: 0, endHour: 20, endMin: 0, isFoodServed: true },
+    { name: "Vows", description: "Ceremonial reading of wedding vows", offsetDays: 0, startHour: 16, startMin: 0, endHour: 17, endMin: 30, isFoodServed: false },
+    { name: "Reception", description: "Dinner, toast, and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 30, isFoodServed: true },
   ],
 };
 
@@ -199,6 +199,7 @@ export default function WizardPage() {
     startTimeOnly: string;
     endTimeOnly: string;
     location: string;
+    isFoodServed: boolean;
   }[]>([]);
 
   // Form states for adding new task
@@ -213,6 +214,7 @@ export default function WizardPage() {
   const [newRitualStartTime, setNewRitualStartTime] = React.useState("09:00");
   const [newRitualEndTime, setNewRitualEndTime] = React.useState("17:00");
   const [newRitualLocation, setNewRitualLocation] = React.useState("");
+  const [newRitualIsFoodServed, setNewRitualIsFoodServed] = React.useState(false);
 
   const handleAddTask = () => {
     if (!newTaskTitle.trim()) return;
@@ -240,6 +242,7 @@ export default function WizardPage() {
         startTimeOnly: newRitualStartTime,
         endTimeOnly: newRitualEndTime,
         location: newRitualLocation.trim() || location || "",
+        isFoodServed: newRitualIsFoodServed,
       },
     ]);
     setNewRitualName("");
@@ -248,6 +251,7 @@ export default function WizardPage() {
     setNewRitualStartTime("09:00");
     setNewRitualEndTime("17:00");
     setNewRitualLocation("");
+    setNewRitualIsFoodServed(false);
   };
 
   const updateTask = (index: number, field: keyof typeof customTasks[0], value: string) => {
@@ -260,7 +264,7 @@ export default function WizardPage() {
     setCustomTasks(customTasks.filter((_, i) => i !== index));
   };
 
-  const updateRitual = (index: number, field: keyof typeof customRituals[0], value: string) => {
+  const updateRitual = (index: number, field: keyof typeof customRituals[0], value: any) => {
     setCustomRituals(
       customRituals.map((r, i) => (i === index ? { ...r, [field]: value } : r))
     );
@@ -286,6 +290,7 @@ export default function WizardPage() {
         startTimeOnly: string;
         endTimeOnly: string;
         location: string;
+        isFoodServed: boolean;
       }[] = [];
 
       if (dbTrad) {
@@ -318,13 +323,20 @@ export default function WizardPage() {
                 const startMStr = String(r.startMin ?? 0).padStart(2, "0");
                 const endHStr = String(r.endHour ?? 17).padStart(2, "0");
                 const endMStr = String(r.endMin ?? 0).padStart(2, "0");
+                const hasFood = typeof r.isFoodServed === 'boolean'
+                  ? r.isFoodServed
+                  : (r.name.toLowerCase().includes("reception") || 
+                     r.name.toLowerCase().includes("valima") || 
+                     r.name.toLowerCase().includes("pheras") ||
+                     r.name.toLowerCase().includes("feast"));
                 return {
                   name: r.name || "",
                   description: r.description || "",
                   date: dateStr,
                   startTimeOnly: `${startHStr}:${startMStr}`,
                   endTimeOnly: `${endHStr}:${endMStr}`,
-                  location: r.location || locationRef.current || ""
+                  location: r.location || locationRef.current || "",
+                  isFoodServed: hasFood
                 };
               });
             }
@@ -356,6 +368,7 @@ export default function WizardPage() {
             startTimeOnly: `${startHStr}:${startMStr}`,
             endTimeOnly: `${endHStr}:${endMStr}`,
             location: locationRef.current || "",
+            isFoodServed: r.isFoodServed,
           };
         });
       }
@@ -454,6 +467,7 @@ export default function WizardPage() {
           startTime: new Date(startStr).toISOString(),
           endTime: new Date(endStr).toISOString(),
           location: r.location,
+          isFoodServed: r.isFoodServed,
         };
       });
 
@@ -948,6 +962,18 @@ export default function WizardPage() {
                           ✕
                         </Button>
                       </div>
+                      <div className="md:col-span-12 flex items-center gap-2 mt-2">
+                        <input
+                          type="checkbox"
+                          id={`food-served-${idx}`}
+                          checked={r.isFoodServed || false}
+                          onChange={(e) => updateRitual(idx, "isFoodServed", e.target.checked)}
+                          className="rounded border-slate-300 text-[#6771ab] focus:ring-[#6771ab] h-4 w-4"
+                        />
+                        <label htmlFor={`food-served-${idx}`} className="text-xs text-slate-600 font-medium cursor-pointer">
+                          🍴 Food Served (Automatically creates a Catering Menu Plan)
+                        </label>
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -1028,6 +1054,18 @@ export default function WizardPage() {
                       Add
                     </Button>
                   </div>
+                  <div className="md:col-span-12 flex items-center gap-2 mt-2">
+                    <input
+                      type="checkbox"
+                      id="new-ritual-food-served"
+                      checked={newRitualIsFoodServed}
+                      onChange={(e) => setNewRitualIsFoodServed(e.target.checked)}
+                      className="rounded border-slate-300 text-[#6771ab] focus:ring-[#6771ab] h-4 w-4"
+                    />
+                    <label htmlFor="new-ritual-food-served" className="text-xs text-slate-600 font-medium cursor-pointer">
+                      🍴 Food Served (Automatically creates a Catering Menu Plan)
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1103,6 +1141,11 @@ export default function WizardPage() {
                         <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs border-b border-slate-100 last:border-0 pb-1.5 last:pb-0">
                           <div>
                             <span className="font-semibold text-[#2d336b]">{r.name}</span>
+                            {r.isFoodServed && (
+                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                                🍴 Menu Plan
+                              </span>
+                            )}
                             {r.location && <span className="text-slate-400 block sm:inline sm:ml-2">📍 {r.location}</span>}
                           </div>
                           <div className="text-[#6771ab] font-medium">

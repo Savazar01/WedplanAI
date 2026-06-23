@@ -122,7 +122,7 @@ export default async function LandingPage() {
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
                 ),
                 title: "Wedding Task Planner",
-                desc: "Drag-and-drop task management across Backlog, To-Do, In Progress and Done columns. Pre-seeded with tradition-specific tasks for Hindu, Muslim, Sikh, and more.",
+                desc: "Drag-and-drop task management. Auto-seeds default ceremonies and tasks for Hindu, Muslim, Sikh, Christian, and Secular traditions, and includes a Categories Visual Checklist builder.",
                 color: "from-violet-500/10 to-violet-50",
                 border: "border-violet-100",
                 iconBg: "bg-violet-100 text-[#6771ab]",
@@ -171,8 +171,8 @@ export default async function LandingPage() {
                 icon: (
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 ),
-                title: "Multi-User Team Collaboration",
-                desc: "Invite wedding planners, coordinators, and clients. Supports Wedding Planner mode to manage multiple weddings with onboarding links and restricted couple views.",
+                title: "Multi-Couple Planner Mode",
+                desc: "Invite coordinators and couples. Supports multi-couple Planner mode to manage multiple weddings with individual onboarding links and restricted client views.",
                 color: "from-purple-500/10 to-purple-50",
                 border: "border-purple-100",
                 iconBg: "bg-purple-100 text-purple-700",

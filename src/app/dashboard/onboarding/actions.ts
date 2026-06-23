@@ -3,7 +3,7 @@
 import { db } from "@/db/client";
 import { weddings } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
-import { getActiveWedding } from "@/lib/wedding-helper";
+import { getActiveWedding, ensureDefaultColumns } from "@/lib/wedding-helper";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -99,6 +99,8 @@ export async function uploadOnboardingCSVAction(formData: FormData) {
         updatedAt: new Date(),
       })
       .where(eq(weddings.id, activeWedding.id));
+
+    await ensureDefaultColumns(activeWedding.id);
 
     revalidatePath("/dashboard");
     return { success: true };

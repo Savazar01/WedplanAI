@@ -4,6 +4,7 @@ import { db } from "@/db/client";
 import { weddings } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { ensureDefaultColumns } from "@/lib/wedding-helper";
 
 export async function submitCoupleOnboardingAction(
   weddingId: string,
@@ -57,6 +58,8 @@ export async function submitCoupleOnboardingAction(
         updatedAt: new Date(),
       })
       .where(eq(weddings.id, weddingId));
+
+    await ensureDefaultColumns(weddingId);
 
     revalidatePath("/dashboard");
     return { success: true };

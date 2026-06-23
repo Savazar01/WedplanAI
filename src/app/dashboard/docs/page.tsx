@@ -22,6 +22,11 @@ const sections = [
           "Use the guided 7-step wizard to set up your wedding: enter partner names, date and venue, select your tradition (Hindu, Muslim, Sikh, Christian, or Secular), set budget and guest count, and the system will auto-generate planning tasks and ceremonies specific to your tradition.",
       },
       {
+        title: "Auto-Seeding & Self-Healing Seeding",
+        content:
+          "When onboarding a couple or uploading their onboarding CSV, the platform automatically seeds default tasks and ceremonies based on their chosen wedding tradition. If tasks or ceremonies are ever completely deleted or missing, the platform self-heals by automatically re-seeding these defaults.",
+      },
+      {
         title: "Dashboard Overview",
         content:
           "The main dashboard shows your active wedding at a glance: task completion percentage (with To-Do, In Progress, Done, and Overdue counts), guest RSVP breakdown (attending, declined, pending — broken down per ceremony), budget status with color-coded depletion bar and breach alerts, and a Build Showcase Page quick-navigation button. The Guests section provides personal invitation links — each link has a separate 'Copy Link' button (to copy the URL) and a 'Save Ceremonies' button (to persist which ceremonies the guest is invited to).",

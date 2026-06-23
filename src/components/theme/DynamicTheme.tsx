@@ -74,8 +74,9 @@ export default function DynamicTheme({ wedding, mode = "app" }: DynamicThemeProp
               --color-primary: ${themeDarkPrimary};
               --color-secondary: ${themeDarkSecondary};
               --color-background: ${themeDarkBackground};
-              --color-surface: #171d2f;
-              --color-outline: #242f47;
+              --color-surface: color-mix(in srgb, var(--color-background) 94%, #ffffff 6%);
+              --color-surface-variant: color-mix(in srgb, var(--color-background) 90%, var(--color-primary) 10%);
+              --color-outline: color-mix(in srgb, var(--color-background) 88%, #ffffff 12%);
             }
             body {
               font-family: var(--font-sans);

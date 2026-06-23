@@ -250,3 +250,26 @@ The Toast auto-dismisses after 3 seconds and is positioned fixed bottom-right.
 - **Confirmations before destructive actions** → `ConfirmDialog`
 - **Success / error feedback after an action** → `Toast`
 - **Never** → `alert()`, `confirm()`, `prompt()`
+
+---
+
+## Dark Mode Adaptation Model
+
+### 1. Dynamic Theme Color Derivations
+To ensure cohesive brand styling even under custom user themes, dark mode utilizes the CSS `color-mix()` function in `src/components/theme/DynamicTheme.tsx`. Colors are mixed in the `srgb` color space using the dynamic user-defined `--color-background` and `--color-primary` variables:
+- **Surface**: Mixed as 94% `--color-background` and 6% `#ffffff` to create a soft, elevated surface color that matches the hue of the custom background.
+- **Surface Variant**: Mixed as 90% `--color-background` and 10% `--color-primary` to produce an active/variant surface (such as Kanban cards or columns) with a subtle tint of the primary theme color.
+- **Outline**: Mixed as 88% `--color-background` and 12% `#ffffff` to form smooth border outlines without harsh contrast or pixelated highlights.
+
+### 2. Dark Theme Variables
+The following variables are defined dynamically under the `.dark` class context:
+- `--color-surface`: Dynamic elevated background color for dialogs, cards, and input panels.
+- `--color-surface-variant`: Custom container/variant card background replacing static light colors like cream (`#fefce8`).
+- `--color-outline`: Dynamic border outline color.
+
+### 3. Accessibility & Contrast Guidelines (WCAG 2.1 AA/AAA)
+To maintain strict compliance with WCAG 2.1 contrast rules (minimum 4.5:1 for body text, 3:1 for graphical elements and large text):
+- **Translucent Badges & Tags**: Calendar tags, status boxes, and category pills are rendered with translucent background opacities (typically 12% to 15%) combined with high-contrast text overrides (e.g., `#fcd34d` for amber, `#6ee7b7` for emerald, and `#cbd5e1` for slate) to keep text fully legible.
+- **Alerts & Notices**: Status-specific alert backgrounds use 12% opacity of the semantic status color paired with high-contrast text color overrides (`text-violet-700` maps to `#d8b4fe`, `text-red-700` maps to `#fca5a5`, etc.) to guarantee optimal readability.
+- **Input Borders & Outlines**: Outline/border states use a minimum 12% translucent overlay of white on the background to remain visible without distracting the user.
+

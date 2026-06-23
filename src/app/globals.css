@@ -167,3 +167,98 @@ body {
   background-image: linear-gradient(to right, rgba(23, 29, 47, 0.6), rgba(36, 47, 71, 0.4)) !important;
 }
 
+/* Cream card backgrounds override to dynamic surface variant */
+.dark .bg-\[\#fefce8\] {
+  background-color: var(--color-surface-variant) !important;
+}
+.dark .hover\:bg-\[\#fefce8\]:hover {
+  background-color: var(--color-surface-variant) !important;
+}
+
+/* Dynamic overlays and hover classes */
+.dark .bg-white\/60 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.dark .bg-\[\#eef0f7\] {
+  background-color: color-mix(in srgb, var(--color-primary) 15%, var(--color-background)) !important;
+}
+.dark .bg-\[\#eef0f7\]\/40 {
+  background-color: color-mix(in srgb, var(--color-primary) 8%, var(--color-background)) !important;
+}
+.dark .hover\:bg-\[\#f0f1fa\]:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 8%, var(--color-background)) !important;
+}
+
+/* Primary Color overrides for dark mode contrast */
+.dark .text-\[\#6771ab\] {
+  color: var(--color-primary) !important;
+}
+.dark .bg-\[\#6771ab\] {
+  background-color: var(--color-primary) !important;
+}
+.dark .hover\:bg-\[\#566198\]:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 85%, #000000 15%) !important;
+}
+
+/* Translucent category badges & calendar tags */
+.dark .bg-amber-100 { background-color: rgba(245, 158, 11, 0.15) !important; }
+.dark .text-amber-800 { color: #fcd34d !important; }
+.dark .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.15) !important; }
+.dark .text-emerald-800 { color: #6ee7b7 !important; }
+.dark .bg-sky-100 { background-color: rgba(14, 165, 233, 0.15) !important; }
+.dark .text-sky-800 { color: #7dd3fc !important; }
+.dark .bg-indigo-100 { background-color: rgba(99, 102, 241, 0.15) !important; }
+.dark .text-indigo-800 { color: #a5b4fc !important; }
+.dark .bg-purple-100 { background-color: rgba(168, 85, 247, 0.15) !important; }
+.dark .text-purple-800 { color: #d8b4fe !important; }
+.dark .bg-pink-100 { background-color: rgba(236, 72, 153, 0.15) !important; }
+.dark .text-pink-800 { color: #f9a8d4 !important; }
+.dark .bg-violet-100 { background-color: rgba(103, 113, 171, 0.15) !important; }
+.dark .text-violet-800 { color: #c4b5fd !important; }
+.dark .bg-slate-100 { background-color: rgba(100, 116, 139, 0.15) !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+
+/* Translucent alerts and notice boxes */
+.dark .bg-violet-50 {
+  background-color: rgba(139, 92, 246, 0.12) !important;
+}
+.dark .bg-amber-50,
+.dark .bg-amber-50\/40,
+.dark .bg-amber-50\/50,
+.dark .bg-amber-50\/20 {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}
+.dark .bg-emerald-50, .dark .bg-green-50 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+}
+.dark .bg-red-50,
+.dark .bg-red-50\/10,
+.dark .bg-red-50\/20,
+.dark .bg-red-50\/30 {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+.dark .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.12) !important;
+}
+.dark .bg-slate-200, .dark .bg-\[\#e2e8f0\] {
+  background-color: rgba(148, 163, 184, 0.12) !important;
+}
+.dark .bg-\[\#f0f1fa\] {
+  background-color: rgba(139, 147, 197, 0.12) !important;
+}
+
+/* Contrast text colors for status alerts */
+.dark .text-violet-700 { color: #d8b4fe !important; }
+.dark .text-amber-700 { color: #fcd34d !important; }
+.dark .text-emerald-700, .dark .text-emerald-800, .dark .text-green-700 { color: #a7f3d0 !important; }
+.dark .text-red-700, .dark .text-red-800 { color: #fca5a5 !important; }
+.dark .text-blue-700 { color: #bfdbfe !important; }
+
+/* Translucent border styles to prevent bright pixelated outlines */
+.dark .border-violet-100, .dark .border-violet-200 { border-color: rgba(139, 92, 246, 0.25) !important; }
+.dark .border-amber-100, .dark .border-amber-200 { border-color: rgba(245, 158, 11, 0.25) !important; }
+.dark .border-blue-100, .dark .border-blue-200 { border-color: rgba(59, 130, 246, 0.25) !important; }
+.dark .border-green-100, .dark .border-green-200 { border-color: rgba(16, 185, 129, 0.25) !important; }
+.dark .border-red-100, .dark .border-red-200 { border-color: rgba(239, 68, 68, 0.25) !important; }
+
+

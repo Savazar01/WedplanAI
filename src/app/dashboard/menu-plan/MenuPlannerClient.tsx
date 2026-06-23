@@ -86,23 +86,39 @@ export default function MenuPlannerClient({
   const [notes, setNotes] = React.useState("");
   const [isPending, setIsPending] = React.useState(false);
 
+  const handleEdit = (menu: CateringMenu) => {
+    setEditingMenu(menu);
+    setCeremonyId(menu.ceremonyId);
+    setVendorId(menu.vendorId || "");
+    setCuisine(menu.cuisine || "");
+    setGuestCount(menu.guestCount);
+    setAppetizers(menu.appetizers || "");
+    setMainCourses(menu.mainCourses || "");
+    setDesserts(menu.desserts || "");
+    setDrinks(menu.drinks || "");
+    setNotes(menu.notes || "");
+    setIsFormOpen(true);
+  };
+
   // Auto-open form if ceremonyId is in search params
   React.useEffect(() => {
     if (preselectedCeremonyId) {
       // Find if a menu already exists for this ceremony
       const existing = menus.find(m => m.ceremonyId === preselectedCeremonyId);
-      if (existing) {
-        handleEdit(existing);
-      } else {
-        setCeremonyId(preselectedCeremonyId);
-        setIsFormOpen(true);
-      }
+      setTimeout(() => {
+        if (existing) {
+          handleEdit(existing);
+        } else {
+          setCeremonyId(preselectedCeremonyId);
+          setIsFormOpen(true);
+        }
+      }, 0);
       // Clear URL params
       const url = new URL(window.location.href);
       url.searchParams.delete("ceremonyId");
       router.replace(url.pathname + url.search);
     }
-  }, [preselectedCeremonyId, menus]);
+  }, [preselectedCeremonyId, menus, router]);
 
   const resetForm = () => {
     setCeremonyId("");
@@ -116,20 +132,6 @@ export default function MenuPlannerClient({
     setNotes("");
     setEditingMenu(null);
     setIsFormOpen(false);
-  };
-
-  const handleEdit = (menu: CateringMenu) => {
-    setEditingMenu(menu);
-    setCeremonyId(menu.ceremonyId);
-    setVendorId(menu.vendorId || "");
-    setCuisine(menu.cuisine || "");
-    setGuestCount(menu.guestCount);
-    setAppetizers(menu.appetizers || "");
-    setMainCourses(menu.mainCourses || "");
-    setDesserts(menu.desserts || "");
-    setDrinks(menu.drinks || "");
-    setNotes(menu.notes || "");
-    setIsFormOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -190,10 +192,6 @@ export default function MenuPlannerClient({
       }
     }
     setIsPending(false);
-  };
-
-  const getCeremonyName = (cId: string) => {
-    return ceremonies.find(c => c.id === cId)?.name || "Unknown Ceremony";
   };
 
   const getVendorName = (vId: string | null) => {

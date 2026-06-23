@@ -48,7 +48,7 @@ interface BoardProps {
   initialColumns?: Column[];
   ceremonies?: { id: string; name: string }[];
   teamMembers?: { id: string; name: string; email: string }[];
-  cateringMenus?: any[];
+  cateringMenus?: { id: string; cuisine: string | null; ceremonyId: string }[];
 }
 
 const DEFAULT_COLUMNS: Column[] = [

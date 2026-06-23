@@ -601,7 +601,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
         </div>
 
         {/* Live Styled Preview Container */}
-        <div style={scopedStyleProps} className="text-slate-800 flex flex-col items-center min-h-[80vh] transition-all duration-300">
+        <div style={scopedStyleProps} className="showcase-preview text-slate-800 flex flex-col items-center min-h-[80vh] transition-all duration-300">
           {/* Decorative Top Border */}
           <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
 

@@ -1,6 +1,7 @@
 import { getServerSession } from "@/lib/auth-server";
 import Link from "next/link";
 import { Cormorant_Infant } from "next/font/google";
+import LandingNavbar from "@/components/landing/LandingNavbar";
 
 const cormorant = Cormorant_Infant({
   subsets: ["latin"],
@@ -13,42 +14,9 @@ export default async function LandingPage() {
   const isLoggedIn = !!(session && session.user);
 
   return (
-    <div className={`${cormorant.variable} min-h-screen bg-[#faf5ff] text-slate-800`}>
+    <div className={`${cormorant.variable} min-h-screen bg-[#faf5ff] dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 transition-colors duration-300`}>
       {/* ─── NAVBAR ─── */}
-      <nav className="fixed top-4 left-4 right-4 z-50 bg-white/90 backdrop-blur-md border border-violet-100 rounded-2xl shadow-lg px-6 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png"
-            alt="Savazar"
-            className="h-8 w-auto object-contain"
-          />
-        </Link>
-
-        <div className="hidden md:flex items-center gap-8">
-          <a href="#features" className="text-sm font-medium text-slate-600 hover:text-[#6771ab] transition-colors cursor-pointer">Features</a>
-          <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-[#6771ab] transition-colors cursor-pointer">How It Works</a>
-          <Link href="/dashboard/docs" className="text-sm font-medium text-slate-600 hover:text-[#6771ab] transition-colors cursor-pointer">Docs</Link>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {isLoggedIn ? (
-            <Link
-              href="/dashboard"
-              className="px-5 py-2 rounded-xl bg-[#6771ab] text-white text-sm font-semibold shadow-md hover:bg-[#566198] transition-all active:scale-[0.97] cursor-pointer"
-            >
-              Go to Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/signup"
-              className="px-5 py-2 rounded-xl bg-[#6771ab] text-white text-sm font-semibold shadow-md hover:bg-[#566198] transition-all active:scale-[0.97] cursor-pointer"
-            >
-              Sign In
-            </Link>
-          )}
-        </div>
-      </nav>
+      <LandingNavbar isLoggedIn={isLoggedIn} />
 
       {/* ─── HERO SECTION ─── */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-28 pb-20">
@@ -65,7 +33,7 @@ export default async function LandingPage() {
           AI-Powered Wedding Planning
         </div>
 
-        <h1 className={`${cormorant.className} relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500 leading-[1.4] mb-6 max-w-full px-4 pb-3`}>
+        <h1 className={`${cormorant.className} relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500 dark:from-[#8b93c5] dark:via-[#c484b0] dark:to-amber-400 leading-[1.4] mb-6 max-w-full px-4 pb-3`}>
           Plan Your Perfect Wedding
         </h1>
 
@@ -101,13 +69,13 @@ export default async function LandingPage() {
       </section>
 
       {/* ─── FEATURES SECTION ─── */}
-      <section id="features" className="py-24 px-6">
+      <section id="features" className="py-24 px-6 bg-white dark:bg-[#0f172a]/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-block px-4 py-1.5 rounded-full bg-violet-100 text-[#6771ab] text-xs font-bold uppercase tracking-widest mb-4">
               Everything You Need
             </div>
-            <h2 className={`${cormorant.className} text-4xl sm:text-5xl font-bold text-[#2d336b] mb-4`}>
+            <h2 className={`${cormorant.className} text-4xl sm:text-5xl font-bold text-[#2d336b] dark:text-slate-200 mb-4`}>
               A Complete Wedding Planning Suite
             </h2>
             <p className="text-slate-500 max-w-2xl mx-auto text-base leading-relaxed">
@@ -190,7 +158,7 @@ export default async function LandingPage() {
             ].map((feature) => (
               <div
                 key={feature.title}
-                className={`group bg-gradient-to-br ${feature.color} border ${feature.border} rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 cursor-default`}
+                className={`group bg-gradient-to-br ${feature.color} dark:from-slate-900/40 dark:to-slate-900/60 border ${feature.border} dark:border-slate-800 rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1 cursor-default`}
               >
                 <div className={`w-14 h-14 rounded-xl ${feature.iconBg} flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform`}>
                   {feature.icon}
@@ -204,7 +172,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section id="how-it-works" className="py-24 px-6 bg-gradient-to-b from-[#faf5ff] to-[#eef0f7]">
+      <section id="how-it-works" className="py-24 px-6 bg-gradient-to-b from-[#faf5ff] to-[#eef0f7] dark:from-[#0b0f19] dark:to-slate-900">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-block px-4 py-1.5 rounded-full bg-rose-100 text-[#c484b0] text-xs font-bold uppercase tracking-widest mb-4">
             Simple Setup
@@ -247,7 +215,7 @@ export default async function LandingPage() {
               },
             ].map((step) => (
               <div key={step.step} className="relative flex flex-col items-center text-center">
-                <div className="relative w-20 h-20 rounded-full bg-white border-2 border-[#6771ab]/30 shadow-md flex items-center justify-center mb-6">
+                <div className="relative w-20 h-20 rounded-full bg-white dark:bg-slate-800 border-2 border-[#6771ab]/30 shadow-md flex items-center justify-center mb-6">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#6771ab] to-[#c484b0] flex items-center justify-center text-white shadow-sm">
                     {step.icon}
                   </div>
@@ -265,7 +233,7 @@ export default async function LandingPage() {
 
 
       {/* ─── TRADITION SUPPORT ─── */}
-      <section className="py-24 px-6 bg-[#faf5ff]">
+      <section className="py-24 px-6 bg-[#faf5ff] dark:bg-[#0b0f19]">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-block px-4 py-1.5 rounded-full bg-violet-100 text-[#6771ab] text-xs font-bold uppercase tracking-widest mb-4">
             Culturally Inclusive
@@ -286,7 +254,7 @@ export default async function LandingPage() {
             ].map((trad) => (
               <div
                 key={trad.name}
-                className="bg-white border border-violet-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-default"
+                className="bg-white dark:bg-slate-900 border border-violet-100 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-default"
               >
                 <div className="text-3xl mb-2" role="img" aria-label={trad.name}>{trad.icon}</div>
                 <div className="font-semibold text-[#2d336b] text-sm">{trad.name}</div>
@@ -299,7 +267,7 @@ export default async function LandingPage() {
 
 
       {/* ─── FOOTER ─── */}
-      <footer className="bg-[#2d336b] text-white py-12 px-6">
+      <footer className="bg-[#2d336b] dark:bg-[#111625] text-white py-12 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 mb-10">
             <div className="flex flex-col items-center md:items-start gap-3">

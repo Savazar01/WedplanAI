@@ -9,11 +9,13 @@ export default function ThemePreferences() {
 
   React.useEffect(() => {
     const saved = localStorage.getItem("theme");
-    if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      setTheme("dark");
-    } else {
-      setTheme("light");
-    }
+    setTimeout(() => {
+      if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        setTheme("dark");
+      } else {
+        setTheme("light");
+      }
+    }, 0);
   }, []);
 
   const setThemeMode = (mode: "light" | "dark") => {

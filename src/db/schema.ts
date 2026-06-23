@@ -152,7 +152,7 @@ export const tasks = pgTable("task", {
   ceremonyId: uuid("ceremony_id").references(() => ceremonies.id, { onDelete: "set null" }),
   assignedUserId: text("assigned_user_id").references(() => users.id, { onDelete: "set null" }),
   categoryData: text("category_data"),
-  cateringMenuId: uuid("catering_menu_id").references((): any => cateringMenus.id, { onDelete: "set null" }),
+  cateringMenuId: uuid("catering_menu_id").references(() => cateringMenus.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

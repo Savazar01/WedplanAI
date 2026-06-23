@@ -9,7 +9,7 @@ import * as React from "react";
 interface CreateUserFormClientProps {
   createAction: (prevState: { success?: boolean; error?: string } | null, formData: FormData) => Promise<{ success?: boolean; error?: string }>;
   adminPersona?: string;
-  weddings?: any[];
+  weddings?: { id: string; partnerA: string; partnerB: string }[];
 }
 
 export default function CreateUserFormClient({ 

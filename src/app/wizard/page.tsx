@@ -264,7 +264,7 @@ export default function WizardPage() {
     setCustomTasks(customTasks.filter((_, i) => i !== index));
   };
 
-  const updateRitual = (index: number, field: keyof typeof customRituals[0], value: any) => {
+  const updateRitual = (index: number, field: keyof typeof customRituals[0], value: string | boolean) => {
     setCustomRituals(
       customRituals.map((r, i) => (i === index ? { ...r, [field]: value } : r))
     );
@@ -508,7 +508,7 @@ export default function WizardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] flex items-center justify-center p-4 transition-colors duration-300">
       <Card variant="default" className="w-full max-w-2xl bg-white p-8 shadow-xl border border-slate-100 flex flex-col relative">
 
         {/* Top Progress Indicator */}

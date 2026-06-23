@@ -21,7 +21,7 @@ export default async function DashboardLayout({ children }: LayoutProps) {
 
   const activeWedding = await getActiveWedding(session.user.id);
 
-  const user = session.user as any;
+  const user = session.user as { role?: string; weddingAccess?: string; id: string; email: string; name: string };
   const userRole = user.role || "user";
   const userWeddingAccess = user.weddingAccess || "all";
 

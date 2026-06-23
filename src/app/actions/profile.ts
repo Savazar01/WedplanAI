@@ -31,7 +31,7 @@ export async function updateProfileAction(input: UpdateProfileInput) {
 
   try {
     const isAdmin = session.user.role === "admin";
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, string | Date | null> = {
       name: name.trim(),
       street: street?.trim() || null,
       city: city?.trim() || null,

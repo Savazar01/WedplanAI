@@ -1,12 +1,30 @@
 "use server";
 
 import { db } from "@/db/client";
-import { weddings } from "@/db/schema";
+import { weddings, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function getActiveWedding(userId: string) {
+  // First check if the user has an assigned weddingId in the users table
+  const userResult = await db
+    .select({ weddingId: users.weddingId })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (userResult.length > 0 && userResult[0].weddingId) {
+    const assignedWedding = await db
+      .select()
+      .from(weddings)
+      .where(eq(weddings.id, userResult[0].weddingId))
+      .limit(1);
+    if (assignedWedding.length > 0) {
+      return assignedWedding[0];
+    }
+  }
+
   const cookieStore = await cookies();
   const activeWeddingId = cookieStore.get("active_wedding_id")?.value;
 

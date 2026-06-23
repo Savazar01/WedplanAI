@@ -9,7 +9,7 @@ import BuildShowcaseClient from "./BuildShowcaseClient";
 
 export default async function ShowcasePage() {
   const session = await getServerSession();
-  if (!session || !session.user || session.user.role !== "admin") {
+  if (!session || !session.user || (session.user.role !== "admin" && session.user.role !== "client")) {
     redirect("/dashboard");
   }
 

@@ -26,6 +26,9 @@ interface Task {
   category: string;
   dueDate: Date | null;
   isCustom: boolean;
+  ceremonyId: string | null;
+  assignedUserId: string | null;
+  categoryData: string | null;
 }
 
 interface Column {
@@ -42,6 +45,8 @@ interface Column {
 interface BoardProps {
   initialTasks: Task[];
   initialColumns?: Column[];
+  ceremonies?: { id: string; name: string }[];
+  teamMembers?: { id: string; name: string; email: string }[];
 }
 
 const DEFAULT_COLUMNS: Column[] = [
@@ -100,10 +105,111 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string; dot: string }>
   other:       { bg: "bg-slate-100",   text: "text-slate-700",   dot: "bg-slate-400" },
 };
 
-export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_COLUMNS }: BoardProps) {
+interface FollowUpQuestion {
+  id: string;
+  label: string;
+  type: "text" | "select";
+  options?: string[];
+}
+
+const DEFAULT_FOLLOW_UP_QUESTIONS: Record<string, FollowUpQuestion[]> = {
+  catering: [
+    {
+      id: "dietaryType",
+      label: "Dietary Option",
+      type: "select",
+      options: ["Vegetarian", "Non-Vegetarian", "Both/All-inclusive"]
+    },
+    {
+      id: "serviceStyle",
+      label: "Service Style",
+      type: "select",
+      options: ["Buffet", "Plated Service", "Family Style", "Food Stations"]
+    }
+  ],
+  venue: [
+    {
+      id: "venueType",
+      label: "Venue Preference",
+      type: "select",
+      options: ["Indoor Ballroom", "Outdoor Lawn/Garden", "Beachside", "Temple/Church"]
+    },
+    {
+      id: "estimatedGuests",
+      label: "Estimated Guest Count",
+      type: "text"
+    }
+  ],
+  decor: [
+    {
+      id: "colorScheme",
+      label: "Color Theme/Palette",
+      type: "text"
+    },
+    {
+      id: "floralSetup",
+      label: "Floral Setup Required?",
+      type: "select",
+      options: ["Yes, extensive", "Minimal floral", "No floral"]
+    }
+  ],
+  music: [
+    {
+      id: "entertainmentType",
+      label: "Entertainment Type",
+      type: "select",
+      options: ["DJ", "Live Band", "Classical Instrumentalists", "Acoustic Soloist"]
+    }
+  ],
+  apparel: [
+    {
+      id: "fittingRequired",
+      label: "Fitting Session Required?",
+      type: "select",
+      options: ["Yes", "No"]
+    }
+  ]
+};
+
+export default function PlanningBoard({ 
+  initialTasks, 
+  initialColumns = DEFAULT_COLUMNS,
+  ceremonies = [],
+  teamMembers = []
+}: BoardProps) {
   const [tasksList, setTasksList] = React.useState<Task[]>(initialTasks);
   const [columnsList, setColumnsList] = React.useState<Column[]>(initialColumns);
   const [activeMobileCol, setActiveMobileCol] = React.useState<string>(initialColumns[0]?.id || "todo");
+
+  const [dbCategories, setDbCategories] = React.useState<{ key: string; name: string; followUpQuestions: string | null }[]>([]);
+  React.useEffect(() => {
+    async function load() {
+      const { getPublicCategories } = await import("@/app/actions/wedding");
+      const list = await getPublicCategories();
+      setDbCategories(list);
+    }
+    load();
+  }, []);
+
+  const getFollowUpQuestions = React.useCallback((catKey: string): FollowUpQuestion[] => {
+    const dbCat = dbCategories.find(c => c.key === catKey);
+    if (dbCat && dbCat.followUpQuestions) {
+      try {
+        const parsed = JSON.parse(dbCat.followUpQuestions);
+        if (Array.isArray(parsed)) {
+          return parsed.map(q => ({
+            id: q.id,
+            label: q.label,
+            type: q.type === "boolean" ? "select" : q.type,
+            options: q.type === "boolean" ? ["Yes", "No"] : q.options
+          }));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return DEFAULT_FOLLOW_UP_QUESTIONS[catKey as keyof typeof DEFAULT_FOLLOW_UP_QUESTIONS] || [];
+  }, [dbCategories]);
   
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
   const [isEditOpen, setIsEditOpen] = React.useState(false);
@@ -119,31 +225,57 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
   const [editColName, setEditColName] = React.useState("");
   const [editColColor, setEditColColor] = React.useState("#6771ab");
 
+  // Create Form State
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [category, setCategory] = React.useState("other");
+  const [customCategory, setCustomCategory] = React.useState("");
   const [dueDate, setDueDate] = React.useState("");
+  const [ceremonyId, setCeremonyId] = React.useState("");
+  const [assignedUserId, setAssignedUserId] = React.useState("");
+  const [categoryAnswers, setCategoryAnswers] = React.useState<Record<string, string>>({});
 
+  // Edit Form State
   const [editTitle, setEditTitle] = React.useState("");
   const [editDescription, setEditDescription] = React.useState("");
   const [editCategory, setEditCategory] = React.useState("other");
+  const [editCustomCategory, setEditCustomCategory] = React.useState("");
   const [editDueDate, setEditDueDate] = React.useState("");
+  const [editCeremonyId, setEditCeremonyId] = React.useState("");
+  const [editAssignedUserId, setEditAssignedUserId] = React.useState("");
+  const [editCategoryAnswers, setEditCategoryAnswers] = React.useState<Record<string, string>>({});
 
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [deleteConfirm, setDeleteConfirm] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  const [prevInitialTasks, setPrevInitialTasks] = React.useState(initialTasks);
-  if (initialTasks !== prevInitialTasks) {
+  // Safe client component state synchronization with structural signature
+  const tasksSignature = React.useMemo(() => {
+    return initialTasks
+      .map(
+        (t) =>
+          `${t.id}-${t.status}-${t.title}-${t.category}-${t.dueDate?.getTime() || ""}-${t.ceremonyId || ""}-${
+            t.assignedUserId || ""
+          }-${t.categoryData || ""}`
+      )
+      .join("|");
+  }, [initialTasks]);
+
+  const [prevTasksSignature, setPrevTasksSignature] = React.useState(tasksSignature);
+  if (tasksSignature !== prevTasksSignature) {
     setTasksList(initialTasks);
-    setPrevInitialTasks(initialTasks);
+    setPrevTasksSignature(tasksSignature);
   }
 
-  const [prevInitialColumns, setPrevInitialColumns] = React.useState(initialColumns);
-  if (initialColumns !== prevInitialColumns) {
+  const columnsSignature = React.useMemo(() => {
+    return initialColumns.map((c) => `${c.id}-${c.name}-${c.color}-${c.position}`).join("|");
+  }, [initialColumns]);
+
+  const [prevColumnsSignature, setPrevColumnsSignature] = React.useState(columnsSignature);
+  if (columnsSignature !== prevColumnsSignature) {
     setColumnsList(initialColumns);
-    setPrevInitialColumns(initialColumns);
+    setPrevColumnsSignature(columnsSignature);
   }
 
   const getColumnIcon = (type: string) => {
@@ -187,11 +319,40 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
     e.preventDefault();
     setError("");
     if (!title.trim()) { setError("Task title is required."); return; }
+    
+    let resolvedCategory = category;
+    if (category === "other") {
+      if (!customCategory.trim()) {
+        setError("Please specify a custom category name.");
+        return;
+      }
+      resolvedCategory = customCategory.trim();
+    }
+
     setLoading(true);
     try {
-      const res = await createTaskAction({ title, description, category, dueDate: dueDate || undefined });
+      const res = await createTaskAction({ 
+        title, 
+        description, 
+        category: resolvedCategory, 
+        dueDate: dueDate || undefined,
+        ceremonyId: ceremonyId || null,
+        assignedUserId: assignedUserId || null,
+        categoryData: Object.keys(categoryAnswers).length > 0 ? JSON.stringify(categoryAnswers) : null
+      });
       if (res?.error) { setError(res.error); }
-      else { setIsCreateOpen(false); setTitle(""); setDescription(""); setCategory("other"); setDueDate(""); window.location.reload(); }
+      else { 
+        setIsCreateOpen(false); 
+        setTitle(""); 
+        setDescription(""); 
+        setCategory("other"); 
+        setCustomCategory("");
+        setDueDate(""); 
+        setCeremonyId("");
+        setAssignedUserId("");
+        setCategoryAnswers({});
+        window.location.reload(); 
+      }
     } catch { setError("An unexpected error occurred."); }
     finally { setLoading(false); }
   };
@@ -201,12 +362,45 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
     if (!selectedTask) return;
     setError("");
     if (!editTitle.trim()) { setError("Task title is required."); return; }
+
+    let resolvedCategory = editCategory;
+    if (editCategory === "other") {
+      if (!editCustomCategory.trim()) {
+        setError("Please specify a custom category name.");
+        return;
+      }
+      resolvedCategory = editCustomCategory.trim();
+    }
+
     setLoading(true);
     try {
-      const res = await updateTaskAction(selectedTask.id, { title: editTitle, description: editDescription, category: editCategory, dueDate: editDueDate || undefined });
+      const res = await updateTaskAction(selectedTask.id, { 
+        title: editTitle, 
+        description: editDescription, 
+        category: resolvedCategory, 
+        dueDate: editDueDate || undefined,
+        ceremonyId: editCeremonyId || null,
+        assignedUserId: editAssignedUserId || null,
+        categoryData: Object.keys(editCategoryAnswers).length > 0 ? JSON.stringify(editCategoryAnswers) : null
+      });
       if (res?.error) { setError(res.error); }
       else {
-        setTasksList((prev) => prev.map((t) => t.id === selectedTask.id ? { ...t, title: editTitle, description: editDescription || null, category: editCategory, dueDate: editDueDate ? new Date(editDueDate) : null } : t));
+        setTasksList((prev) => 
+          prev.map((t) => 
+            t.id === selectedTask.id 
+              ? { 
+                  ...t, 
+                  title: editTitle, 
+                  description: editDescription || null, 
+                  category: resolvedCategory, 
+                  dueDate: editDueDate ? new Date(editDueDate) : null,
+                  ceremonyId: editCeremonyId || null,
+                  assignedUserId: editAssignedUserId || null,
+                  categoryData: Object.keys(editCategoryAnswers).length > 0 ? JSON.stringify(editCategoryAnswers) : null
+                } 
+              : t
+          )
+        );
         setIsEditOpen(false); setSelectedTask(null); window.location.reload();
       }
     } catch { setError("An unexpected error occurred."); }
@@ -339,18 +533,33 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
     return !isDone && new Date(date) < new Date();
   };
 
+  const isPredefinedCategory = (cat: string) => {
+    return ["venue", "catering", "decor", "apparel", "invitations", "music", "rituals"].includes(cat);
+  };
+
+  const getCategoryDisplayName = (cat: string) => {
+    if (cat === "rituals") return "Ceremonies";
+    if (cat === "decor") return "Decoration";
+    const dbCat = dbCategories.find(c => c.key === cat);
+    if (dbCat) return dbCat.name;
+    return cat.charAt(0).toUpperCase() + cat.slice(1);
+  };
+
   const totalTasks = tasksList.length;
   const doneCol = columnsList.find((c) => c.type === "done");
   const doneTasks = tasksList.filter(t => doneCol ? t.status === doneCol.id : t.status === "done").length;
   const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+  const createQuestions = getFollowUpQuestions(category);
+  const editQuestions = getFollowUpQuestions(editCategory);
 
   return (
     <div className="flex flex-col h-full font-sans">
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Wedding Tasks</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Click a card to edit · Drag to change status</p>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Wedding Task Planner</h1>
+          <p className="text-xs text-slate-500 mt-0.5 font-sans">Click a card to edit · Drag to change status</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Mini progress pill */}
@@ -361,12 +570,17 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <span className="text-[11px] font-bold text-slate-600">{progress}%</span>
-            <span className="text-[11px] text-slate-400">{doneTasks}/{totalTasks}</span>
+            <span className="text-[11px] font-bold text-slate-600 font-sans">{progress}%</span>
+            <span className="text-[11px] text-slate-400 font-sans">{doneTasks}/{totalTasks}</span>
           </div>
           <button
-            onClick={() => setIsCreateOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#6771ab] to-[#2d336b] text-white text-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+            onClick={() => {
+              setCategory("other");
+              setCustomCategory("");
+              setCategoryAnswers({});
+              setIsCreateOpen(true);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#6771ab] to-[#2d336b] text-white text-sm font-bold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all font-sans"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -393,12 +607,12 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 font-sans">
                   <span className="text-sm">{getColumnIcon(col.type)}</span>
                   <span className="truncate max-w-[80px]">{col.name}</span>
                 </span>
                 <span 
-                  className={`mt-1 text-[10px] px-2 py-0.5 rounded-full font-bold transition-all ${
+                  className={`mt-1 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans transition-all ${
                     isActive
                       ? "bg-[#6771ab] text-white"
                       : "bg-slate-200/80 text-slate-600"
@@ -436,11 +650,11 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
                 className="rounded-t-2xl px-4 py-3 flex items-center text-white"
                 style={{ backgroundColor: col.color }}
               >
-                <h3 className="font-bold text-sm tracking-wide flex items-center gap-2">
+                <h3 className="font-bold text-sm tracking-wide flex items-center gap-2 font-sans">
                   <span className="text-base">{getColumnIcon(col.type)}</span>
                   <span>{col.name}</span>
                 </h3>
-                <span className="ml-auto mr-1.5 bg-white/20 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm">
+                <span className="ml-auto mr-1.5 bg-white/20 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full backdrop-blur-sm font-sans">
                   {colTasks.length}
                 </span>
                 <button
@@ -474,13 +688,19 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
                     >
                       {getColumnIcon(col.type)}
                     </div>
-                    <p className="text-xs text-slate-400 font-medium">Drop tasks here</p>
+                    <p className="text-xs text-slate-400 font-medium font-sans">Drop tasks here</p>
                   </div>
                 )}
 
                 {colTasks.map((task) => {
                   const overdue = isOverdue(task.dueDate, task.status);
-                  const catStyle = CATEGORY_STYLES[task.category] ?? CATEGORY_STYLES.other;
+                  const isPredefined = isPredefinedCategory(task.category);
+                  const catKey = isPredefined ? task.category : "other";
+                  const catStyle = CATEGORY_STYLES[catKey] ?? CATEGORY_STYLES.other;
+
+                  const assignedUser = teamMembers.find((m) => m.id === task.assignedUserId);
+                  const associatedCeremony = ceremonies.find((c) => c.id === task.ceremonyId);
+
                   return (
                     <div
                       key={task.id}
@@ -490,18 +710,33 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
                         setSelectedTask(task);
                         setEditTitle(task.title);
                         setEditDescription(task.description || "");
-                        setEditCategory(task.category);
+                        
+                        if (isPredefined) {
+                          setEditCategory(task.category);
+                          setEditCustomCategory("");
+                        } else {
+                          setEditCategory("other");
+                          setEditCustomCategory(task.category);
+                        }
+
                         setEditDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : "");
+                        setEditCeremonyId(task.ceremonyId || "");
+                        setEditAssignedUserId(task.assignedUserId || "");
+                        try {
+                          setEditCategoryAnswers(task.categoryData ? JSON.parse(task.categoryData) : {});
+                        } catch {
+                          setEditCategoryAnswers({});
+                        }
                         setIsEditOpen(true);
                       }}
                       className={`group relative bg-white rounded-xl p-3.5 shadow-sm border cursor-grab active:cursor-grabbing hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 ${
-                        overdue ? "border-red-300 bg-red-50/30" : "border-white/80"
+                        overdue ? "border-red-300 bg-red-50/30" : "border-slate-200"
                       }`}
                     >
                       {/* Delete button */}
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
-                        className="absolute top-2.5 right-2.5 p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all outline-none z-10"
+                        className="absolute top-2.5 right-2.5 p-1 text-slate-300 hover:text-[#ef4444] hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all outline-none z-10"
                         title="Delete task"
                       >
                         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -511,40 +746,70 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
 
                       {/* Overdue banner */}
                       {overdue && (
-                        <div className="flex items-center gap-1 mb-2 text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg px-2 py-0.5">
+                        <div className="flex items-center gap-1 mb-2 text-[10px] font-bold text-red-600 bg-red-50 border border-red-100 rounded-lg px-2 py-0.5 font-sans">
                           <span>⚠️</span> Overdue
                         </div>
                       )}
 
-                      <h4 className="font-semibold text-[13px] text-slate-800 pr-6 leading-snug break-words">
+                      <h4 className="font-semibold text-[13px] text-slate-800 pr-6 leading-snug break-words font-sans">
                         {task.title}
                       </h4>
 
                       {task.description && (
-                        <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
+                        <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2 leading-relaxed font-sans">
                           {task.description}
                         </p>
+                      )}
+
+                      {/* Associated details */}
+                      <div className="flex flex-col gap-1 mt-2 text-[10px] text-slate-500 font-sans">
+                        {associatedCeremony && (
+                          <span className="flex items-center gap-1 bg-[#6771ab]/10 text-[#2d336b] px-2 py-0.5 rounded-full w-fit font-semibold">
+                            🎉 {associatedCeremony.name}
+                          </span>
+                        )}
+                        {assignedUser && (
+                          <span className="flex items-center gap-1 text-slate-600 font-medium">
+                            👤 Assigned: {assignedUser.name}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Follow-up question answers details */}
+                      {task.categoryData && (
+                        <div className="mt-2 text-[10px] bg-slate-50 border border-slate-200/50 rounded-lg p-2 space-y-0.5">
+                          {Object.entries(JSON.parse(task.categoryData)).map(([key, val]) => {
+                            const questionList = getFollowUpQuestions(task.category);
+                            const question = questionList.find(q => q.id === key);
+                            const label = question ? question.label : key;
+                            return (
+                              <div key={key} className="text-slate-600 font-sans leading-tight">
+                                <strong>{label}:</strong> {String(val)}
+                              </div>
+                            );
+                          })}
+                        </div>
                       )}
 
                       {/* Footer row */}
                       <div className="flex flex-col gap-2 mt-3 pt-2.5 border-t border-slate-100">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${catStyle.bg} ${catStyle.text}`}>
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${catStyle.bg} ${catStyle.text} font-sans`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${catStyle.dot}`} />
-                            {task.category}
+                            {getCategoryDisplayName(task.category)}
                           </span>
                           {task.dueDate && (
-                            <span className={`text-[10px] font-medium ${overdue ? "text-red-500" : "text-slate-400"}`}>
+                            <span className={`text-[10px] font-medium font-sans ${overdue ? "text-red-500" : "text-slate-400"}`}>
                               📅 {new Date(task.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
                             </span>
                           )}
                           {task.isCustom && (
-                            <span className="text-[10px] font-medium text-violet-500 bg-violet-50 px-1.5 py-0.5 rounded-full">Custom</span>
+                            <span className="text-[10px] font-semibold text-violet-500 bg-violet-50 px-1.5 py-0.5 rounded-full font-sans">Custom</span>
                           )}
                         </div>
                         
                         <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-between gap-2">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status</span>
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider font-sans">Status</span>
                           <select
                             value={task.status}
                             onChange={async (e) => {
@@ -563,7 +828,7 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
                                   setTasksList(originalTasks);
                               }
                             }}
-                            className="bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-600 rounded-lg px-1.5 py-0.5 outline-none focus-visible:ring-1 focus-visible:ring-[#6771ab] cursor-pointer hover:bg-slate-100 transition-colors"
+                            className="bg-slate-50 border border-slate-200 text-[10px] font-bold text-slate-600 rounded-lg px-1.5 py-0.5 outline-none focus-visible:ring-1 focus-visible:ring-[#6771ab] cursor-pointer hover:bg-slate-100 transition-colors font-sans"
                           >
                             {columnsList.map((c) => (
                               <option key={c.id} value={c.id}>
@@ -594,13 +859,13 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
           className="w-full md:w-[300px] shrink-0 border-2 border-dashed border-slate-300 hover:border-[#6771ab] hover:bg-slate-50 rounded-2xl flex flex-col items-center justify-center p-6 min-h-[150px] transition-all cursor-pointer group"
         >
           <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">➕</span>
-          <span className="text-sm font-bold text-slate-600">Add Column</span>
+          <span className="text-sm font-bold text-slate-600 font-sans">Add Column</span>
         </div>
       </div>
 
       {/* ── Create Task Dialog ── */}
       <Dialog isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Create New Task">
-        <form onSubmit={handleCreateTask} className="space-y-4">
+        <form onSubmit={handleCreateTask} className="space-y-4 font-sans">
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Task Title</label>
             <Input type="text" placeholder="e.g. Call wedding cake designer" value={title} onChange={(e) => setTitle(e.target.value)} required disabled={loading} />
@@ -609,11 +874,28 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Description</label>
             <Input type="text" placeholder="Provide more context (optional)" value={description} onChange={(e) => setDescription(e.target.value)} disabled={loading} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Category</label>
-              <Select value={category} onChange={(e) => setCategory(e.target.value)} disabled={loading}>
-                {categories.map((c) => <option key={c} value={c} className="capitalize">{c}</option>)}
+              <Select 
+                value={category} 
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setCategoryAnswers({});
+                }} 
+                disabled={loading}
+              >
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c === "rituals" ? "Ceremonies" : (c === "decor" ? "Decoration" : c.charAt(0).toUpperCase() + c.slice(1))}
+                  </option>
+                ))}
+                {dbCategories.map((c) => (
+                  <option key={c.key} value={c.key}>
+                    {c.name}
+                  </option>
+                ))}
               </Select>
             </div>
             <div>
@@ -621,7 +903,95 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
               <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} disabled={loading} />
             </div>
           </div>
-          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">{error}</div>}
+
+          {/* Custom Category Input if "Other" is selected */}
+          {category === "other" && (
+            <div>
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Custom Category Name</label>
+              <Input
+                type="text"
+                placeholder="e.g. Photography, Makeup, Transport"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+          )}
+
+          {/* Ceremony & Assignee Associations */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Associated Ceremony</label>
+              <select
+                value={ceremonyId}
+                onChange={(e) => setCeremonyId(e.target.value)}
+                disabled={loading}
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+              >
+                <option value="">None (General Task)</option>
+                {ceremonies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Assigned Team Member</label>
+              <select
+                value={assignedUserId}
+                onChange={(e) => setAssignedUserId(e.target.value)}
+                disabled={loading}
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name} ({m.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Dynamic Follow-up Questions */}
+          {createQuestions.length > 0 && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+              <p className="text-[11px] font-bold text-[#6771ab] uppercase tracking-wider mb-2">Category Follow-up Details</p>
+              {createQuestions.map((q) => (
+                <div key={q.id}>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">{q.label}</label>
+                  {q.type === "select" ? (
+                    <select
+                      value={categoryAnswers[q.id] || ""}
+                      onChange={(e) => setCategoryAnswers({ ...categoryAnswers, [q.id]: e.target.value })}
+                      disabled={loading}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                    >
+                      <option value="">Select option...</option>
+                      {q.options?.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      type="text"
+                      placeholder={`Enter ${q.label.toLowerCase()}`}
+                      value={categoryAnswers[q.id] || ""}
+                      onChange={(e) => setCategoryAnswers({ ...categoryAnswers, [q.id]: e.target.value })}
+                      disabled={loading}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {error && <div className="p-3 bg-red-50 border border-red-200 text-[#ef4444] rounded-xl text-xs">{error}</div>}
+          
           <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 mt-2">
             <Button type="button" variant="ghost" onClick={() => setIsCreateOpen(false)} disabled={loading}>Cancel</Button>
             <Button type="submit" variant="primary" disabled={loading}>{loading ? "Creating..." : "Save Task"}</Button>
@@ -631,7 +1001,7 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
 
       {/* ── Edit Task Dialog ── */}
       <Dialog isOpen={isEditOpen} onClose={() => { setIsEditOpen(false); setSelectedTask(null); }} title={`Edit: ${selectedTask?.title ?? "Task"}`}>
-        <form onSubmit={handleEditTask} className="space-y-4">
+        <form onSubmit={handleEditTask} className="space-y-4 font-sans">
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Task Title</label>
             <Input type="text" placeholder="Task title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} required disabled={loading} />
@@ -640,11 +1010,28 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Description</label>
             <Input type="text" placeholder="Provide more context (optional)" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} disabled={loading} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Category</label>
-              <Select value={editCategory} onChange={(e) => setEditCategory(e.target.value)} disabled={loading}>
-                {categories.map((c) => <option key={c} value={c} className="capitalize">{c}</option>)}
+              <Select 
+                value={editCategory} 
+                onChange={(e) => {
+                  setEditCategory(e.target.value);
+                  setEditCategoryAnswers({});
+                }} 
+                disabled={loading}
+              >
+                {categories.map((c) => (
+                  <option key={c} value={c}>
+                    {c === "rituals" ? "Ceremonies" : (c === "decor" ? "Decoration" : c.charAt(0).toUpperCase() + c.slice(1))}
+                  </option>
+                ))}
+                {dbCategories.map((c) => (
+                  <option key={c.key} value={c.key}>
+                    {c.name}
+                  </option>
+                ))}
               </Select>
             </div>
             <div>
@@ -652,7 +1039,95 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
               <Input type="date" value={editDueDate} onChange={(e) => setEditDueDate(e.target.value)} disabled={loading} />
             </div>
           </div>
-          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">{error}</div>}
+
+          {/* Custom Category Input if "Other" is selected */}
+          {editCategory === "other" && (
+            <div>
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Custom Category Name</label>
+              <Input
+                type="text"
+                placeholder="e.g. Photography, Makeup, Transport"
+                value={editCustomCategory}
+                onChange={(e) => setEditCustomCategory(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
+          )}
+
+          {/* Ceremony & Assignee Associations */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Associated Ceremony</label>
+              <select
+                value={editCeremonyId}
+                onChange={(e) => setEditCeremonyId(e.target.value)}
+                disabled={loading}
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+              >
+                <option value="">None (General Task)</option>
+                {ceremonies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Assigned Team Member</label>
+              <select
+                value={editAssignedUserId}
+                onChange={(e) => setEditAssignedUserId(e.target.value)}
+                disabled={loading}
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name} ({m.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Dynamic Follow-up Questions */}
+          {editQuestions.length > 0 && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+              <p className="text-[11px] font-bold text-[#6771ab] uppercase tracking-wider mb-2">Category Follow-up Details</p>
+              {editQuestions.map((q) => (
+                <div key={q.id}>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">{q.label}</label>
+                  {q.type === "select" ? (
+                    <select
+                      value={editCategoryAnswers[q.id] || ""}
+                      onChange={(e) => setEditCategoryAnswers({ ...editCategoryAnswers, [q.id]: e.target.value })}
+                      disabled={loading}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                    >
+                      <option value="">Select option...</option>
+                      {q.options?.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      type="text"
+                      placeholder={`Enter ${q.label.toLowerCase()}`}
+                      value={editCategoryAnswers[q.id] || ""}
+                      onChange={(e) => setEditCategoryAnswers({ ...editCategoryAnswers, [q.id]: e.target.value })}
+                      disabled={loading}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {error && <div className="p-3 bg-red-50 border border-red-200 text-[#ef4444] rounded-xl text-xs">{error}</div>}
+          
           <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 mt-2">
             <Button type="button" variant="ghost" onClick={() => { setIsEditOpen(false); setSelectedTask(null); }} disabled={loading}>Cancel</Button>
             <Button type="submit" variant="primary" disabled={loading}>{loading ? "Saving..." : "Save Changes"}</Button>
@@ -662,7 +1137,7 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
 
       {/* ── Add Column Dialog ── */}
       <Dialog isOpen={isAddColOpen} onClose={() => setIsAddColOpen(false)} title="Add New Column">
-        <form onSubmit={handleAddColumn} className="space-y-4">
+        <form onSubmit={handleAddColumn} className="space-y-4 font-sans">
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Column Name</label>
             <Input type="text" placeholder="e.g. Needs Review" value={newColName} onChange={(e) => setNewColName(e.target.value)} required disabled={loading} />
@@ -674,7 +1149,7 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
               <Input type="text" placeholder="#6771ab" value={newColColor} onChange={(e) => setNewColColor(e.target.value)} className="flex-1" disabled={loading} />
             </div>
           </div>
-          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">{error}</div>}
+          {error && <div className="p-3 bg-red-50 border border-red-200 text-[#ef4444] rounded-xl text-xs">{error}</div>}
           <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 mt-2">
             <Button type="button" variant="ghost" onClick={() => setIsAddColOpen(false)} disabled={loading}>Cancel</Button>
             <Button type="submit" variant="primary" disabled={loading}>{loading ? "Adding..." : "Save Column"}</Button>
@@ -684,7 +1159,7 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
 
       {/* ── Edit Column Dialog ── */}
       <Dialog isOpen={isEditColOpen} onClose={() => { setIsEditColOpen(false); setSelectedCol(null); }} title={`Column Settings: ${selectedCol?.name ?? ""}`}>
-        <form onSubmit={handleEditColumn} className="space-y-4">
+        <form onSubmit={handleEditColumn} className="space-y-4 font-sans">
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Column Name</label>
             <Input type="text" placeholder="Column name" value={editColName} onChange={(e) => setEditColName(e.target.value)} required disabled={loading} />
@@ -731,7 +1206,7 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
             </div>
           </div>
 
-          {error && <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">{error}</div>}
+          {error && <div className="p-3 bg-red-50 border border-red-200 text-[#ef4444] rounded-xl text-xs">{error}</div>}
           
           <div className="flex items-center justify-between border-t border-slate-100 pt-4 mt-2">
             <Button 
@@ -775,3 +1250,4 @@ export default function PlanningBoard({ initialTasks, initialColumns = DEFAULT_C
     </div>
   );
 }
+

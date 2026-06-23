@@ -14,12 +14,12 @@ const sections = [
       {
         title: "Sample Wedding",
         content:
-          "When you sign up, a sample Hindu wedding (Rahul & Priya) is automatically created with pre-seeded tasks, rituals, guests, and vendors. This lets you explore the platform immediately. The sample wedding is read-only and cannot be deleted, but you can hide the walkthrough banner after reviewing it.",
+          "When you sign up, a sample Hindu wedding (Rahul & Priya) is automatically created with pre-seeded tasks, ceremonies, guests, and vendors. This lets you explore the platform immediately. The sample wedding is read-only and cannot be deleted, but you can hide the walkthrough banner after reviewing it.",
       },
       {
         title: "Creating Your Wedding",
         content:
-          "Use the guided 7-step wizard to set up your wedding: enter partner names, date and venue, select your tradition (Hindu, Muslim, Sikh, Christian, or Secular), set budget and guest count, and the system will auto-generate planning tasks, rituals, and itinerary events specific to your tradition.",
+          "Use the guided 7-step wizard to set up your wedding: enter partner names, date and venue, select your tradition (Hindu, Muslim, Sikh, Christian, or Secular), set budget and guest count, and the system will auto-generate planning tasks and ceremonies specific to your tradition.",
       },
       {
         title: "Dashboard Overview",
@@ -63,7 +63,7 @@ const sections = [
       {
         title: "Monthly View",
         content:
-          "The Calendar page displays all rituals, ceremonies, and tasks with due dates in a clean month-grid layout. Navigate between months using the prev/next arrows.",
+          "The Calendar page displays all ceremonies and tasks with due dates in a clean month-grid layout. Navigate between months using the prev/next arrows.",
       },
       {
         title: "Events",
@@ -80,7 +80,7 @@ const sections = [
       {
         title: "Day-of Timeline",
         content:
-          "The Wedding Ceremony Planner page shows all your wedding ceremonies and rituals in chronological order with precise timings. This is your wedding day run sheet — each ritual displays its name, date, time range, and location.",
+          "The Wedding Ceremony Planner page shows all your wedding ceremonies in chronological order with precise timings. This is your wedding day run sheet — each ceremony displays its name, date, time range, and location.",
       },
       {
         title: "Adding Rituals",
@@ -234,7 +234,7 @@ const sections = [
       {
         title: "Available Endpoints",
         content:
-          "Endpoints: GET/POST /api/v1/columns, /api/v1/guests, /api/v1/rituals, /api/v1/tasks, /api/v1/vendors, /api/v1/wedding. Individual resources can be accessed at /api/v1/[resource]/[id].",
+          "Endpoints: GET/POST /api/v1/columns, /api/v1/guests, /api/v1/ceremonies, /api/v1/tasks, /api/v1/vendors, /api/v1/wedding. Individual resources can be accessed at /api/v1/[resource]/[id].",
       },
     ],
   },
@@ -246,7 +246,7 @@ const sections = [
       {
         title: "Supported Traditions",
         content:
-          "WedPlanAI supports 5 wedding traditions: Hindu (Shubh Vivah), Muslim (Nikah), Sikh (Anand Karaj), Christian (Holy Matrimony), and Secular (Celebration). Each tradition comes with pre-seeded planning tasks, ceremonies, and rituals tailored to its customs.",
+          "WedPlanAI supports 5 wedding traditions: Hindu (Shubh Vivah), Muslim (Nikah), Sikh (Anand Karaj), Christian (Holy Matrimony), and Secular (Celebration). Each tradition comes with pre-seeded planning tasks and ceremonies tailored to its customs.",
       },
       {
         title: "Auto-Seeding",

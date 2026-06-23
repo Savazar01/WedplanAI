@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { guests } from "@/db/schema";
+import { guests, guestRsvps, ceremonies } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { eq } from "drizzle-orm";
@@ -14,6 +14,7 @@ export async function createGuestAction(data: {
   rsvpStatus: "pending" | "attending" | "declined";
   plusOneCount: number;
   dietaryRestrictions?: string;
+  invitedCeremonies?: string;
 }) {
   const session = await getServerSession();
   if (!session || !session.user) {
@@ -43,6 +44,7 @@ export async function createGuestAction(data: {
       rsvpStatus: data.rsvpStatus,
       plusOneCount: data.plusOneCount,
       dietaryRestrictions: data.dietaryRestrictions || null,
+      invitedCeremonies: data.invitedCeremonies || "all",
     });
 
     revalidatePath("/guests");
@@ -106,6 +108,7 @@ export async function updateGuestAction(
     rsvpStatus: "pending" | "attending" | "declined";
     plusOneCount: number;
     dietaryRestrictions?: string;
+    invitedCeremonies?: string;
   }
 ) {
   const session = await getServerSession();
@@ -123,6 +126,7 @@ export async function updateGuestAction(
         rsvpStatus: data.rsvpStatus,
         plusOneCount: data.plusOneCount,
         dietaryRestrictions: data.dietaryRestrictions || null,
+        invitedCeremonies: data.invitedCeremonies !== undefined ? data.invitedCeremonies : "all",
         updatedAt: new Date(),
       })
       .where(eq(guests.id, guestId));
@@ -145,6 +149,7 @@ export interface BatchGuestInput {
   rsvpStatus?: string;
   plusOneCount?: number | string;
   dietaryRestrictions?: string | null;
+  invitedCeremonies?: string | null;
 }
 
 export async function batchInsertGuestsAction(weddingId: string, guestsList: BatchGuestInput[]) {
@@ -154,6 +159,7 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
   }
 
   try {
+    const dbCeremonies = await db.select().from(ceremonies).where(eq(ceremonies.weddingId, weddingId));
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const toInsert: {
       weddingId: string;
@@ -164,6 +170,7 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
       rsvpStatus: "pending" | "attending" | "declined";
       plusOneCount: number;
       dietaryRestrictions: string | null;
+      invitedCeremonies: string;
     }[] = [];
 
     for (const guest of guestsList) {
@@ -186,6 +193,20 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
         attempts++;
       }
 
+      let resolved = "all";
+      if (guest.invitedCeremonies && guest.invitedCeremonies.trim() !== "") {
+        const trimmed = guest.invitedCeremonies.trim().toLowerCase();
+        if (trimmed !== "all") {
+          const names = trimmed.split(",").map(n => n.trim().toLowerCase());
+          const matchedIds = dbCeremonies
+            .filter(c => names.includes(c.name.toLowerCase()))
+            .map(c => c.id);
+          if (matchedIds.length > 0) {
+            resolved = matchedIds.join(",");
+          }
+        }
+      }
+
       toInsert.push({
         weddingId,
         name: guest.name || "Unnamed Guest",
@@ -195,6 +216,7 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
         rsvpStatus: (guest.rsvpStatus || "pending") as "pending" | "attending" | "declined",
         plusOneCount: typeof guest.plusOneCount === "number" ? guest.plusOneCount : parseInt(guest.plusOneCount || "0") || 0,
         dietaryRestrictions: guest.dietaryRestrictions || null,
+        invitedCeremonies: resolved,
       });
     }
 
@@ -231,7 +253,12 @@ export async function findGuestByCodeAction(weddingId: string, loginCode: string
       return { error: "This code is for a different wedding." };
     }
 
-    return { success: true, guest };
+    const rsvps = await db
+      .select()
+      .from(guestRsvps)
+      .where(eq(guestRsvps.guestId, guest.id));
+
+    return { success: true, guest, rsvps };
   } catch (error) {
     console.error("Find guest error:", error);
     return { error: "Failed to verify login code." };
@@ -261,6 +288,55 @@ export async function updateGuestRsvpPublicAction(
   } catch (error) {
     console.error("Public RSVP update error:", error);
     return { error: "Failed to save RSVP." };
+  }
+}
+
+export async function saveGuestRsvpAction(
+  guestId: string,
+  rsvps: { ceremonyId: string; rsvpStatus: "attending" | "declined"; guestCount: number }[],
+  data: {
+    plusOneCount: number;
+    dietaryRestrictions?: string;
+  }
+) {
+  try {
+    // Delete existing guest RSVPs
+    await db.delete(guestRsvps).where(eq(guestRsvps.guestId, guestId));
+
+    // Insert new guest RSVPs if any
+    if (rsvps.length > 0) {
+      await db.insert(guestRsvps).values(
+        rsvps.map((r) => ({
+          guestId,
+          ceremonyId: r.ceremonyId,
+          rsvpStatus: r.rsvpStatus,
+          guestCount: r.guestCount,
+        }))
+      );
+    }
+
+    // Determine the main RSVP status
+    const hasAttending = rsvps.some((r) => r.rsvpStatus === "attending");
+    const mainStatus = hasAttending ? "attending" : rsvps.length > 0 ? "declined" : "pending";
+
+    await db
+      .update(guests)
+      .set({
+        rsvpStatus: mainStatus,
+        plusOneCount: data.plusOneCount,
+        dietaryRestrictions: data.dietaryRestrictions || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(guests.id, guestId));
+
+    revalidatePath("/guests");
+    revalidatePath("/dashboard/guests");
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) {
+    console.error("Save guest RSVP error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to save RSVPs";
+    return { error: errorMessage };
   }
 }
 

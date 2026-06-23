@@ -20,6 +20,14 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "user",
       },
+      persona: {
+        type: "string",
+        defaultValue: "diy",
+      },
+      weddingId: {
+        type: "string",
+        required: false,
+      },
     },
   },
   advanced: {

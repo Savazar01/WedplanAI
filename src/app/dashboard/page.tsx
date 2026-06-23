@@ -1,12 +1,12 @@
 import { db } from "@/db/client";
-import { tasks, guests, vendors } from "@/db/schema";
+import { tasks, guests, vendors, ceremonies, guestRsvps } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding, ensureDefaultColumns } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { eq, and, lt, asc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import DashboardWeddingCard from "@/components/dashboard/DashboardWeddingCard";
 import { formatCurrency } from "@/lib/format";
 
@@ -41,6 +41,32 @@ export default async function DashboardPage() {
   const weddingGuests = await db.select().from(guests).where(eq(guests.weddingId, wedding.id));
   const weddingVendors = await db.select().from(vendors).where(eq(vendors.weddingId, wedding.id));
   const weddingColumns = await ensureDefaultColumns(wedding.id);
+
+  const weddingCeremonies = await db
+    .select()
+    .from(ceremonies)
+    .where(eq(ceremonies.weddingId, wedding.id));
+
+  const dbGuestRsvps = await db
+    .select({
+      ceremonyId: guestRsvps.ceremonyId,
+      rsvpStatus: guestRsvps.rsvpStatus,
+      guestCount: guestRsvps.guestCount,
+    })
+    .from(guestRsvps)
+    .innerJoin(guests, eq(guestRsvps.guestId, guests.id))
+    .where(eq(guests.weddingId, wedding.id));
+
+  const ceremonyAttendance = weddingCeremonies.map((c) => {
+    const totalAttending = dbGuestRsvps
+      .filter((r) => r.ceremonyId === c.id && r.rsvpStatus === "attending")
+      .reduce((sum, r) => sum + r.guestCount, 0);
+    return {
+      id: c.id,
+      name: c.name,
+      totalAttending,
+    };
+  });
 
   const doneCol = weddingColumns.find((col) => col.type === "done");
 
@@ -80,8 +106,125 @@ export default async function DashboardPage() {
   const isBudgetBreached = contractedCost > totalBudget;
   const budgetPercentage = totalBudget > 0 ? Math.round((contractedCost / totalBudget) * 100) : 0;
 
+  const isClient = session.user.role === "client";
+
+  if (isClient) {
+    return (
+      <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-8">
+        {/* ─── ROW 1: Wedding Card + Showcase Quick Nav ─── */}
+        <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
+          <DashboardWeddingCard wedding={wedding} />
+          <div className="mt-6 pt-6 border-t border-slate-200/60">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-2">
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Your wedding showcase page lets guests view ceremony details, venue, and RSVP. Head over to the{" "}
+                  <Link href="/dashboard/showcase" className="text-[#6771ab] font-semibold underline underline-offset-2 hover:text-[#2d336b]">
+                    Build Showcase Page
+                  </Link>{" "}
+                  to preview, update content, and see how it looks.
+                </p>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Personal invitation links — each guest receives a unique link with their login code pre-filled.
+                  Manage and send them from the{" "}
+                  <Link href="/dashboard/guests" className="text-[#6771ab] font-semibold underline underline-offset-2 hover:text-[#2d336b]">
+                    Guests
+                  </Link>{" "}
+                  section.
+                </p>
+              </div>
+              <Link href="/dashboard/showcase" className="shrink-0">
+                <Button variant="secondary" size="sm" className="text-xs gap-2 whitespace-nowrap">
+                  <svg className="h-4 w-4 text-[#6771ab]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Build Showcase Page
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Card>
+
+        {/* ─── ROW 3: Guest RSVPs ─── */}
+        <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white">
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-4 flex-1">
+                <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-widest">Guest RSVPs</h3>
+                <div className="flex items-center gap-6 flex-wrap">
+                  <div className="bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                    <div className="text-2xl font-bold text-[#22c55e]">{attendingGuests}</div>
+                    <div className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider">Attending</div>
+                  </div>
+                  <div className="bg-red-50 border border-red-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                    <div className="text-2xl font-bold text-[#ef4444]">{declinedGuests}</div>
+                    <div className="text-[10px] text-red-700 font-semibold uppercase tracking-wider">Declined</div>
+                  </div>
+                  <div className="bg-amber-50 border border-amber-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                    <div className="text-2xl font-bold text-[#f59e0b]">{pendingGuests}</div>
+                    <div className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">Pending</div>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400">Attending count includes primary guests and plus-ones.</p>
+              </div>
+              <div className="shrink-0">
+                <Link href="/dashboard/guests">
+                  <Button variant="secondary" size="sm" className="text-xs gap-1.5">
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Guest RSVP
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Ceremony Breakdown */}
+            {ceremonyAttendance.length > 0 && (
+              <div className="pt-4 border-t border-slate-100 mt-4 space-y-2">
+                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ceremony Attendance Breakdown</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {ceremonyAttendance.map((ca) => (
+                    <div key={ca.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-center text-left">
+                      <span className="text-xs font-medium text-slate-600 truncate" title={ca.name}>{ca.name}</span>
+                      <span className="text-lg font-bold text-slate-800 mt-0.5">{ca.totalAttending} attending</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      </main>
+    );
+  }
+
   return (
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-8">
+
+      {/* ─── Planner Delegated Onboarding Banner ─── */}
+      {session.user.persona === "wedding_planner" && (
+        <Card variant="cream" className="p-6 border-slate-200 shadow-md relative overflow-hidden bg-gradient-to-r from-violet-50/40 via-amber-50/20 to-white">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">📋</span>
+                <h3 className="text-lg font-bold text-[#2d336b]">Delegated Onboarding</h3>
+              </div>
+              <p className="text-sm text-slate-600 max-w-3xl">
+                As a wedding planner, you can delegate setup details to the couple.
+                Share a secure public Onboarding Link or download and upload the Onboarding Spreadsheet to easily collect partners, tradition, date, budget, and location details.
+              </p>
+            </div>
+            <Link href="/dashboard/onboarding" className="shrink-0">
+              <Button variant="primary" className="whitespace-nowrap shadow-sm">
+                Manage Onboarding
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      )}
 
       {/* ─── ROW 1: Wedding Card + Showcase Quick Nav ─── */}
       <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
@@ -184,35 +327,52 @@ export default async function DashboardPage() {
 
       {/* ─── ROW 3: Guest RSVPs ─── */}
       <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-4 flex-1">
-            <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-widest">Guest RSVPs</h3>
-            <div className="flex items-center gap-6 flex-wrap">
-              <div className="bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
-                <div className="text-2xl font-bold text-[#22c55e]">{attendingGuests}</div>
-                <div className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider">Attending</div>
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-4 flex-1">
+              <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-widest">Guest RSVPs</h3>
+              <div className="flex items-center gap-6 flex-wrap">
+                <div className="bg-emerald-50 border border-emerald-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                  <div className="text-2xl font-bold text-[#22c55e]">{attendingGuests}</div>
+                  <div className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wider">Attending</div>
+                </div>
+                <div className="bg-red-50 border border-red-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                  <div className="text-2xl font-bold text-[#ef4444]">{declinedGuests}</div>
+                  <div className="text-[10px] text-red-700 font-semibold uppercase tracking-wider">Declined</div>
+                </div>
+                <div className="bg-amber-50 border border-amber-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
+                  <div className="text-2xl font-bold text-[#f59e0b]">{pendingGuests}</div>
+                  <div className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">Pending</div>
+                </div>
               </div>
-              <div className="bg-red-50 border border-red-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
-                <div className="text-2xl font-bold text-[#ef4444]">{declinedGuests}</div>
-                <div className="text-[10px] text-red-700 font-semibold uppercase tracking-wider">Declined</div>
-              </div>
-              <div className="bg-amber-50 border border-amber-100 px-4 py-2.5 rounded-xl text-center min-w-[100px]">
-                <div className="text-2xl font-bold text-[#f59e0b]">{pendingGuests}</div>
-                <div className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">Pending</div>
+              <p className="text-xs text-slate-400">Attending count includes primary guests and plus-ones.</p>
+            </div>
+            <div className="shrink-0">
+              <Link href="/dashboard/guests">
+                <Button variant="secondary" size="sm" className="text-xs gap-1.5">
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Guest RSVP
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Ceremony Breakdown */}
+          {ceremonyAttendance.length > 0 && (
+            <div className="pt-4 border-t border-slate-100 mt-4 space-y-2">
+              <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Ceremony Attendance Breakdown</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {ceremonyAttendance.map((ca) => (
+                  <div key={ca.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-center text-left">
+                    <span className="text-xs font-medium text-slate-600 truncate" title={ca.name}>{ca.name}</span>
+                    <span className="text-lg font-bold text-slate-800 mt-0.5">{ca.totalAttending} attending</span>
+                  </div>
+                ))}
               </div>
             </div>
-            <p className="text-xs text-slate-400">Attending count includes primary guests and plus-ones.</p>
-          </div>
-          <div className="shrink-0">
-            <Link href="/dashboard/guests">
-              <Button variant="secondary" size="sm" className="text-xs gap-1.5">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Guest RSVP
-              </Button>
-            </Link>
-          </div>
+          )}
         </div>
       </Card>
 

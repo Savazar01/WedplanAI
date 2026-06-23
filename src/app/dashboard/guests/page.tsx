@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { guests } from "@/db/schema";
+import { guests, ceremonies, guestRsvps } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
@@ -24,6 +24,23 @@ export default async function DashboardGuestsPage() {
     .from(guests)
     .where(eq(guests.weddingId, wedding.id));
 
+  const dbCeremonies = await db
+    .select()
+    .from(ceremonies)
+    .where(eq(ceremonies.weddingId, wedding.id));
+
+  const dbGuestRsvps = await db
+    .select({
+      id: guestRsvps.id,
+      guestId: guestRsvps.guestId,
+      ceremonyId: guestRsvps.ceremonyId,
+      rsvpStatus: guestRsvps.rsvpStatus,
+      guestCount: guestRsvps.guestCount,
+    })
+    .from(guestRsvps)
+    .innerJoin(guests, eq(guestRsvps.guestId, guests.id))
+    .where(eq(guests.weddingId, wedding.id));
+
   return (
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm gap-4">
@@ -33,7 +50,12 @@ export default async function DashboardGuestsPage() {
         </div>
         <GuestCsvUpload weddingId={wedding.id} />
       </div>
-      <GuestList initialGuests={dbGuests} weddingId={wedding.id} />
+      <GuestList
+        initialGuests={dbGuests}
+        ceremonies={dbCeremonies}
+        guestRsvps={dbGuestRsvps}
+        weddingId={wedding.id}
+      />
     </main>
   );
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { weddings, tasks, rituals, kanbanColumns } from "@/db/schema";
+import { weddings, tasks, rituals, kanbanColumns, weddingTraditions, taskCategories } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
 const createWeddingSchema = z.object({
   partnerA: z.string().min(1, "Partner A name is required"),
   partnerB: z.string().min(1, "Partner B name is required"),
-  tradition: z.enum(["hindu", "muslim", "sikh", "christian", "secular"]),
+  tradition: z.string().min(1, "Tradition is required"),
   weddingDate: z.string().refine((val) => new Date(val) > new Date(), {
     message: "Wedding date must be in the future",
   }),
@@ -198,6 +198,15 @@ export async function createWeddingAction(data: {
             { title: "Arrange Catering & Open Bar", category: "catering" },
             { title: "Coordinate Photographer/Videographer Contracts", category: "other" },
           ];
+        } else {
+          const dbTradList = await tx.select().from(weddingTraditions).where(eq(weddingTraditions.key, tradition)).limit(1);
+          if (dbTradList.length > 0 && dbTradList[0].seedTasks) {
+            try {
+              seedTasks = JSON.parse(dbTradList[0].seedTasks);
+            } catch (e) {
+              console.error("Failed to parse db tradition seedTasks:", e);
+            }
+          }
         }
       }
 
@@ -236,6 +245,15 @@ export async function createWeddingAction(data: {
             { name: "Vows", description: "Ceremonial reading of wedding vows", offsetDays: 0, startHour: 16, startMin: 0, endHour: 17, endMin: 30, location: location },
             { name: "Reception", description: "Dinner, toast, and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 30, location: location },
           ];
+        } else {
+          const dbTradList = await tx.select().from(weddingTraditions).where(eq(weddingTraditions.key, tradition)).limit(1);
+          if (dbTradList.length > 0 && dbTradList[0].seedCeremonies) {
+            try {
+              seedRituals = JSON.parse(dbTradList[0].seedCeremonies);
+            } catch (e) {
+              console.error("Failed to parse db tradition seedCeremonies:", e);
+            }
+          }
         }
       }
 
@@ -460,5 +478,23 @@ export async function updateWeddingShowcaseAction(
     console.error("Error updating wedding showcase:", error);
     const message = error instanceof Error ? error.message : "Failed to update showcase.";
     return { error: message };
+  }
+}
+
+export async function getPublicTraditions() {
+  try {
+    return await db.select().from(weddingTraditions).orderBy(weddingTraditions.name);
+  } catch (e) {
+    console.error("Failed to list public traditions:", e);
+    return [];
+  }
+}
+
+export async function getPublicCategories() {
+  try {
+    return await db.select().from(taskCategories).orderBy(taskCategories.name);
+  } catch (e) {
+    console.error("Failed to list public categories:", e);
+    return [];
   }
 }

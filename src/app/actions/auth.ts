@@ -10,6 +10,7 @@ export async function signupAction(prevState: unknown, formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const persona = (formData.get("persona") as string) || "diy";
 
   if (!name || !email || !password) {
     return { error: "All fields are required." };
@@ -26,6 +27,7 @@ export async function signupAction(prevState: unknown, formData: FormData) {
         name,
         email,
         password,
+        persona,
       },
     });
 
@@ -34,7 +36,7 @@ export async function signupAction(prevState: unknown, formData: FormData) {
     }
 
     await db.update(users)
-      .set({ role: "admin" })
+      .set({ role: "admin", persona })
       .where(eq(users.id, result.user.id));
 
     await seedSampleWedding(result.user.id);

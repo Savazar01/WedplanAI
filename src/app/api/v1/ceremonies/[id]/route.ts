@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db/client';
-import { rituals } from '@/db/schema';
+import { ceremonies } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import {
   validateApiKey,
@@ -44,18 +44,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return errorResponse('No valid fields provided for update.', 400);
     }
 
-    const [updatedRitual] = await db
-      .update(rituals)
+    const [updatedCeremony] = await db
+      .update(ceremonies)
       .set({ ...updates, updatedAt: new Date() })
-      .where(and(eq(rituals.id, id), eq(rituals.weddingId, auth.weddingId)))
+      .where(and(eq(ceremonies.id, id), eq(ceremonies.weddingId, auth.weddingId)))
       .returning();
 
-    if (!updatedRitual) return notFoundResponse('Ritual');
+    if (!updatedCeremony) return notFoundResponse('Ceremony');
 
-    return Response.json(updatedRitual);
+    return Response.json(updatedCeremony);
   } catch (error) {
-    console.error('[PUT /api/v1/rituals/[id]]', error);
-    return errorResponse('Failed to update ritual.');
+    console.error('[PUT /api/v1/ceremonies/[id]]', error);
+    return errorResponse('Failed to update ceremony.');
   }
 }
 
@@ -66,16 +66,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [deletedRitual] = await db
-      .delete(rituals)
-      .where(and(eq(rituals.id, id), eq(rituals.weddingId, auth.weddingId)))
+    const [deletedCeremony] = await db
+      .delete(ceremonies)
+      .where(and(eq(ceremonies.id, id), eq(ceremonies.weddingId, auth.weddingId)))
       .returning();
 
-    if (!deletedRitual) return notFoundResponse('Ritual');
+    if (!deletedCeremony) return notFoundResponse('Ceremony');
 
-    return Response.json({ message: 'Ritual deleted successfully.', ritual: deletedRitual });
+    return Response.json({ message: 'Ceremony deleted successfully.', ceremony: deletedCeremony });
   } catch (error) {
-    console.error('[DELETE /api/v1/rituals/[id]]', error);
-    return errorResponse('Failed to delete ritual.');
+    console.error('[DELETE /api/v1/ceremonies/[id]]', error);
+    return errorResponse('Failed to delete ceremony.');
   }
 }

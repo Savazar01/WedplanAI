@@ -143,29 +143,32 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
         </h3>
 
         {dbRituals.length > 0 ? (
-          <div className="relative border-l border-amber-200/80 ml-4 sm:ml-8 space-y-8">
+          <div className="relative border-l border-slate-200 ml-4 sm:ml-8 space-y-6">
             {dbRituals.map((ritual) => {
               const startStr = formatDateTime(ritual.startTime);
               const endStr = new Date(ritual.endTime);
               const endTimeStr = endStr.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
               return (
                 <div key={ritual.id} className="relative pl-6 sm:pl-8">
-                  <div className="absolute -left-2 top-1.5 h-4 w-4 rounded-full border-2 border-amber-400 bg-white shadow-xs" />
+                  {/* Timeline Dot */}
+                  <div className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full bg-[var(--color-primary)] ring-4 ring-white" />
                   
-                  <div className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-xs hover:shadow-md transition-shadow">
-                    <span className="text-[10px] font-bold text-[var(--color-secondary)] tracking-widest uppercase block mb-1">
-                      🕒 {startStr} — {endTimeStr}
-                    </span>
-                    <h4 className="font-title text-lg font-bold text-slate-800">
-                      {ritual.name}
-                    </h4>
+                  <div className="space-y-1.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <h4 className="font-title text-base sm:text-lg font-bold text-slate-800">
+                        {ritual.name}
+                      </h4>
+                      <span className="text-xs font-semibold text-[var(--color-secondary)] uppercase tracking-wider whitespace-nowrap">
+                        🕒 {startStr} — {endTimeStr}
+                      </span>
+                    </div>
                     {ritual.description && (
-                      <p className="text-sm text-slate-500 mt-2 font-light leading-relaxed">
+                      <p className="text-sm text-slate-600 font-light leading-relaxed">
                         {ritual.description}
                       </p>
                     )}
-                    <div className="mt-3 flex items-center gap-1.5 text-xs text-amber-800 font-semibold bg-amber-50 border border-amber-200/30 px-3 py-1 rounded-xl w-fit">
-                      <span>📍</span>
+                    <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
+                      <span className="text-amber-500">📍</span>
                       <span>{ritual.location}</span>
                     </div>
                   </div>
@@ -187,6 +190,7 @@ export default async function WeddingShowcasePage({ params }: PageProps) {
           rsvpTitle={wedding.showcaseRsvpTitle}
           rsvpDescription={wedding.showcaseRsvpDescription}
           scrollToOnAttending="gift-registry"
+          ceremonies={dbRituals}
         />
       </section>
 

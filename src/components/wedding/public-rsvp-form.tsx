@@ -4,13 +4,23 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { findGuestByCodeAction, updateGuestRsvpPublicAction } from "@/app/actions/guests";
+import { findGuestByCodeAction, saveGuestRsvpAction } from "@/app/actions/guests";
+
+interface Ceremony {
+  id: string;
+  name: string;
+  description: string | null;
+  startTime: Date;
+  endTime: Date;
+  location: string;
+}
 
 interface PublicRsvpFormProps {
   weddingId: string;
   rsvpTitle?: string | null;
   rsvpDescription?: string | null;
   scrollToOnAttending?: string;
+  ceremonies: Ceremony[];
 }
 
 interface Guest {
@@ -21,13 +31,15 @@ interface Guest {
   rsvpStatus: string;
   plusOneCount: number;
   dietaryRestrictions: string | null;
+  invitedCeremonies: string;
 }
 
 export default function PublicRsvpForm({ 
   weddingId,
   rsvpTitle,
   rsvpDescription,
-  scrollToOnAttending
+  scrollToOnAttending,
+  ceremonies
 }: PublicRsvpFormProps) {
   const [loginCode, setLoginCode] = React.useState("");
   const [guest, setGuest] = React.useState<Guest | null>(null);
@@ -37,10 +49,12 @@ export default function PublicRsvpForm({
   const [autoVerified, setAutoVerified] = React.useState(false);
 
   // RSVP Form state
-  const [rsvpStatus, setRsvpStatus] = React.useState<"attending" | "declined">("attending");
+  const [plusOneCount, setPlusOneCount] = React.useState(0);
+  const [dietaryRestrictions, setDietaryRestrictions] = React.useState("");
+  const [ceremonyRsvps, setCeremonyRsvps] = React.useState<Record<string, { rsvpStatus: "attending" | "declined"; guestCount: number }>>({});
 
   React.useEffect(() => {
-    if (saveSuccess && rsvpStatus === "attending" && scrollToOnAttending) {
+    if (saveSuccess && scrollToOnAttending) {
       const el = document.getElementById(scrollToOnAttending);
       if (el) {
         setTimeout(() => {
@@ -48,9 +62,7 @@ export default function PublicRsvpForm({
         }, 300);
       }
     }
-  }, [saveSuccess, rsvpStatus, scrollToOnAttending]);
-  const [plusOneCount, setPlusOneCount] = React.useState(0);
-  const [dietaryRestrictions, setDietaryRestrictions] = React.useState("");
+  }, [saveSuccess, scrollToOnAttending]);
 
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -61,6 +73,34 @@ export default function PublicRsvpForm({
       }, 0);
     }
   }, []);
+
+  const getInvitedCeremoniesForGuest = React.useCallback((guestRecord: Guest | null) => {
+    if (!guestRecord) return [];
+    if (guestRecord.invitedCeremonies === "all") return ceremonies;
+    const ids = guestRecord.invitedCeremonies.split(",");
+    return ceremonies.filter((c) => ids.includes(c.id));
+  }, [ceremonies]);
+
+  const initializeRsvpsState = React.useCallback((guestRecord: Guest, rsvpsList: { ceremonyId: string; rsvpStatus: string; guestCount: number }[]) => {
+    const guestInvited = getInvitedCeremoniesForGuest(guestRecord);
+    const initialRsvps: Record<string, { rsvpStatus: "attending" | "declined"; guestCount: number }> = {};
+    
+    guestInvited.forEach((c) => {
+      const existing = rsvpsList?.find((r) => r.ceremonyId === c.id);
+      if (existing) {
+        initialRsvps[c.id] = {
+          rsvpStatus: existing.rsvpStatus as "attending" | "declined",
+          guestCount: Math.min(existing.guestCount, 1 + guestRecord.plusOneCount),
+        };
+      } else {
+        initialRsvps[c.id] = {
+          rsvpStatus: "attending",
+          guestCount: 1,
+        };
+      }
+    });
+    setCeremonyRsvps(initialRsvps);
+  }, [getInvitedCeremoniesForGuest]);
 
   React.useEffect(() => {
     if (loginCode.length === 6 && !autoVerified && !guest) {
@@ -73,12 +113,11 @@ export default function PublicRsvpForm({
         try {
           const res = await findGuestByCodeAction(weddingId, loginCode);
           if (res?.guest) {
-            setGuest(res.guest as Guest);
-            setRsvpStatus(
-              res.guest.rsvpStatus === "declined" ? "declined" : "attending"
-            );
-            setPlusOneCount(res.guest.plusOneCount);
-            setDietaryRestrictions(res.guest.dietaryRestrictions || "");
+            const guestRecord = res.guest as Guest;
+            setGuest(guestRecord);
+            setPlusOneCount(guestRecord.plusOneCount);
+            setDietaryRestrictions(guestRecord.dietaryRestrictions || "");
+            initializeRsvpsState(guestRecord, (res.rsvps as { ceremonyId: string; rsvpStatus: string; guestCount: number }[]) || []);
           } else if (res?.error) {
             setError(res.error);
           }
@@ -91,7 +130,7 @@ export default function PublicRsvpForm({
       };
       verify();
     }
-  }, [loginCode, autoVerified, guest, weddingId]);
+  }, [loginCode, autoVerified, guest, weddingId, ceremonies, initializeRsvpsState]);
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,12 +149,11 @@ export default function PublicRsvpForm({
         setError(res.error);
         setGuest(null);
       } else if (res?.guest) {
-        setGuest(res.guest as Guest);
-        setRsvpStatus(
-          res.guest.rsvpStatus === "declined" ? "declined" : "attending"
-        );
-        setPlusOneCount(res.guest.plusOneCount);
-        setDietaryRestrictions(res.guest.dietaryRestrictions || "");
+        const guestRecord = res.guest as Guest;
+        setGuest(guestRecord);
+        setPlusOneCount(guestRecord.plusOneCount);
+        setDietaryRestrictions(guestRecord.dietaryRestrictions || "");
+        initializeRsvpsState(guestRecord, res.rsvps || []);
       }
     } catch (err) {
       console.error(err);
@@ -132,9 +170,30 @@ export default function PublicRsvpForm({
     setLoading(true);
 
     try {
-      const res = await updateGuestRsvpPublicAction(guest.id, {
-        rsvpStatus,
-        plusOneCount: rsvpStatus === "declined" ? 0 : plusOneCount,
+      const guestInvited = getInvitedCeremoniesForGuest(guest);
+      const rsvpsPayload: { ceremonyId: string; rsvpStatus: "attending" | "declined"; guestCount: number }[] = [];
+      const maxParty = 1 + plusOneCount;
+
+      for (const c of guestInvited) {
+        const r = ceremonyRsvps[c.id];
+        if (!r) continue;
+
+        if (r.rsvpStatus === "attending") {
+          if (r.guestCount < 1 || r.guestCount > maxParty) {
+            setError(`Attending count for "${c.name}" must be between 1 and ${maxParty}.`);
+            setLoading(false);
+            return;
+          }
+        }
+        rsvpsPayload.push({
+          ceremonyId: c.id,
+          rsvpStatus: r.rsvpStatus,
+          guestCount: r.rsvpStatus === "attending" ? r.guestCount : 0,
+        });
+      }
+
+      const res = await saveGuestRsvpAction(guest.id, rsvpsPayload, {
+        plusOneCount,
         dietaryRestrictions: dietaryRestrictions || undefined,
       });
 
@@ -142,13 +201,14 @@ export default function PublicRsvpForm({
         setError(res.error);
       } else {
         setSaveSuccess(true);
-        // Update local guest record status
+        const hasAttending = rsvpsPayload.some((r) => r.rsvpStatus === "attending");
+        const mainStatus = hasAttending ? "attending" : rsvpsPayload.length > 0 ? "declined" : "pending";
         setGuest((prev) =>
           prev
             ? {
                 ...prev,
-                rsvpStatus,
-                plusOneCount: rsvpStatus === "declined" ? 0 : plusOneCount,
+                rsvpStatus: mainStatus,
+                plusOneCount,
                 dietaryRestrictions: dietaryRestrictions || null,
               }
             : null
@@ -222,54 +282,123 @@ export default function PublicRsvpForm({
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <label className="block text-xs font-semibold text-[var(--color-primary)] uppercase tracking-widest mb-1.5">
-                Attendance
+                Plus One Count (For your party)
               </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => { setRsvpStatus("attending"); setSaveSuccess(false); }}
-                  className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
-                    rsvpStatus === "attending"
-                      ? "bg-emerald-50 border-emerald-500 text-emerald-700 ring-2 ring-emerald-500/20"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  🟢 Attending
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setRsvpStatus("declined"); setSaveSuccess(false); }}
-                  className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
-                    rsvpStatus === "declined"
-                      ? "bg-red-50 border-red-500 text-red-700 ring-2 ring-red-500/20"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  🔴 Declined
-                </button>
-              </div>
+              <Select
+                value={String(plusOneCount)}
+                onChange={(e) => { setPlusOneCount(Number(e.target.value)); setSaveSuccess(false); }}
+                className="rounded-xl border-slate-200"
+              >
+                <option value="0">No Plus One (Party size: 1)</option>
+                <option value="1">1 Person (Party size: 2)</option>
+                <option value="2">2 People (Party size: 3)</option>
+                <option value="3">3 People (Party size: 4)</option>
+              </Select>
+              <p className="text-xs text-slate-500 mt-1 font-light">Include any additional guests you are bringing.</p>
             </div>
 
-            {rsvpStatus === "attending" && (
-              <div>
-                <label className="block text-xs font-semibold text-[var(--color-primary)] uppercase tracking-widest mb-1.5">
-                  Plus One Count
-                </label>
-                <Select
-                  value={String(plusOneCount)}
-                  onChange={(e) => { setPlusOneCount(Number(e.target.value)); setSaveSuccess(false); }}
-                  className="rounded-xl border-slate-200"
-                >
-                  <option value="0">No Plus One</option>
-                  <option value="1">1 Person</option>
-                  <option value="2">2 People</option>
-                  <option value="3">3 People</option>
-                </Select>
-              </div>
-            )}
+            <div className="space-y-4">
+              <label className="block text-xs font-semibold text-[var(--color-primary)] uppercase tracking-widest mb-1">
+                Ceremonies Attendance
+              </label>
+              
+              {(() => {
+                const guestInvited = getInvitedCeremoniesForGuest(guest);
+
+                if (guestInvited.length === 0) {
+                  return (
+                    <div className="text-sm text-slate-500 text-center italic py-4 bg-slate-50 rounded-xl">
+                      No invited ceremonies found.
+                    </div>
+                  );
+                }
+
+                return guestInvited.map((c) => {
+                  const state = ceremonyRsvps[c.id] || { rsvpStatus: "attending", guestCount: 1 };
+                  const maxParty = 1 + plusOneCount;
+
+                  const handleStatusChange = (status: "attending" | "declined") => {
+                    setSaveSuccess(false);
+                    setCeremonyRsvps((prev) => ({
+                      ...prev,
+                      [c.id]: {
+                        ...prev[c.id] || { guestCount: 1 },
+                        rsvpStatus: status,
+                      }
+                    }));
+                  };
+
+                  const handleCountChange = (count: number) => {
+                    setSaveSuccess(false);
+                    setCeremonyRsvps((prev) => ({
+                      ...prev,
+                      [c.id]: {
+                        ...prev[c.id] || { rsvpStatus: "attending" },
+                        guestCount: count,
+                      }
+                    }));
+                  };
+
+                  return (
+                    <div key={c.id} className="p-4 bg-slate-50/50 border border-slate-200/60 rounded-2xl space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-semibold text-slate-800 text-sm">{c.name}</h4>
+                          <p className="text-xs text-slate-500">{c.location}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange("attending")}
+                            className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
+                              state.rsvpStatus === "attending"
+                                ? "bg-emerald-50 border-emerald-500 text-emerald-700 font-bold"
+                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                            }`}
+                          >
+                            Attending
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange("declined")}
+                            className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
+                              state.rsvpStatus === "declined"
+                                ? "bg-red-50 border-red-500 text-red-700 font-bold"
+                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                            }`}
+                          >
+                            Declined
+                          </button>
+                        </div>
+
+                        {state.rsvpStatus === "attending" && (
+                          <div className="flex items-center gap-2">
+                            <label className="text-xs text-slate-500 whitespace-nowrap">Guests count:</label>
+                            <Select
+                              value={String(state.guestCount)}
+                              onChange={(e) => handleCountChange(Number(e.target.value))}
+                              className="text-xs py-1 h-9 rounded-xl border-slate-200"
+                            >
+                              {Array.from({ length: maxParty }, (_, i) => i + 1).map((val) => (
+                                <option key={val} value={String(val)}>
+                                  {val} {val === 1 ? "Guest" : "Guests"}
+                                </option>
+                              ))}
+                            </Select>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
 
             <div>
               <label className="block text-xs font-semibold text-[var(--color-primary)] uppercase tracking-widest mb-1.5">

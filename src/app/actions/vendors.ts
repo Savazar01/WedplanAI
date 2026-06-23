@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { vendors, weddings } from "@/db/schema";
+import { vendors } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
 import { getActiveWedding } from "@/lib/wedding-helper";
@@ -16,6 +16,7 @@ export async function createVendorAction(data: {
   totalCost: number;
   paidAmount: number;
   notes?: string;
+  ceremonyId?: string | null;
 }) {
   const session = await getServerSession();
   if (!session || !session.user) {
@@ -58,6 +59,7 @@ export async function createVendorAction(data: {
       paidAmount: paidAmountInt,
       paymentStatus,
       notes: data.notes || null,
+      ceremonyId: data.ceremonyId || null,
     });
 
     revalidatePath("/vendors");
@@ -100,6 +102,7 @@ export async function updateVendorAction(
     totalCost: number;
     paidAmount: number;
     notes?: string;
+    ceremonyId?: string | null;
   }
 ) {
   const session = await getServerSession();
@@ -138,6 +141,7 @@ export async function updateVendorAction(
         paidAmount: paidAmountInt,
         paymentStatus,
         notes: data.notes || null,
+        ceremonyId: data.ceremonyId || null,
         updatedAt: new Date(),
       })
       .where(eq(vendors.id, vendorId));

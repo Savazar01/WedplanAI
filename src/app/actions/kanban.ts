@@ -128,6 +128,9 @@ export async function createTaskAction(data: {
   description?: string;
   category: string;
   dueDate?: string;
+  ceremonyId?: string | null;
+  assignedUserId?: string | null;
+  categoryData?: string | null;
 }) {
   const session = await getServerSession();
   if (!session || !session.user) {
@@ -166,6 +169,9 @@ export async function createTaskAction(data: {
       status: "todo",
       position,
       isCustom: true,
+      ceremonyId: data.ceremonyId || null,
+      assignedUserId: data.assignedUserId || null,
+      categoryData: data.categoryData || null,
     });
 
     revalidatePath("/wedding-task-planner");
@@ -267,6 +273,9 @@ export async function updateTaskAction(
     description?: string;
     category: string;
     dueDate?: string;
+    ceremonyId?: string | null;
+    assignedUserId?: string | null;
+    categoryData?: string | null;
   }
 ) {
   const session = await getServerSession();
@@ -282,6 +291,9 @@ export async function updateTaskAction(
         description: data.description || "",
         category: data.category,
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
+        ceremonyId: data.ceremonyId || null,
+        assignedUserId: data.assignedUserId || null,
+        categoryData: data.categoryData || null,
         updatedAt: new Date(),
       })
       .where(eq(tasks.id, taskId));

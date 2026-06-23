@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { rituals, weddings } from "@/db/schema";
+import { rituals } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
 import { getActiveWedding } from "@/lib/wedding-helper";
@@ -13,6 +13,10 @@ export async function createRitualAction(data: {
   startTime: string;
   endTime: string;
   location: string;
+  isFoodServed?: boolean;
+  dressCode?: string | null;
+  extraChecklist?: string | null;
+  assignedUserId?: string | null;
 }) {
   const session = await getServerSession();
   if (!session || !session.user) {
@@ -40,6 +44,10 @@ export async function createRitualAction(data: {
       endTime: end,
       location: data.location,
       isCustom: true,
+      isFoodServed: data.isFoodServed || false,
+      dressCode: data.dressCode || null,
+      extraChecklist: data.extraChecklist || null,
+      assignedUserId: data.assignedUserId || null,
     });
 
     revalidatePath("/calendar");
@@ -61,6 +69,10 @@ export async function updateRitualAction(
     startTime: string;
     endTime: string;
     location: string;
+    isFoodServed?: boolean;
+    dressCode?: string | null;
+    extraChecklist?: string | null;
+    assignedUserId?: string | null;
   }
 ) {
   const session = await getServerSession();
@@ -83,6 +95,10 @@ export async function updateRitualAction(
         startTime: start,
         endTime: end,
         location: data.location,
+        isFoodServed: data.isFoodServed || false,
+        dressCode: data.dressCode || null,
+        extraChecklist: data.extraChecklist || null,
+        assignedUserId: data.assignedUserId || null,
         updatedAt: new Date(),
       })
       .where(eq(rituals.id, ritualId));

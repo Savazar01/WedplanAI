@@ -66,6 +66,22 @@ export default function EditWeddingModal({ wedding, isOpen, onClose }: Props) {
     description: wedding.description || "",
   });
 
+  const [dbTraditions, setDbTraditions] = React.useState<{ id: string; key: string; name: string }[]>([]);
+  const [customTraditionName, setCustomTraditionName] = React.useState("");
+
+  React.useEffect(() => {
+    async function load() {
+      try {
+        const { getPublicTraditions } = await import("@/app/actions/wedding");
+        const list = await getPublicTraditions();
+        setDbTraditions(list);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    load();
+  }, []);
+
   React.useEffect(() => {
     setTimeout(() => {
       setForm({
@@ -84,8 +100,16 @@ export default function EditWeddingModal({ wedding, isOpen, onClose }: Props) {
         pincode: wedding.pincode || "",
         description: wedding.description || "",
       });
+
+      const isBuiltIn = ["hindu", "muslim", "sikh", "christian", "secular"].includes(wedding.tradition);
+      const isDbConfigured = dbTraditions.some(t => t.key === wedding.tradition);
+      if (!isBuiltIn && !isDbConfigured) {
+        setCustomTraditionName(wedding.tradition);
+      } else {
+        setCustomTraditionName("");
+      }
     }, 0);
-  }, [wedding]);
+  }, [wedding, isOpen, dbTraditions]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
@@ -102,7 +126,16 @@ export default function EditWeddingModal({ wedding, isOpen, onClose }: Props) {
     setPending(true);
     setMessage(null);
     try {
-      const result = await updateWeddingAction(wedding.id, form);
+      const isBuiltIn = ["hindu", "muslim", "sikh", "christian", "secular"].includes(form.tradition);
+      const isDbConfigured = dbTraditions.some(t => t.key === form.tradition);
+      const finalTradition = (form.tradition === "other" || (!isBuiltIn && !isDbConfigured))
+        ? (customTraditionName.trim() || "other")
+        : form.tradition;
+
+      const result = await updateWeddingAction(wedding.id, {
+        ...form,
+        tradition: finalTradition
+      });
       if (result?.error) {
         setMessage({ type: "error", text: result.error });
       } else {
@@ -299,17 +332,41 @@ export default function EditWeddingModal({ wedding, isOpen, onClose }: Props) {
               <label className="text-[11px] font-bold text-[#6771ab] uppercase tracking-widest">Tradition</label>
               <select
                 name="tradition"
-                value={form.tradition}
-                onChange={handleChange}
+                value={["hindu", "muslim", "sikh", "christian", "secular"].includes(form.tradition) || dbTraditions.some(t => t.key === form.tradition) ? form.tradition : "other"}
+                onChange={(e) => {
+                  handleChange(e);
+                  if (e.target.value !== "other") {
+                    setCustomTraditionName("");
+                  }
+                }}
                 required
                 className="rounded-2xl border border-violet-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]/30 focus:border-[#6771ab] transition-all"
               >
                 {TRADITIONS.map((t) => (
                   <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
+                {dbTraditions.map((t) => (
+                  <option key={t.key} value={t.key}>{t.name}</option>
+                ))}
+                <option value="other">Other</option>
               </select>
             </div>
           </div>
+
+          {/* Custom Tradition Input */}
+          {(form.tradition === "other" || (!["hindu", "muslim", "sikh", "christian", "secular"].includes(form.tradition) && !dbTraditions.some(t => t.key === form.tradition))) && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-[#6771ab] uppercase tracking-widest">Custom Tradition Name</label>
+              <input
+                type="text"
+                placeholder="e.g. My Custom Tradition"
+                value={customTraditionName}
+                onChange={(e) => setCustomTraditionName(e.target.value)}
+                required
+                className="rounded-2xl border border-violet-200 bg-white px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]/30 focus:border-[#6771ab] transition-all"
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">

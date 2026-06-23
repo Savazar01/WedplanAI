@@ -8,6 +8,8 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { seedSampleWedding } from "@/lib/seed-sample-wedding";
 
+import { getActiveWedding } from "@/lib/wedding-helper";
+
 export async function createSubsequentUserAction(prevState: { success?: boolean; error?: string } | null, formData: FormData) {
   const session = await getServerSession();
   if (!session || !session.user || session.user.role !== "admin") {
@@ -18,12 +20,13 @@ export async function createSubsequentUserAction(prevState: { success?: boolean;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const role = formData.get("role") as string;
+  const persona = (formData.get("persona") as string) || "diy";
 
   if (!name || !email || !password || !role) {
     return { error: "All fields are required." };
   }
 
-  if (role !== "admin" && role !== "user") {
+  if (role !== "admin" && role !== "user" && role !== "client") {
     return { error: "Invalid role selected." };
   }
 
@@ -33,11 +36,14 @@ export async function createSubsequentUserAction(prevState: { success?: boolean;
       return { error: "A user with this email already exists." };
     }
 
+    const wedding = await getActiveWedding(session.user.id);
+
     const result = await auth.api.signUpEmail({
       body: {
         name,
         email,
         password,
+        persona,
       },
     });
 
@@ -46,10 +52,16 @@ export async function createSubsequentUserAction(prevState: { success?: boolean;
     }
 
     await db.update(users)
-      .set({ role: role })
+      .set({ 
+        role: role,
+        persona: persona,
+        weddingId: (role === "client" || role === "user") ? (wedding?.id || null) : null
+      })
       .where(eq(users.id, result.user.id));
 
-    await seedSampleWedding(result.user.id);
+    if (role === "admin") {
+      await seedSampleWedding(result.user.id);
+    }
 
     revalidatePath("/dashboard/admin/users");
     return { success: true };

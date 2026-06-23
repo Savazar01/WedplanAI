@@ -68,10 +68,21 @@ export default function CreateUserFormClient({ createAction }: CreateUserFormCli
 
       <div>
         <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
+          User Persona
+        </label>
+        <Select name="persona" defaultValue="diy" required disabled={isPending}>
+          <option value="diy">Plan My Wedding (DIY)</option>
+          <option value="wedding_planner">Wedding Planner</option>
+        </Select>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
           Assign Role
         </label>
         <Select name="role" required disabled={isPending}>
           <option value="user">User</option>
+          <option value="client">Client</option>
           <option value="admin">Admin</option>
         </Select>
       </div>
@@ -84,12 +95,12 @@ export default function CreateUserFormClient({ createAction }: CreateUserFormCli
 
       {state?.success && (
         <div className="p-3 bg-green-50 border border-green-200 text-green-600 rounded-xl text-xs text-center font-sans">
-          User account created successfully!
+          Team member account created successfully!
         </div>
       )}
 
       <Button type="submit" variant="primary" className="w-full mt-2" disabled={isPending}>
-        {isPending ? "Creating User..." : "Create User"}
+        {isPending ? "Creating Team Member..." : "Create Team Member"}
       </Button>
     </form>
   );

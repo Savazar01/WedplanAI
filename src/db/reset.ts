@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm";
 async function main() {
   console.log("Resetting database...");
   try {
-    await db.execute(sql`TRUNCATE TABLE "session", "account", "verification", "user", "wedding", "task", "ritual", "guest", "vendor" CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE "session", "account", "verification", "user", "wedding", "task", "ceremony", "guest", "vendor", "guest_rsvp", "wedding_trad_config", "task_cat_config" CASCADE`);
     console.log("Database reset successfully! You can now register a new admin user.");
   } catch (error) {
     console.error("Reset failed:", error);

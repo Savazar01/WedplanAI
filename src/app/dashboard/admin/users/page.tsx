@@ -22,15 +22,15 @@ export default async function UsersManagementPage() {
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-1">
         <Card variant="cream" className="p-6 sticky top-24 border border-slate-200">
-          <h2 className="text-lg font-bold text-[#6771ab] mb-2">Create New User</h2>
-          <p className="text-xs text-slate-500 mb-6">Create subsequent user credentials. Note that public signup is locked.</p>
+          <h2 className="text-lg font-bold text-[#6771ab] mb-2">Add Team Member</h2>
+          <p className="text-xs text-slate-500 mb-6">Add subsequent team member credentials. Note that public signup is locked.</p>
           
           <CreateUserFormClient createAction={createSubsequentUserAction} />
         </Card>
       </div>
 
       <div className="lg:col-span-2 space-y-4">
-        <h2 className="text-lg font-bold text-slate-800">User Directory ({allUsers.length})</h2>
+        <h2 className="text-lg font-bold text-slate-800">Team Directory ({allUsers.length})</h2>
         
         <Card variant="default" className="overflow-hidden bg-white shadow-sm border border-slate-200">
           <div className="overflow-x-auto">

@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { weddings, tasks } from "@/db/schema";
+import { weddings, tasks, ceremonies, users } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { ensureDefaultColumns } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
@@ -38,6 +38,16 @@ export default async function PlanningBoardPage() {
     status: t.columnId || "",
   }));
 
+  const dbCeremonies = await db
+    .select({ id: ceremonies.id, name: ceremonies.name })
+    .from(ceremonies)
+    .where(eq(ceremonies.weddingId, wedding.id));
+
+  const teamMembers = await db
+    .select({ id: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.weddingId, wedding.id));
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <DashboardHeader 
@@ -47,7 +57,12 @@ export default async function PlanningBoardPage() {
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-6">
-        <PlanningBoard initialTasks={clientTasks} initialColumns={dbColumns} />
+        <PlanningBoard
+          initialTasks={clientTasks}
+          initialColumns={dbColumns}
+          ceremonies={dbCeremonies}
+          teamMembers={teamMembers}
+        />
       </main>
     </div>
   );

@@ -10,6 +10,21 @@ import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { createRitualAction, updateRitualAction, deleteRitualAction } from "@/app/actions/calendar";
 
+const getLocalDateString = (d: Date) => {
+  const date = new Date(d);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getLocalTimeString = (d: Date) => {
+  const date = new Date(d);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 interface Ritual {
   id: string;
   name: string;
@@ -72,9 +87,13 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
   const [selectedRitual, setSelectedRitual] = React.useState<Ritual | null>(null); // Null means creating
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [startTime, setStartTime] = React.useState("");
-  const [endTime, setEndTime] = React.useState("");
+  const [ceremonyDate, setCeremonyDate] = React.useState("");
+  const [startTimeOnly, setStartTimeOnly] = React.useState("12:00");
+  const [endTimeOnly, setEndTimeOnly] = React.useState("13:00");
   const [location, setLocation] = React.useState("");
+
+  // Filter state
+  const [filterType, setFilterType] = React.useState<'all' | 'ceremonies' | 'tasks'>('all');
   
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -169,19 +188,13 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
     calendarDays.push({ day: d, isCurrent: true });
   }
 
-  // Helper formatting dates for datetime-local fields
-  const formatToDatetimeLocal = (date: Date) => {
-    const d = new Date(date);
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
-
   const openCreateModal = () => {
     setSelectedRitual(null);
     setName("");
     setDescription("");
-    setStartTime("");
-    setEndTime("");
+    setCeremonyDate(getLocalDateString(new Date()));
+    setStartTimeOnly("12:00");
+    setEndTimeOnly("13:00");
     setLocation("");
     setError("");
     setIsFormOpen(true);
@@ -193,8 +206,9 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
     setDescription("");
     const pad = (n: number) => String(n).padStart(2, "0");
     const dateStr = `${year}-${pad(month + 1)}-${pad(day)}`;
-    setStartTime(`${dateStr}T12:00`);
-    setEndTime(`${dateStr}T13:00`);
+    setCeremonyDate(dateStr);
+    setStartTimeOnly("12:00");
+    setEndTimeOnly("13:00");
     setLocation("");
     setError("");
     setIsFormOpen(true);
@@ -205,8 +219,9 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
     setSelectedRitual(ritual);
     setName(ritual.name);
     setDescription(ritual.description || "");
-    setStartTime(formatToDatetimeLocal(ritual.startTime));
-    setEndTime(formatToDatetimeLocal(ritual.endTime));
+    setCeremonyDate(getLocalDateString(ritual.startTime));
+    setStartTimeOnly(getLocalTimeString(ritual.startTime));
+    setEndTimeOnly(getLocalTimeString(ritual.endTime));
     setLocation(ritual.location);
     setError("");
     setIsDetailOpen(false);
@@ -223,12 +238,22 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
     e.preventDefault();
     setError("");
 
-    if (!name.trim() || !startTime || !endTime || !location.trim()) {
+    if (!name.trim() || !ceremonyDate || !startTimeOnly || !endTimeOnly || !location.trim()) {
       setError("Please fill out all required fields.");
       return;
     }
 
-    if (new Date(endTime) <= new Date(startTime)) {
+    const startFullStr = `${ceremonyDate}T${startTimeOnly}`;
+    const endFullStr = `${ceremonyDate}T${endTimeOnly}`;
+    const startFull = new Date(startFullStr);
+    const endFull = new Date(endFullStr);
+
+    if (isNaN(startFull.getTime()) || isNaN(endFull.getTime())) {
+      setError("Invalid date or time values.");
+      return;
+    }
+
+    if (endFull <= startFull) {
       setError("End time must be after the start time.");
       return;
     }
@@ -240,8 +265,8 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
         const res = await updateRitualAction(selectedRitual.id, {
           name,
           description,
-          startTime,
-          endTime,
+          startTime: startFull.toISOString(),
+          endTime: endFull.toISOString(),
           location,
         });
         if (res?.error) {
@@ -255,8 +280,8 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
         const res = await createRitualAction({
           name,
           description,
-          startTime,
-          endTime,
+          startTime: startFull.toISOString(),
+          endTime: endFull.toISOString(),
           location,
         });
         if (res?.error) {
@@ -300,27 +325,31 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
   };
 
   // Day View Current Lists
-  const currentDayRituals = ritualsList.filter((r) => {
-    const d = new Date(r.startTime);
-    return (
-      d.getFullYear() === year &&
-      d.getMonth() === month &&
-      d.getDate() === currentDate.getDate()
-    );
-  }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  const currentDayRituals = filterType !== 'tasks'
+    ? ritualsList.filter((r) => {
+        const d = new Date(r.startTime);
+        return (
+          d.getFullYear() === year &&
+          d.getMonth() === month &&
+          d.getDate() === currentDate.getDate()
+        );
+      }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+    : [];
 
-  const currentDayTasks = tasksList.filter((t) => {
-    if (!t.dueDate) return false;
-    const d = new Date(t.dueDate);
-    return (
-      d.getFullYear() === year &&
-      d.getMonth() === month &&
-      d.getDate() === currentDate.getDate()
-    );
-  }).sort((a, b) => {
-    if (!a.dueDate || !b.dueDate) return 0;
-    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-  });
+  const currentDayTasks = filterType !== 'ceremonies'
+    ? tasksList.filter((t) => {
+        if (!t.dueDate) return false;
+        const d = new Date(t.dueDate);
+        return (
+          d.getFullYear() === year &&
+          d.getMonth() === month &&
+          d.getDate() === currentDate.getDate()
+        );
+      }).sort((a, b) => {
+        if (!a.dueDate || !b.dueDate) return 0;
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      })
+    : [];
 
   const formatTaskCategory = (category: string) => {
     const mapping: Record<string, string> = {
@@ -427,6 +456,40 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
           </div>
         </div>
 
+        {/* Filter Bar */}
+        <div className="flex flex-wrap gap-2 mb-6 bg-slate-50 p-1.5 rounded-xl border border-slate-200/60 w-fit">
+          <button
+            onClick={() => setFilterType('all')}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              filterType === 'all'
+                ? "bg-[#6771ab] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Show All
+          </button>
+          <button
+            onClick={() => setFilterType('ceremonies')}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              filterType === 'ceremonies'
+                ? "bg-[#6771ab] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Show Ceremonies Only
+          </button>
+          <button
+            onClick={() => setFilterType('tasks')}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              filterType === 'tasks'
+                ? "bg-[#6771ab] text-white shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Show Tasks Only
+          </button>
+        </div>
+
         {activeTab === "month" && (
           <>
             {/* Days of Week Row */}
@@ -443,14 +506,14 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
             {/* Calendar Cells Grid */}
             <div className="grid grid-cols-7 gap-2 pt-2">
               {calendarDays.map((cell, idx) => {
-                const dayRituals = cell.day
+                const dayRituals = cell.day && filterType !== 'tasks'
                   ? ritualsList.filter((r) => {
                       const d = new Date(r.startTime);
                       return d.getFullYear() === year && d.getMonth() === month && d.getDate() === cell.day;
                     })
                   : [];
 
-                const dayTasks = cell.day
+                const dayTasks = cell.day && filterType !== 'ceremonies'
                   ? tasksList.filter((t) => {
                       if (!t.dueDate) return false;
                       const d = new Date(t.dueDate);
@@ -506,27 +569,31 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
         {activeTab === "week" && (
           <div className="grid grid-cols-1 md:grid-cols-7 gap-4 pt-2">
             {getWeekDays(currentDate).map((dayDate, index) => {
-              const dayRituals = ritualsList.filter((r) => {
-                const d = new Date(r.startTime);
-                return (
-                  d.getFullYear() === dayDate.getFullYear() &&
-                  d.getMonth() === dayDate.getMonth() &&
-                  d.getDate() === dayDate.getDate()
-                );
-              }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+              const dayRituals = filterType !== 'tasks'
+                ? ritualsList.filter((r) => {
+                    const d = new Date(r.startTime);
+                    return (
+                      d.getFullYear() === dayDate.getFullYear() &&
+                      d.getMonth() === dayDate.getMonth() &&
+                      d.getDate() === dayDate.getDate()
+                    );
+                  }).sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+                : [];
 
-              const dayTasks = tasksList.filter((t) => {
-                if (!t.dueDate) return false;
-                const d = new Date(t.dueDate);
-                return (
-                  d.getFullYear() === dayDate.getFullYear() &&
-                  d.getMonth() === dayDate.getMonth() &&
-                  d.getDate() === dayDate.getDate()
-                );
-              }).sort((a, b) => {
-                if (!a.dueDate || !b.dueDate) return 0;
-                return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-              });
+              const dayTasks = filterType !== 'ceremonies'
+                ? tasksList.filter((t) => {
+                    if (!t.dueDate) return false;
+                    const d = new Date(t.dueDate);
+                    return (
+                      d.getFullYear() === dayDate.getFullYear() &&
+                      d.getMonth() === dayDate.getMonth() &&
+                      d.getDate() === dayDate.getDate()
+                    );
+                  }).sort((a, b) => {
+                    if (!a.dueDate || !b.dueDate) return 0;
+                    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+                  })
+                : [];
 
               const isToday = new Date().toDateString() === dayDate.toDateString();
 
@@ -604,108 +671,112 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
         {activeTab === "day" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-2">
             {/* Left Side: Ceremonies & Rituals */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-wider flex items-center gap-2">
-                    <span>✨</span> Ceremonies
-                  </h3>
-                <span className="text-xs bg-violet-100 text-[#2d336b] px-2 py-0.5 rounded-full font-bold">
-                  {currentDayRituals.length} Scheduled
-                </span>
-              </div>
-
-              {currentDayRituals.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
-                  <span className="text-3xl mb-2">🌸</span>
-                  <h4 className="text-sm font-bold text-slate-700">No Ceremonies Scheduled</h4>
-                  <p className="text-xs text-slate-400 mt-1">Keep it relaxing or add a ceremony for today.</p>
-                  <Button onClick={() => openCreateModalForDate(currentDate.getDate())} variant="ghost" className="text-xs mt-3 text-[#6771ab] font-bold">
-                    + Schedule Ceremony
-                  </Button>
+            {filterType !== 'tasks' && (
+              <div className={`${filterType === 'ceremonies' ? 'lg:col-span-12' : 'lg:col-span-7'} space-y-4`}>
+                <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-wider flex items-center gap-2">
+                      <span>✨</span> Ceremonies
+                    </h3>
+                  <span className="text-xs bg-violet-100 text-[#2d336b] px-2 py-0.5 rounded-full font-bold">
+                    {currentDayRituals.length} Scheduled
+                  </span>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {currentDayRituals.map((r) => (
-                    <div
-                      key={r.id}
-                      onClick={(e) => openDetailModal(r, e)}
-                      className="group border border-slate-100 rounded-2xl p-4 bg-white hover:border-violet-200 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                    >
-                      <div className="space-y-1">
-                        <h4 className="font-bold text-slate-800 group-hover:text-[#6771ab] transition-colors">
-                          {r.name}
-                        </h4>
-                        <p className="text-xs text-slate-500 line-clamp-2">{r.description || "No description provided."}</p>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 pt-1 font-sans">
-                          <span className="flex items-center gap-1">
-                            📍 {r.location}
+
+                {currentDayRituals.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
+                    <span className="text-3xl mb-2">🌸</span>
+                    <h4 className="text-sm font-bold text-slate-700">No Ceremonies Scheduled</h4>
+                    <p className="text-xs text-slate-400 mt-1">Keep it relaxing or add a ceremony for today.</p>
+                    <Button onClick={() => openCreateModalForDate(currentDate.getDate())} variant="ghost" className="text-xs mt-3 text-[#6771ab] font-bold">
+                      + Schedule Ceremony
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {currentDayRituals.map((r) => (
+                      <div
+                        key={r.id}
+                        onClick={(e) => openDetailModal(r, e)}
+                        className="group border border-slate-100 rounded-2xl p-4 bg-white hover:border-violet-200 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      >
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-slate-800 group-hover:text-[#6771ab] transition-colors">
+                            {r.name}
+                          </h4>
+                          <p className="text-xs text-slate-500 line-clamp-2">{r.description || "No description provided."}</p>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 pt-1 font-sans">
+                            <span className="flex items-center gap-1">
+                              📍 {r.location}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-row sm:flex-col items-start sm:items-end justify-between border-t sm:border-t-0 border-slate-100 pt-2 sm:pt-0">
+                          <span className="text-xs font-bold text-slate-700 font-sans">
+                            {new Date(r.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-sans">
+                            to {new Date(r.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       </div>
-                      
-                      <div className="flex flex-row sm:flex-col items-start sm:items-end justify-between border-t sm:border-t-0 border-slate-100 pt-2 sm:pt-0">
-                        <span className="text-xs font-bold text-slate-700 font-sans">
-                          {new Date(r.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-sans">
-                          to {new Date(r.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Right Side: Pre-Wedding Tasks & Deadlines */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-wider flex items-center gap-2">
-                  <span>📋</span> Pre-Wedding Tasks
-                </h3>
-                <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
-                  {currentDayTasks.length} Due
-                </span>
-              </div>
+            {filterType !== 'ceremonies' && (
+              <div className={`${filterType === 'tasks' ? 'lg:col-span-12' : 'lg:col-span-5'} space-y-4`}>
+                <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-[#6771ab] uppercase tracking-wider flex items-center gap-2">
+                    <span>📋</span> Pre-Wedding Tasks
+                  </h3>
+                  <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
+                    {currentDayTasks.length} Due
+                  </span>
+                </div>
 
-              {currentDayTasks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
-                  <span className="text-3xl mb-2">🎉</span>
-                  <h4 className="text-sm font-bold text-slate-700">All Tasks Caught Up</h4>
-                  <p className="text-xs text-slate-400 mt-1">No tasks or deadlines due on this date.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {currentDayTasks.map((t) => (
-                    <div
-                      key={t.id}
-                      onClick={() => {
-                        setDetailTask(t);
-                        setIsTaskDetailOpen(true);
-                      }}
-                      className="group border border-slate-100 rounded-2xl p-4 bg-[#fefce8]/60 hover:bg-[#fefce8] hover:border-amber-200 hover:shadow-md transition-all cursor-pointer flex items-start justify-between gap-3"
-                    >
-                      <div className="space-y-1.5 flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded-lg border ${getStatusBadgeStyles(t.status)}`}>
-                            {formatTaskStatus(t.status)}
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-bold font-sans">
-                            {formatTaskCategory(t.category)}
-                          </span>
+                {currentDayTasks.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center">
+                    <span className="text-3xl mb-2">🎉</span>
+                    <h4 className="text-sm font-bold text-slate-700">All Tasks Caught Up</h4>
+                    <p className="text-xs text-slate-400 mt-1">No tasks or deadlines due on this date.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {currentDayTasks.map((t) => (
+                      <div
+                        key={t.id}
+                        onClick={() => {
+                          setDetailTask(t);
+                          setIsTaskDetailOpen(true);
+                        }}
+                        className="group border border-slate-100 rounded-2xl p-4 bg-[#fefce8]/60 hover:bg-[#fefce8] hover:border-amber-200 hover:shadow-md transition-all cursor-pointer flex items-start justify-between gap-3"
+                      >
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded-lg border ${getStatusBadgeStyles(t.status)}`}>
+                              {formatTaskStatus(t.status)}
+                            </span>
+                            <span className="text-[10px] text-slate-500 font-bold font-sans">
+                              {formatTaskCategory(t.category)}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-slate-800 group-hover:text-amber-900 transition-colors truncate">
+                            {t.title}
+                          </h4>
+                          {t.description && (
+                            <p className="text-xs text-slate-500 line-clamp-1">{t.description}</p>
+                          )}
                         </div>
-                        <h4 className="font-bold text-slate-800 group-hover:text-amber-900 transition-colors truncate">
-                          {t.title}
-                        </h4>
-                        {t.description && (
-                          <p className="text-xs text-slate-500 line-clamp-1">{t.description}</p>
-                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </Card>
@@ -845,13 +916,23 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
               disabled={loading}
             />
           </div>
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Ceremony Date</label>
+            <Input
+              type="date"
+              value={ceremonyDate}
+              onChange={(e) => setCeremonyDate(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Start Time</label>
               <Input
-                type="datetime-local"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                type="time"
+                value={startTimeOnly}
+                onChange={(e) => setStartTimeOnly(e.target.value)}
                 required
                 disabled={loading}
               />
@@ -859,9 +940,9 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
             <div>
               <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">End Time</label>
               <Input
-                type="datetime-local"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                type="time"
+                value={endTimeOnly}
+                onChange={(e) => setEndTimeOnly(e.target.value)}
                 required
                 disabled={loading}
               />

@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { tasks } from "@/db/schema";
+import { tasks, ceremonies, users } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding, ensureDefaultColumns } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
@@ -31,9 +31,25 @@ export default async function DashboardPlanningBoardPage() {
     status: t.columnId || "",
   }));
 
+  const dbCeremonies = await db
+    .select({ id: ceremonies.id, name: ceremonies.name })
+    .from(ceremonies)
+    .where(eq(ceremonies.weddingId, wedding.id));
+
+  const teamMembers = await db
+    .select({ id: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.weddingId, wedding.id));
+
   return (
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8">
-      <PlanningBoard initialTasks={clientTasks} initialColumns={dbColumns} />
+      <PlanningBoard
+        initialTasks={clientTasks}
+        initialColumns={dbColumns}
+        ceremonies={dbCeremonies}
+        teamMembers={teamMembers}
+      />
     </main>
   );
 }
+

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db/client';
-import { rituals } from '@/db/schema';
+import { ceremonies } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import {
   validateApiKey,
@@ -15,13 +15,13 @@ export async function GET(request: NextRequest) {
 
     const result = await db
       .select()
-      .from(rituals)
-      .where(eq(rituals.weddingId, auth.weddingId));
+      .from(ceremonies)
+      .where(eq(ceremonies.weddingId, auth.weddingId));
 
     return Response.json(result);
   } catch (error) {
-    console.error('[GET /api/v1/rituals]', error);
-    return errorResponse('Failed to fetch rituals.');
+    console.error('[GET /api/v1/ceremonies]', error);
+    return errorResponse('Failed to fetch ceremonies.');
   }
 }
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const [created] = await db
-      .insert(rituals)
+      .insert(ceremonies)
       .values({
         weddingId: auth.weddingId,
         name,
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json(created, { status: 201 });
   } catch (error) {
-    console.error('[POST /api/v1/rituals]', error);
-    return errorResponse('Failed to create ritual.');
+    console.error('[POST /api/v1/ceremonies]', error);
+    return errorResponse('Failed to create ceremony.');
   }
 }

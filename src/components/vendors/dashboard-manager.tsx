@@ -22,17 +22,24 @@ interface Vendor {
   paidAmount: number;
   paymentStatus: string;
   notes: string | null;
+  ceremonyId: string | null;
 }
 
 interface ManagerProps {
   initialVendors: Vendor[];
   totalBudget: number;
   country?: string;
+  ceremonies?: { id: string; name: string }[];
 }
 
 const categories = ["catering", "photography", "decoration", "apparel", "venue", "makeup", "music", "transport", "other"] as const;
 
-export default function DashboardVendorManager({ initialVendors, totalBudget, country = "India" }: ManagerProps) {
+export default function DashboardVendorManager({ 
+  initialVendors, 
+  totalBudget, 
+  country = "India",
+  ceremonies = []
+}: ManagerProps) {
   const [vendorsList, setVendorsList] = React.useState<Vendor[]>(initialVendors);
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [editingVendor, setEditingVendor] = React.useState<Vendor | null>(null);
@@ -46,6 +53,7 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
   const [totalCost, setTotalCost] = React.useState(0);
   const [paidAmount, setPaidAmount] = React.useState(0);
   const [notes, setNotes] = React.useState("");
+  const [ceremonyId, setCeremonyId] = React.useState("");
 
   // Edit Form state
   const [editName, setEditName] = React.useState("");
@@ -56,16 +64,27 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
   const [editTotalCost, setEditTotalCost] = React.useState(0);
   const [editPaidAmount, setEditPaidAmount] = React.useState(0);
   const [editNotes, setEditNotes] = React.useState("");
+  const [editCeremonyId, setEditCeremonyId] = React.useState("");
 
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [deleteConfirm, setDeleteConfirm] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  const [prevInitialVendors, setPrevInitialVendors] = React.useState(initialVendors);
-  if (initialVendors !== prevInitialVendors) {
+  // Safe client component state synchronization using a value signature
+  const vendorsSignature = React.useMemo(() => {
+    return initialVendors
+      .map(
+        (v) =>
+          `${v.id}-${v.name}-${v.category}-${v.totalCost}-${v.paidAmount}-${v.paymentStatus}-${v.ceremonyId || ""}`
+      )
+      .join("|");
+  }, [initialVendors]);
+
+  const [prevSignature, setPrevSignature] = React.useState(vendorsSignature);
+  if (vendorsSignature !== prevSignature) {
     setVendorsList(initialVendors);
-    setPrevInitialVendors(initialVendors);
+    setPrevSignature(vendorsSignature);
   }
 
   const contractedCost = vendorsList.reduce((sum, v) => sum + v.totalCost, 0);
@@ -100,6 +119,7 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
         totalCost,
         paidAmount,
         notes: notes || undefined,
+        ceremonyId: ceremonyId || null,
       });
 
       if (res?.error) {
@@ -114,6 +134,7 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
         setTotalCost(0);
         setPaidAmount(0);
         setNotes("");
+        setCeremonyId("");
         window.location.reload();
       }
     } catch (err) {
@@ -134,6 +155,7 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
     setEditTotalCost(vendor.totalCost || 0);
     setEditPaidAmount(vendor.paidAmount || 0);
     setEditNotes(vendor.notes || "");
+    setEditCeremonyId(vendor.ceremonyId || "");
   };
 
   const handleUpdateVendor = async (e: React.FormEvent) => {
@@ -162,6 +184,7 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
         totalCost: editTotalCost,
         paidAmount: editPaidAmount,
         notes: editNotes || undefined,
+        ceremonyId: editCeremonyId || null,
       });
 
       if (res?.error) {
@@ -199,6 +222,59 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
     }
   };
 
+  const downloadReport = () => {
+    const escapeCsv = (str: string | null | undefined) => {
+      if (str === null || str === undefined) return "";
+      const val = String(str).replace(/"/g, '""');
+      return val.includes(",") || val.includes("\n") || val.includes('"') ? `"${val}"` : val;
+    };
+
+    const csvContent = [
+      [
+        "Vendor Name",
+        "Category",
+        "Contact Person",
+        "Phone",
+        "Email",
+        "Total Cost",
+        "Paid Amount",
+        "Outstanding Balance",
+        "Payment Status",
+        "Associated Ceremony",
+        "Notes"
+      ].join(",")
+    ];
+
+    vendorsList.forEach((v) => {
+      const balance = v.totalCost - v.paidAmount;
+      const ceremonyName = v.ceremonyId ? ceremonies.find((c) => c.id === v.ceremonyId)?.name || "" : "None";
+      
+      csvContent.push([
+        escapeCsv(v.name),
+        escapeCsv(v.category),
+        escapeCsv(v.contactPerson),
+        escapeCsv(v.phone),
+        escapeCsv(v.email),
+        v.totalCost,
+        v.paidAmount,
+        balance,
+        escapeCsv(v.paymentStatus),
+        escapeCsv(ceremonyName),
+        escapeCsv(v.notes)
+      ].join(","));
+    });
+
+    const blob = new Blob([csvContent.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "wedding_budget_and_vendors_report.csv");
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex flex-col h-full font-sans space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -206,9 +282,14 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
           <h1 className="text-2xl font-bold text-slate-800">Vendors & Budget</h1>
           <p className="text-xs text-slate-500">Track and manage vendor contracts against your overall limit.</p>
         </div>
-        <Button onClick={() => setIsAddOpen(true)} variant="primary">
-          + Add Vendor Contract
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={downloadReport} variant="secondary" className="font-semibold text-xs py-2">
+            📥 Download Report
+          </Button>
+          <Button onClick={() => setIsAddOpen(true)} variant="primary">
+            + Add Vendor Contract
+          </Button>
+        </div>
       </div>
 
       {/* Header calculation widget */}
@@ -279,6 +360,8 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {vendorsList.map((vendor) => {
           const balance = vendor.totalCost - vendor.paidAmount;
+          const linkedCeremony = ceremonies.find((c) => c.id === vendor.ceremonyId);
+
           return (
             <Card 
               key={vendor.id} 
@@ -313,8 +396,16 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
                       {vendor.email}
                     </p>
                   )}
+                  {linkedCeremony && (
+                    <p className="mt-1">
+                      <span className="font-semibold text-slate-700">Ceremony: </span>
+                      <span className="bg-[#6771ab]/10 text-[#2d336b] px-2.5 py-0.5 rounded-full text-[10px] font-semibold w-fit inline-block">
+                        🎉 {linkedCeremony.name}
+                      </span>
+                    </p>
+                  )}
                   {vendor.notes && (
-                    <p className="italic text-slate-400 mt-1 line-clamp-2" title={vendor.notes}>
+                    <p className="italic text-slate-400 mt-1.5 line-clamp-2" title={vendor.notes}>
                       &ldquo;{vendor.notes}&rdquo;
                     </p>
                   )}
@@ -438,6 +529,23 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
               />
             </div>
           </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Associated Ceremony</label>
+            <Select
+              value={ceremonyId}
+              onChange={(e) => setCeremonyId(e.target.value)}
+              disabled={loading}
+            >
+              <option value="">None (General Vendor)</option>
+              {ceremonies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Contract Total Cost</label>
@@ -552,6 +660,23 @@ export default function DashboardVendorManager({ initialVendors, totalBudget, co
               />
             </div>
           </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Associated Ceremony</label>
+            <Select
+              value={editCeremonyId}
+              onChange={(e) => setEditCeremonyId(e.target.value)}
+              disabled={loading}
+            >
+              <option value="">None (General Vendor)</option>
+              {ceremonies.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Contract Total Cost</label>

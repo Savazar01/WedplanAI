@@ -19,15 +19,39 @@ interface Guest {
   plusOneCount: number;
   dietaryRestrictions: string | null;
   loginCode: string;
+  invitedCeremonies: string;
 }
 
+interface Ceremony {
+  id: string;
+  name: string;
+  description: string | null;
+  startTime: Date;
+  endTime: Date;
+  location: string;
+}
+
+interface GuestRsvp {
+  id: string;
+  guestId: string;
+  ceremonyId: string;
+  rsvpStatus: string;
+  guestCount: number;
+}
 
 interface ListProps {
   initialGuests: Guest[];
+  ceremonies: Ceremony[];
+  guestRsvps: GuestRsvp[];
   weddingId?: string;
 }
 
-export default function GuestList({ initialGuests, weddingId }: ListProps) {
+const parseInvitedCeremonies = (val: string | null | undefined): string[] => {
+  if (!val || val === "all") return ["all"];
+  return val.split(",").filter(Boolean);
+};
+
+export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddingId }: ListProps) {
   const [guestsList, setGuestsList] = React.useState<Guest[]>(initialGuests);
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -43,6 +67,7 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
   const [rsvpStatus, setRsvpStatus] = React.useState<"pending" | "attending" | "declined">("pending");
   const [plusOneCount, setPlusOneCount] = React.useState(0);
   const [dietaryRestrictions, setDietaryRestrictions] = React.useState("");
+  const [invitedCeremonies, setInvitedCeremonies] = React.useState<string[]>(["all"]);
   
   const [editingGuest, setEditingGuest] = React.useState<Guest | null>(null);
   const [editName, setEditName] = React.useState("");
@@ -51,12 +76,55 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
   const [editRsvpStatus, setEditRsvpStatus] = React.useState<"pending" | "attending" | "declined">("pending");
   const [editPlusOneCount, setEditPlusOneCount] = React.useState(0);
   const [editDietaryRestrictions, setEditDietaryRestrictions] = React.useState("");
+  const [editInvitedCeremonies, setEditInvitedCeremonies] = React.useState<string[]>([]);
+
+  const [sendInvitedCeremonies, setSendInvitedCeremonies] = React.useState<string[]>([]);
   
   const [error, setError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
   const [deleteConfirm, setDeleteConfirm] = React.useState<Guest | null>(null);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const handleCeremonyToggle = (
+    id: string,
+    selected: string[],
+    setSelected: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    if (id === "all") {
+      if (selected.includes("all") || selected.length === ceremonies.length) {
+        setSelected([]);
+      } else {
+        setSelected(["all"]);
+      }
+    } else {
+      const isAllActive = selected.includes("all");
+      let next: string[];
+      if (isAllActive) {
+        next = ceremonies.map((c) => c.id).filter((cid) => cid !== id);
+      } else {
+        if (selected.includes(id)) {
+          next = selected.filter((x) => x !== id);
+        } else {
+          next = [...selected, id];
+        }
+        if (next.length === ceremonies.length) {
+          next = ["all"];
+        }
+      }
+      setSelected(next);
+    }
+  };
+
+  const getInvitedCeremoniesDisplay = (invitedStr: string | null | undefined) => {
+    if (!invitedStr || invitedStr === "all") return "All";
+    const ids = invitedStr.split(",").filter(Boolean);
+    const names = ids.map((id) => {
+      const c = ceremonies.find((c) => c.id === id);
+      return c ? c.name : "Unknown";
+    });
+    return names.join(", ");
+  };
 
   const handleStartEdit = (guest: Guest) => {
     setEditingGuest(guest);
@@ -66,6 +134,7 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
     setEditRsvpStatus(guest.rsvpStatus as "pending" | "attending" | "declined");
     setEditPlusOneCount(guest.plusOneCount || 0);
     setEditDietaryRestrictions(guest.dietaryRestrictions || "");
+    setEditInvitedCeremonies(parseInvitedCeremonies(guest.invitedCeremonies));
   };
 
   const handleUpdateGuest = async (e: React.FormEvent) => {
@@ -87,6 +156,7 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
         rsvpStatus: editRsvpStatus,
         plusOneCount: editPlusOneCount,
         dietaryRestrictions: editDietaryRestrictions || undefined,
+        invitedCeremonies: editInvitedCeremonies.includes("all") ? "all" : editInvitedCeremonies.join(","),
       });
 
       if (res?.error) {
@@ -132,6 +202,7 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
         rsvpStatus,
         plusOneCount,
         dietaryRestrictions: dietaryRestrictions || undefined,
+        invitedCeremonies: invitedCeremonies.includes("all") ? "all" : invitedCeremonies.join(","),
       });
 
       if (res?.error) {
@@ -144,6 +215,7 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
         setRsvpStatus("pending");
         setPlusOneCount(0);
         setDietaryRestrictions("");
+        setInvitedCeremonies(["all"]);
         window.location.reload();
       }
     } catch (err) {
@@ -152,6 +224,67 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadReport = () => {
+    const csvHeaders = [
+      "Name",
+      "Email",
+      "Phone",
+      "RSVP Status",
+      "Plus One Count",
+      "Dietary Restrictions",
+      "Invited Ceremonies",
+      "RSVP Counts per Ceremony",
+    ];
+
+    const escapeCsv = (str: string | null | undefined) => {
+      if (str === null || str === undefined) return '""';
+      const escaped = String(str).replace(/"/g, '""');
+      return `"${escaped}"`;
+    };
+
+    const csvRows = [csvHeaders.join(",")];
+
+    for (const g of guestsList) {
+      const invitedStr = getInvitedCeremoniesDisplay(g.invitedCeremonies);
+      const guestRsvpsList = guestRsvps.filter((r) => r.guestId === g.id);
+      const rsvpCountsParts = ceremonies
+        .map((c) => {
+          const isInvited =
+            g.invitedCeremonies === "all" ||
+            g.invitedCeremonies.split(",").includes(c.id);
+          if (!isInvited) return null;
+          const r = guestRsvpsList.find((r) => r.ceremonyId === c.id);
+          if (!r) return `${c.name}: pending`;
+          return `${c.name}: ${r.rsvpStatus === "attending" ? r.guestCount : "declined"}`;
+        })
+        .filter(Boolean);
+      const rsvpCountsStr = rsvpCountsParts.join("; ");
+
+      const row = [
+        escapeCsv(g.name),
+        escapeCsv(g.email),
+        escapeCsv(g.phone),
+        escapeCsv(g.rsvpStatus),
+        g.plusOneCount,
+        escapeCsv(g.dietaryRestrictions),
+        escapeCsv(invitedStr),
+        escapeCsv(rsvpCountsStr),
+      ];
+      csvRows.push(row.join(","));
+    }
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `guests_report_${weddingId || "wedding"}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleStatusChange = async (guestId: string, newStatus: "pending" | "attending" | "declined") => {
@@ -204,6 +337,82 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
     return matchesSearch && matchesStatus;
   });
 
+  const renderCeremoniesCheckboxes = (
+    selected: string[],
+    setSelected: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    const isAllChecked =
+      selected.includes("all") ||
+      (ceremonies.length > 0 && selected.length === ceremonies.length);
+
+    return (
+      <div className="space-y-1">
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1.5">
+          Invited Ceremonies
+        </label>
+        <div className="space-y-2 border border-slate-200 rounded-xl p-3 bg-slate-50 max-h-40 overflow-y-auto">
+          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isAllChecked}
+              onChange={() => handleCeremonyToggle("all", selected, setSelected)}
+              className="rounded border-slate-300 text-[#6771ab] focus:ring-[#6771ab] h-4 w-4"
+            />
+            <span className="font-semibold">All</span>
+          </label>
+          <div className="h-[1px] bg-slate-200 my-1" />
+          {ceremonies.map((c) => {
+            const isChecked = selected.includes("all") || selected.includes(c.id);
+            return (
+              <label key={c.id} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer pl-2">
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => handleCeremonyToggle(c.id, selected, setSelected)}
+                  className="rounded border-slate-300 text-[#6771ab] focus:ring-[#6771ab] h-4 w-4"
+                />
+                <span>{c.name}</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const handleSaveSendInvitedCeremonies = async () => {
+    if (!inviteGuest) return;
+    setError("");
+    setLoading(true);
+    try {
+      const updatedValue = sendInvitedCeremonies.includes("all") ? "all" : sendInvitedCeremonies.join(",");
+      const res = await updateGuestAction(inviteGuest.id, {
+        name: inviteGuest.name,
+        email: inviteGuest.email || undefined,
+        phone: inviteGuest.phone || undefined,
+        rsvpStatus: inviteGuest.rsvpStatus as "pending" | "attending" | "declined",
+        plusOneCount: inviteGuest.plusOneCount,
+        dietaryRestrictions: inviteGuest.dietaryRestrictions || undefined,
+        invitedCeremonies: updatedValue,
+      });
+
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        const text = `You're invited to our wedding!\n\nView all details and RSVP:\n${showcaseLink}?code=${inviteGuest.loginCode}\n\nWe can't wait to celebrate with you!`;
+        await navigator.clipboard.writeText(text);
+        setToast({ message: "Invitation copied and ceremonies saved!", type: "success" });
+        setInviteGuest(null);
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full font-sans space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -211,9 +420,14 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
           <h1 className="text-2xl font-bold text-slate-800">Guest RSVP Manager</h1>
           <p className="text-xs text-slate-500">Coordinate and search your wedding invitations.</p>
         </div>
-        <Button onClick={() => setIsAddOpen(true)} variant="primary">
-          + Add Guest
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleDownloadReport} variant="secondary" className="border-slate-200 hover:bg-slate-50">
+            Download Guests Report
+          </Button>
+          <Button onClick={() => setIsAddOpen(true)} variant="primary">
+            + Add Guest
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -273,40 +487,31 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
           <table className="min-w-full divide-y divide-slate-100">
             <thead className="bg-slate-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Actions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Send Invite</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Name</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Contact Info</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Login Code</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">RSVP Status</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Plus Ones</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Dietary Restrictions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Invited Ceremonies</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {filteredGuests.map((g) => (
                 <tr key={g.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm flex gap-1">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <Button
                       variant="ghost"
-                      onClick={() => { setInviteGuest(g); }}
+                      onClick={() => {
+                        setInviteGuest(g);
+                        setSendInvitedCeremonies(parseInvitedCeremonies(g.invitedCeremonies));
+                      }}
                       className="text-emerald-600 hover:text-emerald-800 text-xs font-semibold"
                       title="Send Invitation"
                     >
                       Send
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleStartEdit(g)}
-                      className="text-[#6771ab] hover:text-[#566198] text-xs font-semibold"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleDeleteGuest(g.id)}
-                      className="text-red-500 hover:text-red-700 text-xs font-semibold"
-                    >
-                      Del
                     </Button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{g.name}</td>
@@ -346,11 +551,32 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
                   <td className="px-6 py-4 text-sm text-slate-500 max-w-xs truncate" title={g.dietaryRestrictions || ""}>
                     {g.dietaryRestrictions || "-"}
                   </td>
+                  <td className="px-6 py-4 text-sm text-slate-500 max-w-xs truncate" title={getInvitedCeremoniesDisplay(g.invitedCeremonies)}>
+                    {getInvitedCeremoniesDisplay(g.invitedCeremonies)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleStartEdit(g)}
+                        className="text-[#6771ab] hover:text-[#566198] text-xs font-semibold"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleDeleteGuest(g.id)}
+                        className="text-red-500 hover:text-red-700 text-xs font-semibold"
+                      >
+                        Del
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {filteredGuests.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-slate-400 text-xs font-sans">
+                  <td colSpan={9} className="text-center py-8 text-slate-400 text-xs font-sans">
                     No matching guests found.
                   </td>
                 </tr>
@@ -419,6 +645,7 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
               />
             </div>
           </div>
+          {renderCeremoniesCheckboxes(invitedCeremonies, setInvitedCeremonies)}
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Dietary Restrictions (optional)</label>
             <Input
@@ -486,19 +713,24 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
               </p>
             </div>
 
+            {renderCeremoniesCheckboxes(sendInvitedCeremonies, setSendInvitedCeremonies)}
+
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">
+                {error}
+              </div>
+            )}
+
             <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
-              <Button variant="ghost" onClick={() => setInviteGuest(null)}>
+              <Button variant="ghost" onClick={() => setInviteGuest(null)} disabled={loading}>
                 Close
               </Button>
               <Button
                 variant="primary"
-                onClick={() => {
-                  const text = `You're invited to our wedding!\n\nView all details and RSVP:\n${showcaseLink}?code=${inviteGuest.loginCode}\n\nWe can't wait to celebrate with you!`;
-                  navigator.clipboard.writeText(text);
-                  setToast({ message: "Full invitation copied to clipboard!", type: "success" });
-                }}
+                onClick={handleSaveSendInvitedCeremonies}
+                disabled={loading}
               >
-                Copy All
+                {loading ? "Saving..." : "Save & Copy Invite"}
               </Button>
             </div>
           </div>
@@ -564,6 +796,7 @@ export default function GuestList({ initialGuests, weddingId }: ListProps) {
               />
             </div>
           </div>
+          {renderCeremoniesCheckboxes(editInvitedCeremonies, setEditInvitedCeremonies)}
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Dietary Restrictions (optional)</label>
             <Input

@@ -64,6 +64,7 @@ export default function GuestCsvUpload({ weddingId }: GuestCsvUploadProps) {
             rsvpStatus: guest.rsvpStatus || "pending",
             plusOneCount: parseInt(guest.plusOneCount) || 0,
             dietaryRestrictions: guest.dietaryRestrictions || null,
+            invitedCeremonies: guest.invited_ceremonies || guest.invitedCeremonies || null,
           });
         }
       }

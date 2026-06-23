@@ -14,6 +14,9 @@ export const users = pgTable("user", {
   country: text("country"),
   pincode: text("pincode"),
   languages: text("languages"),
+  persona: text("persona").default("diy").notNull(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  weddingId: uuid("wedding_id").references((): any => weddings.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -61,7 +64,8 @@ export const verification = verifications;
 // Wedding Business Tables (using Random UUIDs as required)
 export const weddings = pgTable("wedding", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  userId: text("user_id").notNull().references((): any => users.id, { onDelete: "cascade" }),
   partnerA: text("partner_a").notNull(),
   partnerB: text("partner_b").notNull(),
   tradition: text("tradition").notNull(),
@@ -125,11 +129,14 @@ export const tasks = pgTable("task", {
   category: text("category").notNull(), // venue, catering, decor, apparel, invitations, music, rituals, other
   isCustom: boolean("is_custom").default(false).notNull(),
   position: integer("position").default(0).notNull(), // sort order
+  ceremonyId: uuid("ceremony_id").references(() => ceremonies.id, { onDelete: "set null" }),
+  assignedUserId: text("assigned_user_id").references(() => users.id, { onDelete: "set null" }),
+  categoryData: text("category_data"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const rituals = pgTable("ritual", {
+export const ceremonies = pgTable("ceremony", {
   id: uuid("id").defaultRandom().primaryKey(),
   weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
@@ -138,9 +145,14 @@ export const rituals = pgTable("ritual", {
   endTime: timestamp("end_time").notNull(),
   location: text("location").notNull(),
   isCustom: boolean("is_custom").default(false).notNull(),
+  isFoodServed: boolean("is_food_served").default(false).notNull(),
+  dressCode: text("dress_code"),
+  extraChecklist: text("extra_checklist"), // JSON string
+  assignedUserId: text("assigned_user_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
 
 export const guests = pgTable("guest", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -162,6 +174,7 @@ export const guests = pgTable("guest", {
   rsvpStatus: text("rsvp_status").default("pending").notNull(), // pending, attending, declined
   plusOneCount: integer("plus_one_count").default(0).notNull(),
   dietaryRestrictions: text("dietary_restrictions"),
+  invitedCeremonies: text("invited_ceremonies").default("all").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -178,6 +191,7 @@ export const vendors = pgTable("vendor", {
   paidAmount: integer("paid_amount").default(0).notNull(), // Paid amount
   paymentStatus: text("payment_status").default("unpaid").notNull(), // unpaid, partially_paid, paid
   notes: text("notes"),
+  ceremonyId: uuid("ceremony_id").references(() => ceremonies.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -190,3 +204,35 @@ export const apiKeys = pgTable("api_key", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
 });
+
+export const guestRsvps = pgTable("guest_rsvp", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  guestId: uuid("guest_id").notNull().references(() => guests.id, { onDelete: "cascade" }),
+  ceremonyId: uuid("ceremony_id").notNull().references(() => ceremonies.id, { onDelete: "cascade" }),
+  rsvpStatus: text("rsvp_status").notNull(), // 'attending', 'declined'
+  guestCount: integer("guest_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const weddingTraditions = pgTable("wedding_trad_config", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  key: text("key").unique().notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  seedTasks: text("seed_tasks"), // JSON string
+  seedCeremonies: text("seed_ceremonies"), // JSON string
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const taskCategories = pgTable("task_cat_config", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  key: text("key").unique().notNull(),
+  name: text("name").notNull(),
+  followUpQuestions: text("follow_up_questions"), // JSON string
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const rituals = ceremonies;

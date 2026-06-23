@@ -113,9 +113,41 @@ export default function WizardPage() {
   const [country, setCountry] = React.useState("India");
   const [pincode, setPincode] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [tradition, setTradition] = React.useState<"hindu" | "muslim" | "sikh" | "christian" | "secular">("secular");
+  const [tradition, setTradition] = React.useState<string>("secular");
   const [budget, setBudget] = React.useState(1000000);
   const [guestCount, setGuestCount] = React.useState(150);
+
+  // Dynamic db data
+  interface DBTradition {
+    id: string;
+    key: string;
+    name: string;
+    description: string | null;
+    seedTasks: string | null;
+    seedCeremonies: string | null;
+  }
+  interface DBCategory {
+    id: string;
+    key: string;
+    name: string;
+  }
+  const [dbTraditions, setDbTraditions] = React.useState<DBTradition[]>([]);
+  const [dbCategories, setDbCategories] = React.useState<DBCategory[]>([]);
+  const [customTraditionName, setCustomTraditionName] = React.useState("");
+
+  React.useEffect(() => {
+    async function load() {
+      try {
+        const { getPublicTraditions, getPublicCategories } = await import("@/app/actions/wedding");
+        const [trads, cats] = await Promise.all([getPublicTraditions(), getPublicCategories()]);
+        setDbTraditions(trads);
+        setDbCategories(cats);
+      } catch (e) {
+        console.error("Failed to load db traditions/categories in wizard:", e);
+      }
+    }
+    load();
+  }, []);
 
   // Helper function to calculate due date dynamically
   const calculateTaskDueDate = (wDateStr: string, category: string): string => {
@@ -245,36 +277,93 @@ export default function WizardPage() {
   React.useEffect(() => {
     if (!weddingDate) return;
     setTimeout(() => {
-      const tasksMapped = defaultTasks[tradition].map((t) => ({
-        ...t,
-        dueDate: calculateTaskDueDate(weddingDate, t.category),
-      }));
+      const dbTrad = dbTraditions.find(t => t.key === tradition);
+      let tasksMapped: { title: string; category: string; dueDate: string }[] = [];
+      let ritualsMapped: {
+        name: string;
+        description: string;
+        date: string;
+        startTimeOnly: string;
+        endTimeOnly: string;
+        location: string;
+      }[] = [];
 
-      const ritualsMapped = defaultRituals[tradition].map((r) => {
-        const offset = r.offsetDays ?? 0;
-        const rDate = new Date(weddingDate);
-        rDate.setDate(rDate.getDate() + offset);
-        const dateStr = rDate.toISOString().split("T")[0];
+      if (dbTrad) {
+        if (dbTrad.seedTasks) {
+          try {
+            const parsedTasks = JSON.parse(dbTrad.seedTasks);
+            if (Array.isArray(parsedTasks)) {
+              tasksMapped = parsedTasks.map(t => ({
+                title: t.title || "",
+                category: t.category || "other",
+                dueDate: calculateTaskDueDate(weddingDate, t.category || "other")
+              }));
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        if (dbTrad.seedCeremonies) {
+          try {
+            const parsedCers = JSON.parse(dbTrad.seedCeremonies);
+            if (Array.isArray(parsedCers)) {
+              ritualsMapped = parsedCers.map(r => {
+                let dateStr = weddingDate;
+                if (typeof r.offsetDays === "number") {
+                  const rDate = new Date(weddingDate);
+                  rDate.setDate(rDate.getDate() + r.offsetDays);
+                  dateStr = rDate.toISOString().split("T")[0];
+                }
+                const startHStr = String(r.startHour ?? 9).padStart(2, "0");
+                const startMStr = String(r.startMin ?? 0).padStart(2, "0");
+                const endHStr = String(r.endHour ?? 17).padStart(2, "0");
+                const endMStr = String(r.endMin ?? 0).padStart(2, "0");
+                return {
+                  name: r.name || "",
+                  description: r.description || "",
+                  date: dateStr,
+                  startTimeOnly: `${startHStr}:${startMStr}`,
+                  endTimeOnly: `${endHStr}:${endMStr}`,
+                  location: r.location || locationRef.current || ""
+                };
+              });
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      } else if (tradition !== "other" && defaultTasks[tradition as keyof typeof defaultTasks]) {
+        tasksMapped = defaultTasks[tradition as keyof typeof defaultTasks].map((t) => ({
+          ...t,
+          dueDate: calculateTaskDueDate(weddingDate, t.category),
+        }));
 
-        const startHStr = String(r.startHour ?? 9).padStart(2, "0");
-        const startMStr = String(r.startMin ?? 0).padStart(2, "0");
-        const endHStr = String(r.endHour ?? 17).padStart(2, "0");
-        const endMStr = String(r.endMin ?? 0).padStart(2, "0");
+        ritualsMapped = defaultRituals[tradition as keyof typeof defaultRituals].map((r) => {
+          const offset = r.offsetDays ?? 0;
+          const rDate = new Date(weddingDate);
+          rDate.setDate(rDate.getDate() + offset);
+          const dateStr = rDate.toISOString().split("T")[0];
 
-        return {
-          name: r.name,
-          description: r.description || "",
-          date: dateStr,
-          startTimeOnly: `${startHStr}:${startMStr}`,
-          endTimeOnly: `${endHStr}:${endMStr}`,
-          location: locationRef.current || "",
-        };
-      });
+          const startHStr = String(r.startHour ?? 9).padStart(2, "0");
+          const startMStr = String(r.startMin ?? 0).padStart(2, "0");
+          const endHStr = String(r.endHour ?? 17).padStart(2, "0");
+          const endMStr = String(r.endMin ?? 0).padStart(2, "0");
+
+          return {
+            name: r.name,
+            description: r.description || "",
+            date: dateStr,
+            startTimeOnly: `${startHStr}:${startMStr}`,
+            endTimeOnly: `${endHStr}:${endMStr}`,
+            location: locationRef.current || "",
+          };
+        });
+      }
 
       setCustomTasks(tasksMapped);
       setCustomRituals(ritualsMapped);
     }, 0);
-  }, [tradition, weddingDate]);
+  }, [tradition, weddingDate, dbTraditions]);
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -371,7 +460,7 @@ export default function WizardPage() {
       const res = await createWeddingAction({
         partnerA,
         partnerB,
-        tradition,
+        tradition: tradition === "other" ? (customTraditionName.trim() || "other") : tradition,
         weddingDate,
         budget,
         guestCount,
@@ -581,15 +670,24 @@ export default function WizardPage() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Select Wedding Tradition</h2>
-                <p className="text-sm text-slate-500">Choose a cultural tradition. This will pre-populate your tasks and rituals.</p>
+                <p className="text-sm text-slate-500">Choose a cultural tradition. This will pre-populate your tasks and ceremonies.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {traditions.map((t) => {
+                {[
+                  ...traditions.map(t => ({ id: t.id, label: t.label, desc: t.desc })),
+                  ...dbTraditions.map(t => ({ id: t.key, label: t.name, desc: t.description || "" })),
+                  { id: "other", label: "Other", desc: "Create a custom tradition with your own tasks and ceremonies" }
+                ].map((t) => {
                   const isSelected = tradition === t.id;
                   return (
                     <Card
                       key={t.id}
-                      onClick={() => setTradition(t.id)}
+                      onClick={() => {
+                        setTradition(t.id);
+                        if (t.id !== "other") {
+                          setCustomTraditionName("");
+                        }
+                      }}
                       variant={isSelected ? "cream" : "default"}
                       className={`p-4 cursor-pointer hover:border-[#6771ab] transition-all hover:scale-[1.01] ${
                         isSelected ? "border-[#6771ab] ring-1 ring-[#6771ab]" : "border-slate-200"
@@ -601,6 +699,18 @@ export default function WizardPage() {
                   );
                 })}
               </div>
+              {tradition === "other" && (
+                <div className="space-y-1 mt-4">
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest block mb-1">Custom Tradition Name</label>
+                  <Input
+                    type="text"
+                    placeholder="e.g. My Custom Tradition"
+                    value={customTraditionName}
+                    onChange={(e) => setCustomTraditionName(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -661,7 +771,11 @@ export default function WizardPage() {
                           onChange={(e) => updateTask(idx, "category", e.target.value)}
                           className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
                         >
-                          {taskCategories.map((cat) => (
+                          {[
+                            ...taskCategories.filter(c => c.id !== "other"),
+                            ...dbCategories.map(c => ({ id: c.key, label: c.name })),
+                            { id: "other", label: "Other" }
+                          ].map((cat) => (
                             <option key={cat.id} value={cat.id}>
                               {cat.label}
                             </option>
@@ -717,7 +831,11 @@ export default function WizardPage() {
                       onChange={(e) => setNewTaskCategory(e.target.value)}
                       className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
                     >
-                      {taskCategories.map((cat) => (
+                      {[
+                        ...taskCategories.filter(c => c.id !== "other"),
+                        ...dbCategories.map(c => ({ id: c.key, label: c.name })),
+                        { id: "other", label: "Other" }
+                      ].map((cat) => (
                         <option key={cat.id} value={cat.id}>
                           {cat.label}
                         </option>

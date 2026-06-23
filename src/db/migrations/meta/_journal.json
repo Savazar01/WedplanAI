@@ -64,6 +64,20 @@
       "when": 1781845066385,
       "tag": "0008_amazing_zodiak",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1782181261977,
+      "tag": "0009_sturdy_true_believers",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1782181271336,
+      "tag": "0010_good_legion",
+      "breakpoints": true
     }
   ]
 }

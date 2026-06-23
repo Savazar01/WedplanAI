@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { weddings, guests } from "@/db/schema";
+import { weddings, guests, ceremonies, guestRsvps } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
@@ -29,6 +29,23 @@ export default async function GuestsPage() {
     .from(guests)
     .where(eq(guests.weddingId, wedding.id));
 
+  const dbCeremonies = await db
+    .select()
+    .from(ceremonies)
+    .where(eq(ceremonies.weddingId, wedding.id));
+
+  const dbGuestRsvps = await db
+    .select({
+      id: guestRsvps.id,
+      guestId: guestRsvps.guestId,
+      ceremonyId: guestRsvps.ceremonyId,
+      rsvpStatus: guestRsvps.rsvpStatus,
+      guestCount: guestRsvps.guestCount,
+    })
+    .from(guestRsvps)
+    .innerJoin(guests, eq(guestRsvps.guestId, guests.id))
+    .where(eq(guests.weddingId, wedding.id));
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <DashboardHeader 
@@ -38,7 +55,12 @@ export default async function GuestsPage() {
       />
 
       <main className="flex-1 max-w-6xl w-full mx-auto p-6">
-        <GuestList initialGuests={dbGuests} weddingId={wedding.id} />
+        <GuestList
+          initialGuests={dbGuests}
+          ceremonies={dbCeremonies}
+          guestRsvps={dbGuestRsvps}
+          weddingId={wedding.id}
+        />
       </main>
     </div>
   );

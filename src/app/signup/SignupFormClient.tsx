@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
+import { Select } from "@/components/ui/select";
+
 interface SignupFormClientProps {
   signupAction: (prevState: { success?: boolean; error?: string } | null, formData: FormData) => Promise<{ success?: boolean; error?: string }>;
 }
@@ -48,6 +50,21 @@ export default function SignupFormClient({ signupAction }: SignupFormClientProps
           required 
           disabled={isPending}
         />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
+          User Persona
+        </label>
+        <Select 
+          name="persona" 
+          defaultValue="diy"
+          disabled={isPending}
+          required
+        >
+          <option value="diy">Plan My Wedding (DIY)</option>
+          <option value="wedding_planner">Wedding Planner</option>
+        </Select>
       </div>
 
       <div>

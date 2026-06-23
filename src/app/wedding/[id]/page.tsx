@@ -91,7 +91,7 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
         </div>
         
         <h1
-          className="font-title text-4xl sm:text-6xl font-extrabold bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide"
+          className="showcase-gradient-text font-title text-4xl sm:text-6xl font-extrabold bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide"
           style={{ WebkitTextFillColor: 'transparent', color: 'transparent' }}
         >
           {wedding.showcaseTitle || `${wedding.partnerA} & ${wedding.partnerB}`}

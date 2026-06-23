@@ -173,14 +173,18 @@ body {
 }
 
 /* Handle walkthrough gradient panels on dashboard */
-.dark .from-violet-50\/60:not(.showcase-preview, .showcase-preview *) {
-  --tw-gradient-from: rgba(23, 29, 47, 0.6) !important;
-}
-.dark .to-rose-50\/40:not(.showcase-preview, .showcase-preview *) {
-  --tw-gradient-to: rgba(23, 29, 47, 0.4) !important;
-}
-.dark .bg-gradient-to-r:not(.showcase-preview, .showcase-preview *) {
+/* IMPORTANT: Only target panels that explicitly have the walkthrough panel classes, NOT all bg-gradient-to-r elements */
+.dark .from-violet-50\/60.bg-gradient-to-r:not(.showcase-preview, .showcase-preview *),
+.dark .from-violet-50\/60.bg-gradient-to-br:not(.showcase-preview, .showcase-preview *) {
   background-image: linear-gradient(to right, rgba(23, 29, 47, 0.6), rgba(36, 47, 71, 0.4)) !important;
+}
+
+/* Gradient text headings — ensure bright gradient shows through the transparent text clip */
+.dark .hero-gradient-text {
+  background-image: linear-gradient(to right, #8b93c5, #c484b0, #fbbf24) !important;
+}
+.dark .showcase-gradient-text {
+  background-image: linear-gradient(to right, var(--color-primary), var(--color-secondary), #fbbf24) !important;
 }
 
 /* Cream card backgrounds override to dynamic surface variant */

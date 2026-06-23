@@ -622,8 +622,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
             </div>
             
             <h1 
-              style={{ fontFamily: "var(--font-title)" }}
-              className="text-4xl sm:text-6xl font-extrabold !text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide"
+              style={{ fontFamily: "var(--font-title)", WebkitTextFillColor: 'transparent', color: 'transparent' }}
+              className="text-4xl sm:text-6xl font-extrabold bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide"
             >
               {showcaseTitle || defaultTitle}
             </h1>

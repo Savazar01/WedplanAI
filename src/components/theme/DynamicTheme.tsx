@@ -71,9 +71,9 @@ export default function DynamicTheme({ wedding, mode = "app" }: DynamicThemeProp
               ${isShowcase ? `--font-title: "${sanitizedTitle}", Georgia, serif;` : ""}
             }
             .dark {
-              --color-primary: ${themeDarkPrimary};
-              --color-secondary: ${themeDarkSecondary};
-              --color-background: ${themeDarkBackground};
+              --color-primary: ${isShowcase ? (primary ? `color-mix(in srgb, ${primary} 30%, #ffffff 70%)` : '#e6b7d2') : themeDarkPrimary};
+              --color-secondary: ${isShowcase ? (secondary ? `color-mix(in srgb, ${secondary} 30%, #ffffff 70%)` : '#fce4f0') : themeDarkSecondary};
+              --color-background: ${isShowcase ? (background ? `color-mix(in srgb, ${background} 15%, #0b0f19 85%)` : '#0b0f19') : themeDarkBackground};
               --color-surface: color-mix(in srgb, var(--color-background) 94%, #ffffff 6%);
               --color-surface-variant: color-mix(in srgb, var(--color-background) 90%, var(--color-primary) 10%);
               --color-outline: color-mix(in srgb, var(--color-background) 88%, #ffffff 12%);

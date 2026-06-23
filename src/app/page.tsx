@@ -33,7 +33,7 @@ export default async function LandingPage() {
           AI-Powered Wedding Planning
         </div>
 
-        <h1 className={`${cormorant.className} relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500 dark:from-[#8b93c5] dark:via-[#c484b0] dark:to-amber-400 leading-[1.4] mb-6 max-w-full px-4 pb-3`}>
+        <h1 className={`${cormorant.className} relative text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold !text-transparent bg-clip-text bg-gradient-to-r from-[#6771ab] via-[#c484b0] to-amber-500 dark:from-[#8b93c5] dark:via-[#c484b0] dark:to-amber-400 leading-[1.4] mb-6 max-w-full px-4 pb-3`}>
           Plan Your Perfect Wedding
         </h1>
 

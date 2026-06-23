@@ -492,7 +492,7 @@ export default function MenuPlannerClient({
                     )}
 
                     {menu.notes && (
-                      <div className="bg-[#fcfcfa] p-3 rounded-xl border border-yellow-100 mt-2">
+                      <div className="bg-[#fcfcfa] dark:bg-amber-950/20 p-3 rounded-xl border border-yellow-100 dark:border-amber-900/30 mt-2">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">
                           <StickyNote className="h-3.5 w-3.5" /> Notes
                         </div>

@@ -227,90 +227,106 @@ export async function ensureDefaultColumns(weddingId: string) {
       isFoodServed?: boolean;
     }[] = [];
 
-    if (tradition === "hindu") {
-      seedTasks = [
-        { title: "Book Mehndi Artist", category: "ceremonies" },
-        { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
-        { title: "Hire Dhol Players & DJ", category: "music" },
-        { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
-        { title: "Select Mandap Decorator", category: "decor" },
-      ];
-      seedRituals = [
-        { name: "Mehndi", description: "Traditional henna pre-wedding celebration", offsetDays: -2, startHour: 14, startMin: 0, endHour: 18, endMin: 0, location: location, isFoodServed: false },
-        { name: "Haldi", description: "Traditional cleansing ceremony", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: false },
-        { name: "Sangeet", description: "Musical celebration night", offsetDays: -1, startHour: 18, startMin: 0, endHour: 22, endMin: 0, location: location, isFoodServed: false },
-        { name: "Mandap Pheras", description: "Main Vedic wedding ceremony rituals around the holy fire", offsetDays: 0, startHour: 10, startMin: 0, endHour: 14, endMin: 0, location: location, isFoodServed: true },
-        { name: "Reception", description: "Grand wedding dinner reception", offsetDays: 0, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
-      ];
-    } else if (tradition === "muslim") {
-      seedTasks = [
-        { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
-        { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
-        { title: "Select Stage & Floral Decorator", category: "decor" },
-        { title: "Book Catering Menu for Valima Feast", category: "catering" },
-      ];
-      seedRituals = [
-        { name: "Manjha", description: "Traditional pre-wedding ceremonies", offsetDays: -2, startHour: 16, startMin: 0, endHour: 20, endMin: 0, location: location, isFoodServed: false },
-        { name: "Nikah", description: "Official marriage contract ceremony", offsetDays: 0, startHour: 11, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: true },
-        { name: "Valima", description: "Post-wedding grand feast reception", offsetDays: 1, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
-      ];
-    } else if (tradition === "sikh") {
-      seedTasks = [
-        { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
-        { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
-        { title: "Finalize Langar or Catering Menu", category: "catering" },
-        { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
-      ];
-      seedRituals = [
-        { name: "Maiya", description: "Traditional pre-wedding cleansing ceremonies", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: false },
-        { name: "Anand Karaj", description: "Holy wedding ceremony at the Gurdwara", offsetDays: 0, startHour: 9, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: true },
-        { name: "Reception", description: "Post-wedding dinner party celebration", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
-      ];
-    } else if (tradition === "christian") {
-      seedTasks = [
-        { title: "Secure Church Venue & Priest", category: "venue" },
-        { title: "Purchase Wedding Dress & Tuxedo", category: "apparel" },
-        { title: "Order Wedding Cake & Floral Bouquets", category: "catering" },
-        { title: "Hire Wedding Choir & Organist", category: "music" },
-      ];
-      seedRituals = [
-        { name: "Rehearsal Dinner", description: "Formal dinner with family and bridal party", offsetDays: -1, startHour: 18, startMin: 0, endHour: 21, endMin: 0, location: location, isFoodServed: true },
-        { name: "Church Ceremony", description: "Marriage ceremony in the church", offsetDays: 0, startHour: 14, startMin: 0, endHour: 16, endMin: 0, location: location, isFoodServed: false },
-        { name: "Reception", description: "Evening reception celebration with cake and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
-      ];
-    } else if (tradition === "secular") {
-      seedTasks = [
-        { title: "Select Secular Celebrant", category: "ceremonies" },
-        { title: "Write Wedding Vows", category: "other" },
-        { title: "Arrange Catering & Open Bar", category: "catering" },
-        { title: "Coordinate Photographer/Videographer Contracts", category: "other" },
-      ];
-      seedRituals = [
-        { name: "Toast", description: "Ice-breaker drinks with incoming guests", offsetDays: -1, startHour: 18, startMin: 0, endHour: 20, endMin: 0, location: location, isFoodServed: true },
-        { name: "Vows", description: "Ceremonial reading of wedding vows", offsetDays: 0, startHour: 16, startMin: 0, endHour: 17, endMin: 30, location: location, isFoodServed: false },
-        { name: "Reception", description: "Dinner, toast, and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 30, location: location, isFoodServed: true },
-      ];
-    } else {
-      const dbTradList = await db
-        .select()
-        .from(weddingTraditions)
-        .where(eq(weddingTraditions.key, tradition))
-        .limit(1);
-      if (dbTradList.length > 0) {
-        if (dbTradList[0].seedTasks) {
-          try {
-            seedTasks = JSON.parse(dbTradList[0].seedTasks);
-          } catch (e) {
-            console.error("Failed to parse db tradition seedTasks:", e);
-          }
-        }
-        if (dbTradList[0].seedCeremonies) {
-          try {
-            seedRituals = JSON.parse(dbTradList[0].seedCeremonies);
-          } catch (e) {
-            console.error("Failed to parse db tradition seedCeremonies:", e);
-          }
-        }
+    const dbTradList = await db
+      .select()
+      .from(weddingTraditions)
+      .where(eq(weddingTraditions.key, tradition))
+      .limit(1);
+    const dbTraditionData = dbTradList.length > 0 ? dbTradList[0] : null;
+
+    let loadedTasksFromDb = false;
+    if (dbTraditionData && dbTraditionData.seedTasks) {
+      try {
+        seedTasks = JSON.parse(dbTraditionData.seedTasks);
+        loadedTasksFromDb = true;
+      } catch (e) {
+        console.error("Failed to parse db tradition seedTasks:", e);
+      }
+    }
+
+    if (!loadedTasksFromDb) {
+      if (tradition === "hindu") {
+        seedTasks = [
+          { title: "Book Mehndi Artist", category: "ceremonies" },
+          { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
+          { title: "Hire Dhol Players & DJ", category: "music" },
+          { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
+          { title: "Select Mandap Decorator", category: "decor" },
+        ];
+      } else if (tradition === "muslim") {
+        seedTasks = [
+          { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
+          { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
+          { title: "Select Stage & Floral Decorator", category: "decor" },
+          { title: "Book Catering Menu for Valima Feast", category: "catering" },
+        ];
+      } else if (tradition === "sikh") {
+        seedTasks = [
+          { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
+          { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
+          { title: "Finalize Langar or Catering Menu", category: "catering" },
+          { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
+        ];
+      } else if (tradition === "christian") {
+        seedTasks = [
+          { title: "Secure Church Venue & Priest", category: "venue" },
+          { title: "Purchase Wedding Dress & Tuxedo", category: "apparel" },
+          { title: "Order Wedding Cake & Floral Bouquets", category: "catering" },
+          { title: "Hire Wedding Choir & Organist", category: "music" },
+        ];
+      } else if (tradition === "secular") {
+        seedTasks = [
+          { title: "Select Secular Celebrant", category: "ceremonies" },
+          { title: "Write Wedding Vows", category: "other" },
+          { title: "Arrange Catering & Open Bar", category: "catering" },
+          { title: "Coordinate Photographer/Videographer Contracts", category: "other" },
+        ];
+      }
+    }
+
+    let loadedRitualsFromDb = false;
+    if (dbTraditionData && dbTraditionData.seedCeremonies) {
+      try {
+        seedRituals = JSON.parse(dbTraditionData.seedCeremonies);
+        loadedRitualsFromDb = true;
+      } catch (e) {
+        console.error("Failed to parse db tradition seedCeremonies:", e);
+      }
+    }
+
+    if (!loadedRitualsFromDb) {
+      if (tradition === "hindu") {
+        seedRituals = [
+          { name: "Mehndi", description: "Traditional henna pre-wedding celebration", offsetDays: -2, startHour: 14, startMin: 0, endHour: 18, endMin: 0, location: location, isFoodServed: false },
+          { name: "Haldi", description: "Traditional cleansing ceremony", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: false },
+          { name: "Sangeet", description: "Musical celebration night", offsetDays: -1, startHour: 18, startMin: 0, endHour: 22, endMin: 0, location: location, isFoodServed: false },
+          { name: "Mandap Pheras", description: "Main Vedic wedding ceremony rituals around the holy fire", offsetDays: 0, startHour: 10, startMin: 0, endHour: 14, endMin: 0, location: location, isFoodServed: true },
+          { name: "Reception", description: "Grand wedding dinner reception", offsetDays: 0, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+        ];
+      } else if (tradition === "muslim") {
+        seedRituals = [
+          { name: "Manjha", description: "Traditional pre-wedding ceremonies", offsetDays: -2, startHour: 16, startMin: 0, endHour: 20, endMin: 0, location: location, isFoodServed: false },
+          { name: "Nikah", description: "Official marriage contract ceremony", offsetDays: 0, startHour: 11, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: true },
+          { name: "Valima", description: "Post-wedding grand feast reception", offsetDays: 1, startHour: 19, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+        ];
+      } else if (tradition === "sikh") {
+        seedRituals = [
+          { name: "Maiya", description: "Traditional pre-wedding cleansing ceremonies", offsetDays: -1, startHour: 10, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: false },
+          { name: "Anand Karaj", description: "Holy wedding ceremony at the Gurdwara", offsetDays: 0, startHour: 9, startMin: 0, endHour: 13, endMin: 0, location: location, isFoodServed: true },
+          { name: "Reception", description: "Post-wedding dinner party celebration", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+        ];
+      } else if (tradition === "christian") {
+        seedRituals = [
+          { name: "Rehearsal Dinner", description: "Formal dinner with family and bridal party", offsetDays: -1, startHour: 18, startMin: 0, endHour: 21, endMin: 0, location: location, isFoodServed: true },
+          { name: "Church Ceremony", description: "Marriage ceremony in the church", offsetDays: 0, startHour: 14, startMin: 0, endHour: 16, endMin: 0, location: location, isFoodServed: false },
+          { name: "Reception", description: "Evening reception celebration with cake and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 0, location: location, isFoodServed: true },
+        ];
+      } else if (tradition === "secular") {
+        seedRituals = [
+          { name: "Toast", description: "Ice-breaker drinks with incoming guests", offsetDays: -1, startHour: 18, startMin: 0, endHour: 20, endMin: 0, location: location, isFoodServed: true },
+          { name: "Vows", description: "Ceremonial reading of wedding vows", offsetDays: 0, startHour: 16, startMin: 0, endHour: 17, endMin: 30, location: location, isFoodServed: false },
+          { name: "Reception", description: "Dinner, toast, and dancing", offsetDays: 0, startHour: 18, startMin: 0, endHour: 23, endMin: 30, location: location, isFoodServed: true },
+        ];
       }
     }
 

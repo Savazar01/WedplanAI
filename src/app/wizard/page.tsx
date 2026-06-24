@@ -82,16 +82,6 @@ const defaultRituals = {
   ],
 };
 
-const taskCategories = [
-  { id: "venue", label: "Venue" },
-  { id: "catering", label: "Catering" },
-  { id: "decor", label: "Decor" },
-  { id: "apparel", label: "Apparel" },
-  { id: "invitations", label: "Invitations" },
-  { id: "music", label: "Music" },
-  { id: "rituals", label: "Rituals" },
-  { id: "other", label: "Other" },
-];
 
 export default function WizardPage() {
   const router = useRouter();
@@ -981,13 +971,9 @@ export default function WizardPage() {
                           onChange={(e) => updateTask(idx, "category", e.target.value)}
                           className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
                         >
-                          {[
-                            ...taskCategories.filter(c => c.id !== "other"),
-                            ...dbCategories.map(c => ({ id: c.key, label: c.name })),
-                            { id: "other", label: "Other" }
-                          ].map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                              {cat.label}
+                          {dbCategories.map((cat) => (
+                            <option key={cat.key} value={cat.key}>
+                              {cat.name}
                             </option>
                           ))}
                         </select>
@@ -1058,13 +1044,9 @@ export default function WizardPage() {
                       onChange={(e) => setNewTaskCategory(e.target.value)}
                       className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
                     >
-                      {[
-                        ...taskCategories.filter(c => c.id !== "other"),
-                        ...dbCategories.map(c => ({ id: c.key, label: c.name })),
-                        { id: "other", label: "Other" }
-                      ].map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.label}
+                      {dbCategories.map((cat) => (
+                        <option key={cat.key} value={cat.key}>
+                          {cat.name}
                         </option>
                       ))}
                     </select>

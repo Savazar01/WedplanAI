@@ -61,6 +61,14 @@ export default function SampleWalkthroughCard({
         path: "/dashboard",
       },
       {
+        id: "event-itinerary",
+        title: "Wedding Ceremony Planner",
+        description: "Track the detailed, minute-by-minute itinerary of events on the wedding day to ensure seamless coordination.",
+        icon: Clock,
+        color: "text-violet-500 bg-violet-50 border-violet-100",
+        path: "/dashboard/wedding-ceremony-planner",
+      },
+      {
         id: "planning-board",
         title: "Wedding Task Planner",
         description: "Manage pre-wedding ceremonies like Haldi, Mehndi, Sangeet, and the main wedding events. Easily drag tasks across stages (To Do, In Progress, Done) to stay organized.",
@@ -75,14 +83,6 @@ export default function SampleWalkthroughCard({
         icon: Calendar,
         color: "text-rose-500 bg-rose-50 border-rose-100",
         path: "/dashboard/calendar",
-      },
-      {
-        id: "event-itinerary",
-        title: "Wedding Ceremony Planner",
-        description: "Track the detailed, minute-by-minute itinerary of events on the wedding day to ensure seamless coordination.",
-        icon: Clock,
-        color: "text-violet-500 bg-violet-50 border-violet-100",
-        path: "/dashboard/wedding-ceremony-planner",
       },
       {
         id: "menu-plan",

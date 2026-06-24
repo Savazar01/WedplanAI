@@ -158,6 +158,36 @@ export default async function LandingPage() {
                 border: "border-purple-100",
                 iconBg: "bg-purple-100 text-purple-700",
               },
+              {
+                icon: (
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                ),
+                title: "App Administration",
+                desc: "Manage custom traditions, customize task categories with follow-up questions, enable dark mode, manage team accounts, and generate REST API v1 keys.",
+                color: "from-blue-500/10 to-blue-50",
+                border: "border-blue-100",
+                iconBg: "bg-blue-100 text-blue-700",
+              },
+              {
+                icon: (
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 9.172V5L8 4z" /></svg>
+                ),
+                title: "Event Creation Wizard",
+                desc: "A guided 7-step setup flow to capture partner details, date, tradition, budget, and estimated guest count, auto-seeding ceremonies and tasks.",
+                color: "from-teal-500/10 to-teal-50",
+                border: "border-teal-100",
+                iconBg: "bg-teal-100 text-teal-700",
+              },
+              {
+                icon: (
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 10.742l8.99-4.495m0 0l-8.99-4.495m8.99 4.495v10m-8.99-5.505l8.99 4.495m0 0l-8.99 4.495m8.99-4.495v-10" /></svg>
+                ),
+                title: "Personal Guest Sharing",
+                desc: "Generate unique codes for guests. Share personalized RSVP links via the Web Share API (WhatsApp/Email/SMS) on desktop and mobile devices.",
+                color: "from-indigo-500/10 to-indigo-50",
+                border: "border-indigo-100",
+                iconBg: "bg-indigo-100 text-indigo-700",
+              },
             ].map((feature) => (
               <div
                 key={feature.title}

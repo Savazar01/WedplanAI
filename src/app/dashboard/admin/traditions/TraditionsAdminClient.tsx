@@ -12,6 +12,21 @@ import {
   deleteTraditionAction,
 } from "./actions";
 
+interface SeedTask {
+  title: string;
+  category: string;
+}
+
+interface SeedCeremony {
+  name: string;
+  description: string;
+  offsetDays: number;
+  startHour: number;
+  startMin: number;
+  endHour: number;
+  endMin: number;
+}
+
 interface Tradition {
   id: string;
   key: string;
@@ -27,6 +42,25 @@ interface TraditionsAdminClientProps {
   initialTraditions: Tradition[];
 }
 
+const AVAILABLE_CATEGORIES = [
+  "venue",
+  "catering",
+  "attire",
+  "decor",
+  "photography",
+  "music",
+  "transportation",
+  "flowers",
+  "invitations",
+  "ceremony",
+  "honeymoon",
+  "beauty",
+  "stationery",
+  "gifts",
+  "accommodation",
+  "other",
+];
+
 export default function TraditionsAdminClient({
   initialTraditions,
 }: TraditionsAdminClientProps) {
@@ -41,8 +75,8 @@ export default function TraditionsAdminClient({
   const [key, setKey] = React.useState("");
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [seedTasks, setSeedTasks] = React.useState("[]");
-  const [seedCeremonies, setSeedCeremonies] = React.useState("[]");
+  const [seedTaskRows, setSeedTaskRows] = React.useState<SeedTask[]>([]);
+  const [seedCeremonyRows, setSeedCeremonyRows] = React.useState<SeedCeremony[]>([]);
 
   // Sync state with props using a structural ID comparison to avoid raw reference check and render ref write.
   const [prevInitialTraditions, setPrevInitialTraditions] = React.useState(initialTraditions);
@@ -58,8 +92,8 @@ export default function TraditionsAdminClient({
     setKey("");
     setName("");
     setDescription("");
-    setSeedTasks("[]");
-    setSeedCeremonies("[]");
+    setSeedTaskRows([]);
+    setSeedCeremonyRows([]);
     setError(null);
     setIsFormOpen(true);
   };
@@ -69,8 +103,27 @@ export default function TraditionsAdminClient({
     setKey(t.key);
     setName(t.name);
     setDescription(t.description || "");
-    setSeedTasks(t.seedTasks || "[]");
-    setSeedCeremonies(t.seedCeremonies || "[]");
+
+    let parsedTasks: SeedTask[] = [];
+    try {
+      if (t.seedTasks) {
+        parsedTasks = JSON.parse(t.seedTasks);
+      }
+    } catch (e) {
+      console.error("Error parsing seedTasks:", e);
+    }
+    setSeedTaskRows(parsedTasks);
+
+    let parsedCeremonies: SeedCeremony[] = [];
+    try {
+      if (t.seedCeremonies) {
+        parsedCeremonies = JSON.parse(t.seedCeremonies);
+      }
+    } catch (e) {
+      console.error("Error parsing seedCeremonies:", e);
+    }
+    setSeedCeremonyRows(parsedCeremonies);
+
     setError(null);
     setIsFormOpen(true);
   };
@@ -89,8 +142,8 @@ export default function TraditionsAdminClient({
       key: key.toLowerCase().replace(/[^a-z0-9_-]/g, ""),
       name: name.trim(),
       description: description.trim() || undefined,
-      seedTasks: seedTasks.trim() || undefined,
-      seedCeremonies: seedCeremonies.trim() || undefined,
+      seedTasks: seedTaskRows.length > 0 ? JSON.stringify(seedTaskRows) : "[]",
+      seedCeremonies: seedCeremonyRows.length > 0 ? JSON.stringify(seedCeremonyRows) : "[]",
     };
 
     if (!data.key || !data.name) {
@@ -272,30 +325,236 @@ export default function TraditionsAdminClient({
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-              Seed Tasks (JSON Array)
-            </label>
-            <textarea
-              className="w-full h-32 p-3 text-xs font-mono border border-slate-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#6771ab] transition-all bg-slate-50"
-              value={seedTasks}
-              onChange={(e) => setSeedTasks(e.target.value)}
-              placeholder='[{"title": "Book Venue", "category": "venue"}]'
-            />
-            <p className="text-[10px] text-slate-400">JSON array of tasks containing &quot;title&quot; and &quot;category&quot; keys.</p>
+          <div className="space-y-2 border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Seed Tasks
+              </label>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setSeedTaskRows([...seedTaskRows, { title: "", category: "other" }])}
+                className="h-7 px-2 text-xs"
+              >
+                + Add Task
+              </Button>
+            </div>
+            
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              {seedTaskRows.map((row, idx) => (
+                <div key={idx} className="flex gap-2 items-center p-2 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <Input
+                    type="text"
+                    placeholder="Task Title (e.g. Book Venue)"
+                    value={row.title}
+                    onChange={(e) => {
+                      const newRows = [...seedTaskRows];
+                      newRows[idx].title = e.target.value;
+                      setSeedTaskRows(newRows);
+                    }}
+                    required
+                    className="h-8 text-xs flex-1 bg-white"
+                  />
+                  <select
+                    value={row.category}
+                    onChange={(e) => {
+                      const newRows = [...seedTaskRows];
+                      newRows[idx].category = e.target.value;
+                      setSeedTaskRows(newRows);
+                    }}
+                    className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 min-w-[120px]"
+                  >
+                    {AVAILABLE_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSeedTaskRows(seedTaskRows.filter((_, i) => i !== idx));
+                    }}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded-lg text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {seedTaskRows.length === 0 && (
+                <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                  No tasks added yet. Click "+ Add Task" to start.
+                </p>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400">Tasks added here will be auto-created in the Wedding Task Planner when this tradition is selected.</p>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-              Seed Ceremonies (JSON Array)
-            </label>
-            <textarea
-              className="w-full h-32 p-3 text-xs font-mono border border-slate-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-[#6771ab] transition-all bg-slate-50"
-              value={seedCeremonies}
-              onChange={(e) => setSeedCeremonies(e.target.value)}
-              placeholder='[{"name": "Mehndi", "description": "Henna party", "offsetDays": -2, "startHour": 14, "startMin": 0, "endHour": 18, "endMin": 0}]'
-            />
-            <p className="text-[10px] text-slate-400">JSON array of ceremonies. Can contain &quot;offsetDays&quot;, &quot;startHour&quot;, &quot;startMin&quot;, &quot;endHour&quot;, &quot;endMin&quot;, &quot;name&quot;, &quot;description&quot;.</p>
+          <div className="space-y-2 border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Seed Ceremonies
+              </label>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setSeedCeremonyRows([...seedCeremonyRows, { name: "", description: "", offsetDays: 0, startHour: 12, startMin: 0, endHour: 13, endMin: 0 }])}
+                className="h-7 px-2 text-xs"
+              >
+                + Add Ceremony
+              </Button>
+            </div>
+
+            <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+              {seedCeremonyRows.map((row, idx) => (
+                <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 relative">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 flex gap-2">
+                      <div className="flex-1">
+                        <label className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Name</label>
+                        <Input
+                          type="text"
+                          placeholder="Ceremony Name (e.g. Sangeet)"
+                          value={row.name}
+                          onChange={(e) => {
+                            const newRows = [...seedCeremonyRows];
+                            newRows[idx].name = e.target.value;
+                            setSeedCeremonyRows(newRows);
+                          }}
+                          required
+                          className="h-8 text-xs bg-white"
+                        />
+                      </div>
+                      <div className="w-24">
+                        <label className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Offset Days</label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={row.offsetDays}
+                          onChange={(e) => {
+                            const newRows = [...seedCeremonyRows];
+                            newRows[idx].offsetDays = Number(e.target.value);
+                            setSeedCeremonyRows(newRows);
+                          }}
+                          className="h-8 text-xs bg-white"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSeedCeremonyRows(seedCeremonyRows.filter((_, i) => i !== idx));
+                      }}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg text-xs self-end"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider block">Start Time</label>
+                      <div className="flex gap-1">
+                        <select
+                          value={row.startHour}
+                          onChange={(e) => {
+                            const newRows = [...seedCeremonyRows];
+                            newRows[idx].startHour = Number(e.target.value);
+                            setSeedCeremonyRows(newRows);
+                          }}
+                          className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 flex-1"
+                        >
+                          {Array.from({ length: 24 }).map((_, i) => (
+                            <option key={i} value={i}>
+                              {String(i).padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-slate-400 self-center">:</span>
+                        <select
+                          value={row.startMin}
+                          onChange={(e) => {
+                            const newRows = [...seedCeremonyRows];
+                            newRows[idx].startMin = Number(e.target.value);
+                            setSeedCeremonyRows(newRows);
+                          }}
+                          className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 flex-1"
+                        >
+                          {[0, 15, 30, 45].map((m) => (
+                            <option key={m} value={m}>
+                              {String(m).padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider block">End Time</label>
+                      <div className="flex gap-1">
+                        <select
+                          value={row.endHour}
+                          onChange={(e) => {
+                            const newRows = [...seedCeremonyRows];
+                            newRows[idx].endHour = Number(e.target.value);
+                            setSeedCeremonyRows(newRows);
+                          }}
+                          className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 flex-1"
+                        >
+                          {Array.from({ length: 24 }).map((_, i) => (
+                            <option key={i} value={i}>
+                              {String(i).padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-slate-400 self-center">:</span>
+                        <select
+                          value={row.endMin}
+                          onChange={(e) => {
+                            const newRows = [...seedCeremonyRows];
+                            newRows[idx].endMin = Number(e.target.value);
+                            setSeedCeremonyRows(newRows);
+                          }}
+                          className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 flex-1"
+                        >
+                          {[0, 15, 30, 45].map((m) => (
+                            <option key={m} value={m}>
+                              {String(m).padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">Description (optional)</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Henna painting & music"
+                      value={row.description}
+                      onChange={(e) => {
+                        const newRows = [...seedCeremonyRows];
+                        newRows[idx].description = e.target.value;
+                        setSeedCeremonyRows(newRows);
+                      }}
+                      className="h-8 text-xs bg-white"
+                    />
+                  </div>
+                </div>
+              ))}
+              {seedCeremonyRows.length === 0 && (
+                <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                  No ceremonies added yet. Click "+ Add Ceremony" to start.
+                </p>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400">
+              Ceremonies added here will populate the Wedding Ceremony Planner when this tradition is selected.
+              Offset Days: 0 = wedding day, -1 = day before, -2 = two days before, 1 = day after.
+            </p>
           </div>
 
           <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">

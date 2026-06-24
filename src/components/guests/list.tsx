@@ -423,6 +423,31 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
     setToast({ message: "Invitation link copied!", type: "success" });
   };
 
+  const handleShare = async () => {
+    if (!inviteGuest) return;
+    const link = `${showcaseLink}?code=${inviteGuest.loginCode}`;
+    const shareData = {
+      title: `Wedding Invitation for ${inviteGuest.name}`,
+      text: `You're invited! View your personal wedding invitation and RSVP:`,
+      url: link,
+    };
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(link);
+        setToast({ message: "Link copied to clipboard!", type: "success" });
+      }
+    } catch (err) {
+      // User cancelled share or error — silently ignore cancellation
+      if (err instanceof Error && err.name !== 'AbortError') {
+        await navigator.clipboard.writeText(link);
+        setToast({ message: "Link copied to clipboard!", type: "success" });
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-full font-sans space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -716,12 +741,6 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
               </div>
             </div>
 
-            <div className="p-3 bg-[#eef0f7] border border-[#6771ab]/20 rounded-xl">
-              <p className="text-xs font-semibold text-[#2d336b] mb-1">📋 Personal Link (click Copy Link to share):</p>
-              <p className="text-xs text-slate-600 font-mono break-all">
-                {showcaseLink}?code={inviteGuest.loginCode}
-              </p>
-            </div>
 
             {renderCeremoniesCheckboxes(sendInvitedCeremonies, setSendInvitedCeremonies)}
 
@@ -731,7 +750,7 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
               </div>
             )}
 
-            <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-700 pt-4">
               <Button variant="ghost" onClick={() => setInviteGuest(null)} disabled={loading}>
                 Close
               </Button>
@@ -742,6 +761,13 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
                   className="border-slate-200"
                 >
                   📋 Copy Link
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={handleShare}
+                  className="border-[#6771ab]/30 text-[#6771ab] dark:text-[#8b93c5]"
+                >
+                  🔗 Share
                 </Button>
                 <Button
                   variant="primary"

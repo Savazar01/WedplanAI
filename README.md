@@ -309,6 +309,177 @@ src/
 
 ---
 
+## 🔌 REST API v1 Reference
+
+WedPlanAI exposes a fully-functional REST API v1 for programmatic access and integrations (e.g. Model Context Protocol / MCP implementation).
+
+### Authentication
+
+All API requests require an API key passed in the `Authorization` header. You can generate and manage API keys under **App Administration > API Keys** in the dashboard.
+
+```http
+Authorization: Bearer wpa_your_api_key_here
+```
+
+API keys are scoped per-wedding. All requests and responses are in JSON format. The base URL is `/api/v1/`.
+
+### Endpoints Overview
+
+| Resource | Path | Methods | Description |
+|---|---|---|---|
+| **Wedding** | `/api/v1/wedding` | `GET`, `PUT` | Manage active wedding info |
+| **Columns** | `/api/v1/columns` | `GET`, `POST` | Manage Kanban task columns |
+| **Columns (ID)** | `/api/v1/columns/:id` | `PUT`, `DELETE` | Update/delete specific Kanban column |
+| **Tasks** | `/api/v1/tasks` | `GET`, `POST` | Manage wedding planning tasks |
+| **Tasks (ID)** | `/api/v1/tasks/:id` | `PUT`, `DELETE` | Update/delete specific task |
+| **Ceremonies** | `/api/v1/ceremonies` | `GET`, `POST` | Manage timeline ceremonies |
+| **Ceremonies (ID)** | `/api/v1/ceremonies/:id` | `PUT`, `DELETE` | Update/delete specific ceremony |
+| **Guests** | `/api/v1/guests` | `GET`, `POST` | Manage guests & RSVP statuses |
+| **Guests (ID)** | `/api/v1/guests/:id` | `PUT`, `DELETE` | Update/delete specific guest |
+| **Vendors** | `/api/v1/vendors` | `GET`, `POST` | Manage vendor contracts & payments |
+| **Vendors (ID)** | `/api/v1/vendors/:id` | `PUT`, `DELETE` | Update/delete specific vendor |
+
+---
+
+### Endpoint Details & Examples
+
+#### 1. Wedding Info
+* **GET `/api/v1/wedding`**
+  - **Description:** Retrieve details of the active wedding.
+  - **Response (200 OK):**
+    ```json
+    {
+      "id": "78096f83-e18e-4a6f-b258-7e23114d59ff",
+      "partnerA": "Rahul",
+      "partnerB": "Priya",
+      "weddingDate": "2025-12-25T00:00:00.000Z",
+      "budget": 50000,
+      "guestCount": 150,
+      "location": "Umaid Bhawan Palace, Jodhpur",
+      "country": "India",
+      "tradition": "hindu"
+    }
+    ```
+
+* **PUT `/api/v1/wedding`**
+  - **Description:** Update wedding metadata.
+  - **Request Body:**
+    ```json
+    {
+      "partnerA": "Rahul",
+      "partnerB": "Priya",
+      "weddingDate": "2025-12-26T00:00:00.000Z",
+      "budget": 55000
+    }
+    ```
+  - **Response (200 OK):** Updated wedding object.
+
+#### 2. Wedding Tasks
+* **GET `/api/v1/tasks`**
+  - **Description:** Get all tasks.
+  - **Response (200 OK):** Array of tasks.
+
+* **POST `/api/v1/tasks`**
+  - **Description:** Create a new planning task.
+  - **Request Body:**
+    ```json
+    {
+      "title": "Book mehndi artist",
+      "description": "Book a premium mehndi artist for the bride.",
+      "category": "catering",
+      "columnId": "column-uuid-here",
+      "dueDate": "2025-11-20T00:00:00Z"
+    }
+    ```
+
+* **PUT `/api/v1/tasks/:id`**
+  - **Description:** Edit a task. Any subset of fields can be updated.
+
+* **DELETE `/api/v1/tasks/:id`**
+  - **Description:** Delete a task.
+
+#### 3. Wedding Ceremonies
+* **GET `/api/v1/ceremonies`**
+  - **Description:** Get all ceremonies.
+  - **Response (200 OK):** Array of ceremonies.
+
+* **POST `/api/v1/ceremonies`**
+  - **Description:** Create a new ceremony.
+  - **Request Body:**
+    ```json
+    {
+      "name": "Sangeet",
+      "description": "Dance and music night",
+      "startTime": "2025-12-24T18:00:00Z",
+      "endTime": "2025-12-24T22:00:00Z",
+      "location": "Banquet Lawn",
+      "foodServed": true
+    }
+    ```
+
+* **PUT/DELETE `/api/v1/ceremonies/:id`**
+  - **Description:** Update or delete a ceremony.
+
+#### 4. Guests & RSVP
+* **GET `/api/v1/guests`**
+  - **Description:** List guests, unique invitation codes, and invited ceremony assignments.
+
+* **POST `/api/v1/guests`**
+  - **Description:** Create a guest.
+  - **Request Body:**
+    ```json
+    {
+      "name": "Aarav Sharma",
+      "email": "aarav@example.com",
+      "phone": "+919876543210",
+      "rsvpStatus": "pending",
+      "plusOneCount": 1,
+      "dietaryRestrictions": "Vegetarian"
+    }
+    ```
+
+* **PUT/DELETE `/api/v1/guests/:id`**
+  - **Description:** Update or delete a guest.
+
+#### 5. Vendors & Contracts
+* **GET `/api/v1/vendors`**
+  - **Description:** List all vendors and payment progress.
+
+* **POST `/api/v1/vendors`**
+  - **Description:** Create a vendor entry.
+  - **Request Body:**
+    ```json
+    {
+      "name": "Gourmet Catering Co",
+      "category": "catering",
+      "contractAmount": 15000,
+      "paidAmount": 5000,
+      "currency": "INR"
+    }
+    ```
+
+* **PUT/DELETE `/api/v1/vendors/:id`**
+  - **Description:** Update or delete a vendor.
+
+#### 6. Kanban Columns
+* **GET `/api/v1/columns`**
+  - **Description:** List all Kanban columns.
+
+* **POST `/api/v1/columns`**
+  - **Description:** Create a column (e.g. `To-Do`, `In Progress`).
+  - **Request Body:**
+    ```json
+    {
+      "title": "Priority Tasks",
+      "position": 1
+    }
+    ```
+
+* **PUT/DELETE `/api/v1/columns/:id`**
+  - **Description:** Update or delete a column.
+
+---
+
 ## 🤝 Contributing
 
 1. Fork the repository

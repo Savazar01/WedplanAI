@@ -425,17 +425,17 @@ export default function WizardPage() {
       }
     }
     if (step === 5) {
-      for (const t of customTasks) {
-        if (!t.title.trim()) {
-          setError("All tasks must have a title.");
+      for (const r of customRituals) {
+        if (!r.name.trim()) {
+          setError("All events must have a name.");
           return false;
         }
       }
     }
     if (step === 6) {
-      for (const r of customRituals) {
-        if (!r.name.trim()) {
-          setError("All events must have a name.");
+      for (const t of customTasks) {
+        if (!t.title.trim()) {
+          setError("All tasks must have a title.");
           return false;
         }
       }
@@ -530,8 +530,8 @@ export default function WizardPage() {
                   {s === 2 && "Date & Place"}
                   {s === 3 && "Tradition"}
                   {s === 4 && "Budget & Guests"}
-                  {s === 5 && "Wedding Tasks Plan"}
-                  {s === 6 && "Wedding Ceremonies"}
+                  {s === 5 && "Wedding Ceremonies"}
+                  {s === 6 && "Wedding Tasks Plan"}
                   {s === 7 && "Review"}
                 </span>
               </div>
@@ -758,131 +758,6 @@ export default function WizardPage() {
           {step === 5 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Tasks Plan</h2>
-                <p className="text-sm text-slate-500">
-                  Customize the tasks for your wedding. Set due dates to keep your planning on track. You can always manage these tasks from the Wedding Task Planner.
-                </p>
-              </div>
-
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                {customTasks.map((t, idx) => (
-                  <Card key={idx} variant="default" className="p-4 border border-slate-100 shadow-sm relative bg-[#fefce8]">
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                      <div className="sm:col-span-6">
-                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
-                        <Input
-                          type="text"
-                          value={t.title}
-                          onChange={(e) => updateTask(idx, "title", e.target.value)}
-                          placeholder="e.g. Book mehndi artist"
-                          className="h-9 text-xs"
-                        />
-                      </div>
-                      <div className="sm:col-span-3">
-                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
-                        <select
-                          value={t.category}
-                          onChange={(e) => updateTask(idx, "category", e.target.value)}
-                          className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
-                        >
-                          {[
-                            ...taskCategories.filter(c => c.id !== "other"),
-                            ...dbCategories.map(c => ({ id: c.key, label: c.name })),
-                            { id: "other", label: "Other" }
-                          ].map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                              {cat.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="sm:col-span-3 flex items-end gap-2">
-                        <div className="flex-1">
-                          <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Due Date</label>
-                          <Input
-                            type="date"
-                            value={t.dueDate}
-                            onChange={(e) => updateTask(idx, "dueDate", e.target.value)}
-                            className="h-9 text-xs"
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => deleteTask(idx)}
-                          className="h-9 px-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl flex items-center justify-center min-w-[36px]"
-                          title="Delete task"
-                        >
-                          ✕
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-                {customTasks.length === 0 && (
-                  <p className="text-sm text-slate-400 italic text-center py-4">No tasks added yet. Add one below!</p>
-                )}
-              </div>
-
-              {/* Add New Task Form */}
-              <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-xl border">
-                <h4 className="text-xs font-semibold text-[#6771ab] uppercase tracking-wider mb-2">Add New Planning Task</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                  <div className="sm:col-span-6">
-                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
-                    <Input
-                      type="text"
-                      placeholder="e.g. Hire Wedding Planner"
-                      value={newTaskTitle}
-                      onChange={(e) => setNewTaskTitle(e.target.value)}
-                      className="h-9 text-xs"
-                    />
-                  </div>
-                  <div className="sm:col-span-3">
-                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
-                    <select
-                      value={newTaskCategory}
-                      onChange={(e) => setNewTaskCategory(e.target.value)}
-                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
-                    >
-                      {[
-                        ...taskCategories.filter(c => c.id !== "other"),
-                        ...dbCategories.map(c => ({ id: c.key, label: c.name })),
-                        { id: "other", label: "Other" }
-                      ].map((cat) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="sm:col-span-3 flex gap-2">
-                    <div className="flex-1">
-                      <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Due Date</label>
-                      <Input
-                        type="date"
-                        value={newTaskDueDate}
-                        onChange={(e) => setNewTaskDueDate(e.target.value)}
-                        className="h-9 text-xs"
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={handleAddTask}
-                      variant="primary"
-                      className="h-9 px-4 text-xs rounded-xl bg-[#6771ab] text-white hover:bg-[#566198]"
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === 6 && (
-            <div className="space-y-6">
-              <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Ceremonies</h2>
                 <p className="text-sm text-slate-500">
                   Customize details, dates, times, and venues for each ceremony or event. You can always manage these ceremonies from the Wedding Ceremony Planner.
@@ -1065,6 +940,131 @@ export default function WizardPage() {
                     <label htmlFor="new-ritual-food-served" className="text-xs text-slate-600 font-medium cursor-pointer">
                       🍴 Food Served (Automatically creates a Catering Menu Plan)
                     </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Tasks Plan</h2>
+                <p className="text-sm text-slate-500">
+                  Customize the tasks for your wedding. Set due dates to keep your planning on track. You can always manage these tasks from the Wedding Task Planner.
+                </p>
+              </div>
+
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {customTasks.map((t, idx) => (
+                  <Card key={idx} variant="default" className="p-4 border border-slate-100 shadow-sm relative bg-[#fefce8]">
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                      <div className="sm:col-span-6">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
+                        <Input
+                          type="text"
+                          value={t.title}
+                          onChange={(e) => updateTask(idx, "title", e.target.value)}
+                          placeholder="e.g. Book mehndi artist"
+                          className="h-9 text-xs"
+                        />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
+                        <select
+                          value={t.category}
+                          onChange={(e) => updateTask(idx, "category", e.target.value)}
+                          className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                        >
+                          {[
+                            ...taskCategories.filter(c => c.id !== "other"),
+                            ...dbCategories.map(c => ({ id: c.key, label: c.name })),
+                            { id: "other", label: "Other" }
+                          ].map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="sm:col-span-3 flex items-end gap-2">
+                        <div className="flex-1">
+                          <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Due Date</label>
+                          <Input
+                            type="date"
+                            value={t.dueDate}
+                            onChange={(e) => updateTask(idx, "dueDate", e.target.value)}
+                            className="h-9 text-xs"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => deleteTask(idx)}
+                          className="h-9 px-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl flex items-center justify-center min-w-[36px]"
+                          title="Delete task"
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {customTasks.length === 0 && (
+                  <p className="text-sm text-slate-400 italic text-center py-4">No tasks added yet. Add one below!</p>
+                )}
+              </div>
+
+              {/* Add New Task Form */}
+              <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-xl border">
+                <h4 className="text-xs font-semibold text-[#6771ab] uppercase tracking-wider mb-2">Add New Planning Task</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  <div className="sm:col-span-6">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Hire Wedding Planner"
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      className="h-9 text-xs"
+                    />
+                  </div>
+                  <div className="sm:col-span-3">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
+                    <select
+                      value={newTaskCategory}
+                      onChange={(e) => setNewTaskCategory(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                    >
+                      {[
+                        ...taskCategories.filter(c => c.id !== "other"),
+                        ...dbCategories.map(c => ({ id: c.key, label: c.name })),
+                        { id: "other", label: "Other" }
+                      ].map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-3 flex gap-2">
+                    <div className="flex-1">
+                      <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Due Date</label>
+                      <Input
+                        type="date"
+                        value={newTaskDueDate}
+                        onChange={(e) => setNewTaskDueDate(e.target.value)}
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleAddTask}
+                      variant="primary"
+                      className="h-9 px-4 text-xs rounded-xl bg-[#6771ab] text-white hover:bg-[#566198]"
+                    >
+                      Add
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/db/client';
-import { guests } from '@/db/schema';
+import { cateringMenus } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import {
   validateApiKey,
@@ -22,13 +22,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
 
     const allowedFields = [
-      'name',
-      'email',
-      'phone',
-      'rsvpStatus',
-      'plusOneCount',
-      'dietaryRestrictions',
-      'invitedCeremonies',
+      'ceremonyId',
+      'vendorId',
+      'cuisine',
+      'guestCount',
+      'appetizers',
+      'mainCourses',
+      'desserts',
+      'drinks',
+      'notes',
     ] as const;
 
     const updates: Record<string, unknown> = {};
@@ -42,18 +44,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return errorResponse('No valid fields provided for update.', 400);
     }
 
-    const [updatedGuest] = await db
-      .update(guests)
+    const [updatedMenu] = await db
+      .update(cateringMenus)
       .set({ ...updates, updatedAt: new Date() })
-      .where(and(eq(guests.id, id), eq(guests.weddingId, auth.weddingId)))
+      .where(and(eq(cateringMenus.id, id), eq(cateringMenus.weddingId, auth.weddingId)))
       .returning();
 
-    if (!updatedGuest) return notFoundResponse('Guest');
+    if (!updatedMenu) return notFoundResponse('Catering menu');
 
-    return Response.json(updatedGuest);
+    return Response.json(updatedMenu);
   } catch (error) {
-    console.error('[PUT /api/v1/guests/[id]]', error);
-    return errorResponse('Failed to update guest.');
+    console.error('[PUT /api/v1/catering-menus/[id]]', error);
+    return errorResponse('Failed to update catering menu.');
   }
 }
 
@@ -64,16 +66,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
-    const [deletedGuest] = await db
-      .delete(guests)
-      .where(and(eq(guests.id, id), eq(guests.weddingId, auth.weddingId)))
+    const [deletedMenu] = await db
+      .delete(cateringMenus)
+      .where(and(eq(cateringMenus.id, id), eq(cateringMenus.weddingId, auth.weddingId)))
       .returning();
 
-    if (!deletedGuest) return notFoundResponse('Guest');
+    if (!deletedMenu) return notFoundResponse('Catering menu');
 
-    return Response.json({ message: 'Guest deleted successfully.', guest: deletedGuest });
+    return Response.json({ message: 'Catering menu deleted successfully.', cateringMenu: deletedMenu });
   } catch (error) {
-    console.error('[DELETE /api/v1/guests/[id]]', error);
-    return errorResponse('Failed to delete guest.');
+    console.error('[DELETE /api/v1/catering-menus/[id]]', error);
+    return errorResponse('Failed to delete catering menu.');
   }
 }

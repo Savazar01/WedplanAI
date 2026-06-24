@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!auth) return unauthorizedResponse();
 
     const body = await request.json();
-    const { name, email, phone, rsvpStatus, plusOneCount, dietaryRestrictions } = body;
+    const { name, email, phone, rsvpStatus, plusOneCount, dietaryRestrictions, invitedCeremonies } = body;
 
     if (!name || typeof name !== 'string') {
       return errorResponse('name is required.', 400);
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
         rsvpStatus: rsvpStatus ?? 'pending',
         plusOneCount: plusOneCount ?? 0,
         dietaryRestrictions: dietaryRestrictions ?? null,
+        invitedCeremonies: invitedCeremonies ?? 'all',
       })
       .returning();
 

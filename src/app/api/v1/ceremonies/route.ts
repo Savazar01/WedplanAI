@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!auth) return unauthorizedResponse();
 
     const body = await request.json();
-    const { name, description, startTime, endTime, location } = body;
+    const { name, description, startTime, endTime, location, isFoodServed, dressCode, extraChecklist, assignedUserId } = body;
 
     if (!name || typeof name !== 'string') {
       return errorResponse('name is required.', 400);
@@ -55,6 +55,10 @@ export async function POST(request: NextRequest) {
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         location,
+        isFoodServed: isFoodServed ?? false,
+        dressCode: dressCode ?? null,
+        extraChecklist: extraChecklist ?? null,
+        assignedUserId: assignedUserId ?? null,
         isCustom: true,
       })
       .returning();

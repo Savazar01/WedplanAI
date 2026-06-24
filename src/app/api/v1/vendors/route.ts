@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       paidAmount,
       paymentStatus,
       notes,
+      ceremonyId,
     } = body;
 
     if (!name || typeof name !== 'string') {
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
         paidAmount: paidAmount ?? 0,
         paymentStatus: paymentStatus ?? 'unpaid',
         notes: notes ?? null,
+        ceremonyId: ceremonyId ?? null,
       })
       .returning();
 

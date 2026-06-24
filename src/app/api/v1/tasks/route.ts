@@ -14,16 +14,7 @@ export async function GET(request: NextRequest) {
     if (!auth) return unauthorizedResponse();
 
     const result = await db
-      .select({
-        id: tasks.id,
-        title: tasks.title,
-        description: tasks.description,
-        status: tasks.status,
-        dueDate: tasks.dueDate,
-        category: tasks.category,
-        columnId: tasks.columnId,
-        position: tasks.position,
-      })
+      .select()
       .from(tasks)
       .where(eq(tasks.weddingId, auth.weddingId));
 
@@ -41,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const { title, description, dueDate, category, columnId } = body;
+    const { title, description, dueDate, category, columnId, status, position, ceremonyId, assignedUserId, categoryData, cateringMenuId } = body;
 
     if (!title || typeof title !== 'string') {
       return errorResponse('title is required.', 400);
@@ -59,6 +50,12 @@ export async function POST(request: NextRequest) {
         dueDate: dueDate ? new Date(dueDate) : null,
         category,
         columnId: columnId ?? null,
+        status: status ?? 'todo',
+        position: position ?? 0,
+        ceremonyId: ceremonyId ?? null,
+        assignedUserId: assignedUserId ?? null,
+        categoryData: categoryData ?? null,
+        cateringMenuId: cateringMenuId ?? null,
         isCustom: true,
       })
       .returning();

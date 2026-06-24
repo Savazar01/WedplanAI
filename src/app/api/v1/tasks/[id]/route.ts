@@ -29,6 +29,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       'columnId',
       'status',
       'position',
+      'ceremonyId',
+      'assignedUserId',
+      'categoryData',
+      'cateringMenuId',
     ] as const;
 
     const updates: Record<string, unknown> = {};

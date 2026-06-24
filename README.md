@@ -226,7 +226,7 @@ src/
 │   ├── actions/            # Server Actions (guests, vendors, weddings, auth, calendar)
 │   ├── api/                # Route handlers
 │   │   ├── auth/           # Better Auth API handler
-│   │   └── v1/             # REST API v1 (columns, guests, ceremonies, tasks, vendors, wedding, traditions, categories)
+│   │   └── v1/             # REST API v1 (wedding, ceremonies, tasks, columns, guests, guest-rsvps, vendors, catering-menus, traditions, categories)
 │   ├── calendar/           # Public calendar view
 │   ├── dashboard/          # Authenticated dashboard pages
 │   │   ├── admin/          # Admin-only pages (appearance, api-keys, users)
@@ -331,87 +331,74 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
 
 ### Endpoints Overview
 
-| Resource | Path | Methods | Description |
+| Group | Resource | Path | Methods | Description |
 |---|---|---|---|---|
-| **Wedding** | `/api/v1/wedding` | `GET`, `PUT` | Manage active wedding info |
-| **Columns** | `/api/v1/columns` | `GET`, `POST` | Manage Kanban task columns |
-| **Columns (ID)** | `/api/v1/columns/:id` | `PUT`, `DELETE` | Update/delete specific Kanban column |
-| **Tasks** | `/api/v1/tasks` | `GET`, `POST` | Manage wedding planning tasks |
-| **Tasks (ID)** | `/api/v1/tasks/:id` | `PUT`, `DELETE` | Update/delete specific task |
-| **Ceremonies** | `/api/v1/ceremonies` | `GET`, `POST` | Manage timeline ceremonies |
-| **Ceremonies (ID)** | `/api/v1/ceremonies/:id` | `PUT`, `DELETE` | Update/delete specific ceremony |
-| **Guests** | `/api/v1/guests` | `GET`, `POST` | Manage guests & RSVP statuses |
-| **Guests (ID)** | `/api/v1/guests/:id` | `PUT`, `DELETE` | Update/delete specific guest |
-| **Vendors** | `/api/v1/vendors` | `GET`, `POST` | Manage vendor contracts & payments |
-| **Vendors (ID)** | `/api/v1/vendors/:id` | `PUT`, `DELETE` | Update/delete specific vendor |
-| **Traditions** | `/api/v1/traditions` | `GET`, `POST` | List/create wedding traditions (global config) |
-| **Traditions (ID)** | `/api/v1/traditions/:id` | `PUT`, `DELETE` | Update/delete specific tradition |
-| **Categories** | `/api/v1/categories` | `GET`, `POST` | List/create task categories (global config) |
-| **Categories (ID)** | `/api/v1/categories/:id` | `PUT`, `DELETE` | Update/delete specific category |
+| **Wedding Management** | Wedding | `/api/v1/wedding` | `GET`, `POST`, `PUT` | Create, read, and update wedding info |
+| **Wedding Ceremony Planner** | Ceremonies | `/api/v1/ceremonies` | `GET`, `POST` | Manage timeline ceremonies |
+| | Ceremonies (ID) | `/api/v1/ceremonies/:id` | `PUT`, `DELETE` | Update/delete specific ceremony |
+| **Wedding Task Planner** | Columns | `/api/v1/columns` | `GET`, `POST` | Manage Kanban task columns |
+| | Columns (ID) | `/api/v1/columns/:id` | `PUT`, `DELETE` | Update/delete specific Kanban column |
+| | Tasks | `/api/v1/tasks` | `GET`, `POST` | Manage wedding planning tasks |
+| | Tasks (ID) | `/api/v1/tasks/:id` | `PUT`, `DELETE` | Update/delete specific task |
+| **Catering Menu Planner** | Catering Menus | `/api/v1/catering-menus` | `GET`, `POST` | Manage catering menus per ceremony |
+| | Catering Menus (ID) | `/api/v1/catering-menus/:id` | `PUT`, `DELETE` | Update/delete specific catering menu |
+| **Guest RSVP Management** | Guests | `/api/v1/guests` | `GET`, `POST` | Manage guests & RSVP statuses |
+| | Guests (ID) | `/api/v1/guests/:id` | `PUT`, `DELETE` | Update/delete specific guest |
+| | Guest RSVPs | `/api/v1/guest-rsvps` | `GET`, `POST` | Per-ceremony RSVP responses |
+| | Guest RSVPs (ID) | `/api/v1/guest-rsvps/:id` | `PUT`, `DELETE` | Update/delete per-ceremony RSVP |
+| **Vendor & Budget Tracker** | Vendors | `/api/v1/vendors` | `GET`, `POST` | Manage vendor contracts & payments |
+| | Vendors (ID) | `/api/v1/vendors/:id` | `PUT`, `DELETE` | Update/delete specific vendor |
+| **Traditions (Global Config)** | Traditions | `/api/v1/traditions` | `GET`, `POST` | List/create wedding traditions |
+| | Traditions (ID) | `/api/v1/traditions/:id` | `PUT`, `DELETE` | Update/delete specific tradition |
+| **Categories (Global Config)** | Categories | `/api/v1/categories` | `GET`, `POST` | List/create task categories |
+| | Categories (ID) | `/api/v1/categories/:id` | `PUT`, `DELETE` | Update/delete specific category |
+
+> **Note:** User Management is managed via the dashboard UI (Manage Your Team) and Better Auth server actions — no REST API endpoints are exposed for user CRUD at this time.
 
 ---
 
 ### Endpoint Details & Examples
 
-#### 1. Wedding Info
+#### 1. Wedding Management
+
 * **GET `/api/v1/wedding`**
-  - **Description:** Retrieve details of the active wedding.
-  - **Response (200 OK):**
+  - **Description:** Retrieve details of the active wedding (all fields).
+  - **Response (200 OK):** Full wedding object including partner names, date, budget, guest count, location details, address fields, theme settings, and all showcase fields.
+
+* **POST `/api/v1/wedding`**
+  - **Description:** Create a new wedding. Auto-seeds default Kanban columns, tradition-based ceremonies, catering menus for food-served ceremonies, and planning tasks. The new wedding is created under the same user account that owns the API key.
+  - **Request Body:**
     ```json
     {
-      "id": "78096f83-e18e-4a6f-b258-7e23114d59ff",
       "partnerA": "Rahul",
       "partnerB": "Priya",
-      "weddingDate": "2025-12-25T00:00:00.000Z",
+      "tradition": "hindu",
+      "weddingDate": "2026-12-25T00:00:00.000Z",
+      "location": "Umaid Bhawan Palace, Jodhpur",
       "budget": 50000,
       "guestCount": 150,
-      "location": "Umaid Bhawan Palace, Jodhpur",
+      "locationName": "Umaid Bhawan",
+      "street": "Circuit House Rd",
+      "city": "Jodhpur",
+      "state": "Rajasthan",
       "country": "India",
-      "tradition": "hindu"
+      "pincode": "342006",
+      "description": "Our dream wedding"
     }
     ```
+  - **Accepted fields:** `partnerA` (required), `partnerB` (required), `tradition` (required), `weddingDate` (required, ISO 8601), `location` (required), `budget` (default 1000000), `guestCount` (default 150), `locationName`, `street`, `city`, `state`, `country` (default "India"), `pincode`, `description`.
+  - **Response (201 Created):** Full wedding object.
 
 * **PUT `/api/v1/wedding`**
-  - **Description:** Update wedding metadata.
-  - **Request Body:**
-    ```json
-    {
-      "partnerA": "Rahul",
-      "partnerB": "Priya",
-      "weddingDate": "2025-12-26T00:00:00.000Z",
-      "budget": 55000
-    }
-    ```
+  - **Description:** Update any wedding metadata field including address, theme, and showcase settings.
+  - **Accepted fields:** `partnerA`, `partnerB`, `weddingDate`, `tradition`, `location`, `locationName`, `street`, `city`, `state`, `country`, `pincode`, `budget`, `guestCount`, `description`, `themeFont`, `themePrimary`, `themeSecondary`, `themeBackground`, `themeDarkPrimary`, `themeDarkSecondary`, `themeDarkBackground`, `logoUrl`, `logoData`, `showcaseFont`, `showcaseTitleFont`, `showcasePrimary`, `showcaseSecondary`, `showcaseBackground`, `showcaseHeroUrl`, `showcaseHeroData`, `showcaseWelcomeText`, `showcaseDetails`, `showcaseSubtitle`, `showcaseTitle`, `showcaseDescription`, `showcaseRsvpTitle`, `showcaseRsvpDescription`, `showcaseGiftUrl`, `showcaseGiftTitle`, `showcaseGiftDescription`.
   - **Response (200 OK):** Updated wedding object.
 
-#### 2. Wedding Tasks
-* **GET `/api/v1/tasks`**
-  - **Description:** Get all tasks.
-  - **Response (200 OK):** Array of tasks.
+#### 2. Wedding Ceremony Planner
 
-* **POST `/api/v1/tasks`**
-  - **Description:** Create a new planning task.
-  - **Request Body:**
-    ```json
-    {
-      "title": "Book mehndi artist",
-      "description": "Book a premium mehndi artist for the bride.",
-      "category": "catering",
-      "columnId": "column-uuid-here",
-      "dueDate": "2025-11-20T00:00:00Z"
-    }
-    ```
-
-* **PUT `/api/v1/tasks/:id`**
-  - **Description:** Edit a task. Any subset of fields can be updated.
-
-* **DELETE `/api/v1/tasks/:id`**
-  - **Description:** Delete a task.
-
-#### 3. Wedding Ceremonies
 * **GET `/api/v1/ceremonies`**
-  - **Description:** Get all ceremonies.
-  - **Response (200 OK):** Array of ceremonies.
+  - **Description:** Get all ceremonies for the wedding.
+  - **Response (200 OK):** Array of ceremony objects with all fields.
 
 * **POST `/api/v1/ceremonies`**
   - **Description:** Create a new ceremony.
@@ -420,19 +407,121 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
     {
       "name": "Sangeet",
       "description": "Dance and music night",
-      "startTime": "2025-12-24T18:00:00Z",
-      "endTime": "2025-12-24T22:00:00Z",
-      "location": "Banquet Lawn"
+      "startTime": "2026-12-24T18:00:00Z",
+      "endTime": "2026-12-24T22:00:00Z",
+      "location": "Banquet Lawn",
+      "isFoodServed": false,
+      "dressCode": "Traditional",
+      "extraChecklist": "[{\"item\":\"Confirm DJ booking\"}]",
+      "assignedUserId": "user-uuid-here"
     }
     ```
-  - **Accepted fields:** `name` (required), `description`, `startTime` (required, ISO 8601), `endTime` (required, ISO 8601), `location` (required). Extra ceremony fields (dress code, food served, assignee) are managed via the UI only.
+  - **Accepted fields:** `name` (required), `startTime` (required, ISO 8601), `endTime` (required, ISO 8601), `location` (required), `description`, `isFoodServed` (boolean), `dressCode`, `extraChecklist` (JSON string), `assignedUserId`.
+  - **Response (201 Created):** Full ceremony object.
 
-* **PUT/DELETE `/api/v1/ceremonies/:id`**
-  - **Description:** Update or delete a ceremony.
+* **PUT `/api/v1/ceremonies/:id`**
+  - **Description:** Update a ceremony. Any subset of fields.
+  - **Accepted fields:** Same as POST above.
 
-#### 4. Guests & RSVP
+* **DELETE `/api/v1/ceremonies/:id`**
+  - **Description:** Delete a ceremony.
+
+#### 3. Wedding Task Planner
+
+##### 3a. Kanban Columns
+* **GET `/api/v1/columns`**
+  - **Description:** List all Kanban columns.
+  - **Response (200 OK):** Array of column objects.
+
+* **POST `/api/v1/columns`**
+  - **Description:** Create a column (e.g. `To-Do`, `In Progress`).
+  - **Request Body:**
+    ```json
+    {
+      "name": "Priority Tasks",
+      "color": "#6771ab",
+      "position": 1
+    }
+    ```
+  - **Accepted fields:** `name` (required), `color`, `position`.
+
+* **PUT `/api/v1/columns/:id`**
+  - **Description:** Update a column. Any subset of fields.
+  - **Accepted fields:** `name`, `color`, `position`.
+
+* **DELETE `/api/v1/columns/:id`**
+  - **Description:** Delete a column. Returns 400 error if tasks still reference this column.
+
+##### 3b. Tasks
+* **GET `/api/v1/tasks`**
+  - **Description:** Get all tasks with all fields (including ceremony, assignee, and catering menu links).
+  - **Response (200 OK):** Array of task objects.
+
+* **POST `/api/v1/tasks`**
+  - **Description:** Create a new planning task.
+  - **Request Body:**
+    ```json
+    {
+      "title": "Book mehndi artist",
+      "description": "Book a premium mehndi artist for the bride.",
+      "category": "ceremonies",
+      "columnId": "column-uuid-here",
+      "dueDate": "2026-11-20T00:00:00Z",
+      "status": "todo",
+      "position": 0,
+      "ceremonyId": "ceremony-uuid-here",
+      "assignedUserId": "user-uuid-here",
+      "categoryData": "{\"q1\":\"North Indian\"}",
+      "cateringMenuId": "menu-uuid-here"
+    }
+    ```
+  - **Accepted fields:** `title` (required), `category` (required), `description`, `dueDate`, `columnId`, `status`, `position`, `ceremonyId`, `assignedUserId`, `categoryData` (JSON string), `cateringMenuId`.
+
+* **PUT `/api/v1/tasks/:id`**
+  - **Description:** Edit a task. Any subset of fields.
+  - **Accepted fields:** Same as POST above.
+
+* **DELETE `/api/v1/tasks/:id`**
+  - **Description:** Delete a task.
+
+#### 4. Catering Menu Planner
+
+* **GET `/api/v1/catering-menus`**
+  - **Description:** List all catering menus for the wedding, joined with ceremony names.
+  - **Response (200 OK):** Array of menu objects with ceremony name.
+
+* **POST `/api/v1/catering-menus`**
+  - **Description:** Create a catering menu for a ceremony.
+  - **Request Body:**
+    ```json
+    {
+      "ceremonyId": "ceremony-uuid-here",
+      "cuisine": "Traditional Buffet",
+      "guestCount": 150,
+      "appetizers": "Assorted Starters",
+      "mainCourses": "Signature Main Course Dishes",
+      "desserts": "Traditional Desserts",
+      "drinks": "Juices and Mocktails",
+      "vendorId": "vendor-uuid-here",
+      "notes": "Customize this menu"
+    }
+    ```
+  - **Accepted fields:** `ceremonyId` (required), `cuisine`, `guestCount`, `appetizers`, `mainCourses`, `desserts`, `drinks`, `vendorId`, `notes`.
+  - **Response (201 Created):** Full menu object.
+
+* **PUT `/api/v1/catering-menus/:id`**
+  - **Description:** Update a catering menu. Any subset of fields.
+  - **Accepted fields:** `ceremonyId`, `cuisine`, `guestCount`, `appetizers`, `mainCourses`, `desserts`, `drinks`, `vendorId`, `notes`.
+
+* **DELETE `/api/v1/catering-menus/:id`**
+  - **Description:** Delete a catering menu.
+
+#### 5. Guest RSVP Management
+
+##### 5a. Guests
 * **GET `/api/v1/guests`**
-  - **Description:** List guests, unique invitation codes, and invited ceremony assignments.
+  - **Description:** List all guests with invitation codes and invited ceremonies.
+  - **Response (200 OK):** Array of guest objects.
 
 * **POST `/api/v1/guests`**
   - **Description:** Create a guest.
@@ -444,16 +533,49 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
       "phone": "+919876543210",
       "rsvpStatus": "pending",
       "plusOneCount": 1,
-      "dietaryRestrictions": "Vegetarian"
+      "dietaryRestrictions": "Vegetarian",
+      "invitedCeremonies": "all"
     }
     ```
+  - **Accepted fields:** `name` (required), `email`, `phone`, `rsvpStatus` ("pending", "attending", "declined"), `plusOneCount`, `dietaryRestrictions`, `invitedCeremonies` ("all" or comma-separated ceremony IDs).
 
-* **PUT/DELETE `/api/v1/guests/:id`**
-  - **Description:** Update or delete a guest.
+* **PUT `/api/v1/guests/:id`**
+  - **Description:** Update a guest. Any subset of fields.
+  - **Accepted fields:** Same as POST above.
 
-#### 5. Vendors & Contracts
+* **DELETE `/api/v1/guests/:id`**
+  - **Description:** Delete a guest.
+
+##### 5b. Guest RSVPs (Per-Ceremony)
+* **GET `/api/v1/guest-rsvps`**
+  - **Description:** List all per-ceremony RSVPs for the wedding, joined with guest names and ceremony names.
+  - **Response (200 OK):** Array of RSVP objects with guest and ceremony details.
+
+* **POST `/api/v1/guest-rsvps`**
+  - **Description:** Record a guest's RSVP for a specific ceremony.
+  - **Request Body:**
+    ```json
+    {
+      "guestId": "guest-uuid-here",
+      "ceremonyId": "ceremony-uuid-here",
+      "rsvpStatus": "attending",
+      "guestCount": 2
+    }
+    ```
+  - **Accepted fields:** `guestId` (required), `ceremonyId` (required), `rsvpStatus` (required, "attending" or "declined"), `guestCount`.
+
+* **PUT `/api/v1/guest-rsvps/:id`**
+  - **Description:** Update an RSVP. Any subset of fields.
+  - **Accepted fields:** `rsvpStatus`, `guestCount`.
+
+* **DELETE `/api/v1/guest-rsvps/:id`**
+  - **Description:** Delete an RSVP entry.
+
+#### 6. Vendor & Budget Tracker
+
 * **GET `/api/v1/vendors`**
-  - **Description:** List all vendors and payment progress.
+  - **Description:** List all vendors with payment progress and ceremony links.
+  - **Response (200 OK):** Array of vendor objects.
 
 * **POST `/api/v1/vendors`**
   - **Description:** Create a vendor entry.
@@ -462,34 +584,27 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
     {
       "name": "Gourmet Catering Co",
       "category": "catering",
-      "contractAmount": 15000,
+      "contactPerson": "Ravi Kumar",
+      "phone": "+919876543210",
+      "email": "ravi@gourmet.com",
+      "totalCost": 15000,
       "paidAmount": 5000,
-      "currency": "INR"
+      "paymentStatus": "partially_paid",
+      "notes": "Payment due at event",
+      "ceremonyId": "ceremony-uuid-here"
     }
     ```
+  - **Accepted fields:** `name` (required), `category` (required), `contactPerson`, `phone`, `email`, `totalCost`, `paidAmount`, `paymentStatus` ("unpaid", "partially_paid", "paid"), `notes`, `ceremonyId`.
 
-* **PUT/DELETE `/api/v1/vendors/:id`**
-  - **Description:** Update or delete a vendor.
+* **PUT `/api/v1/vendors/:id`**
+  - **Description:** Update a vendor. Any subset of fields.
+  - **Accepted fields:** Same as POST above.
 
-#### 6. Kanban Columns
-* **GET `/api/v1/columns`**
-  - **Description:** List all Kanban columns.
-
-* **POST `/api/v1/columns`**
-  - **Description:** Create a column (e.g. `To-Do`, `In Progress`).
-  - **Request Body:**
-    ```json
-    {
-      "title": "Priority Tasks",
-      "position": 1
-    }
-    ```
-
-* **PUT/DELETE `/api/v1/columns/:id`**
-  - **Description:** Update or delete a column.
-  - **Note:** Columns that still have tasks assigned cannot be deleted. Move or delete all tasks in the column before removing it.
+* **DELETE `/api/v1/vendors/:id`**
+  - **Description:** Delete a vendor.
 
 #### 7. Wedding Traditions (Global Config)
+
 * **GET `/api/v1/traditions`**
   - **Description:** List all wedding traditions configured on the platform (global — not per-wedding).
   - **Response (200 OK):**
@@ -500,8 +615,8 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
         "key": "hindu",
         "name": "Hindu",
         "description": "Traditional Hindu wedding with Vedic ceremonies",
-        "seedTasks": "[{\"title\":\"Book priest\",\"category\":\"venue\",\"description\":\"\"}]",
-        "seedCeremonies": "[{\"name\":\"Mehendi\",\"offsetDays\":-2,\"startTime\":\"14:00\",\"endTime\":\"18:00\",\"description\":\"Henna ceremony\"}]",
+        "seedTasks": "[{\"title\":\"Book priest\",\"category\":\"venue\"}]",
+        "seedCeremonies": "[{\"name\":\"Mehendi\",\"offsetDays\":-2,\"startTime\":\"14:00\",\"endTime\":\"18:00\"}]",
         "createdAt": "2025-01-01T00:00:00.000Z",
         "updatedAt": "2025-01-01T00:00:00.000Z"
       }
@@ -516,22 +631,24 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
       "key": "telugu_wedding",
       "name": "Telugu Wedding",
       "description": "Traditional Telugu Hindu wedding",
-      "seedTasks": "[{\"title\":\"...\",\"category\":\"...\",\"description\":\"...\"}]",
-      "seedCeremonies": "[{\"name\":\"...\",\"offsetDays\":-1,\"startTime\":\"09:00\",\"endTime\":\"12:00\",\"description\":\"...\"}]"
+      "seedTasks": "[{\"title\":\"...\",\"category\":\"...\"}]",
+      "seedCeremonies": "[{\"name\":\"...\",\"offsetDays\":-1,\"startTime\":\"09:00\",\"endTime\":\"12:00\"}]"
     }
     ```
-  - **Accepted fields:** `key` (required, will be lowercased/slugified), `name` (required), `description`, `seedTasks` (JSON string), `seedCeremonies` (JSON string).
+  - **Accepted fields:** `key` (required, slugified), `name` (required), `description`, `seedTasks` (JSON string), `seedCeremonies` (JSON string).
+  - **Note:** Duplicate `key` returns 409 Conflict.
 
 * **PUT `/api/v1/traditions/:id`**
-  - **Description:** Update a tradition. Any subset of fields can be updated.
-  - **Note:** Duplicate `key` values return a 409 Conflict error.
+  - **Description:** Update a tradition. Any subset of fields.
+  - **Note:** Duplicate `key` returns 409 Conflict.
 
 * **DELETE `/api/v1/traditions/:id`**
   - **Description:** Delete a tradition permanently.
 
 #### 8. Task Categories (Global Config)
+
 * **GET `/api/v1/categories`**
-  - **Description:** List all task categories configured on the platform (global — not per-wedding).
+  - **Description:** List all task categories (global — not per-wedding).
   - **Response (200 OK):**
     ```json
     [
@@ -556,11 +673,12 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
       "followUpQuestions": "[{\"id\":\"q1\",\"label\":\"Number of vehicles?\",\"type\":\"number\"}]"
     }
     ```
-  - **Accepted fields:** `key` (required, will be lowercased/slugified), `name` (required), `followUpQuestions` (JSON string).
+  - **Accepted fields:** `key` (required, slugified), `name` (required), `followUpQuestions` (JSON string).
+  - **Note:** Duplicate `key` returns 409 Conflict.
 
 * **PUT `/api/v1/categories/:id`**
   - **Description:** Update a category. Any subset of fields.
-  - **Note:** Duplicate `key` values return a 409 Conflict error.
+  - **Note:** Duplicate `key` returns 409 Conflict.
 
 * **DELETE `/api/v1/categories/:id`**
   - **Description:** Delete a category permanently.

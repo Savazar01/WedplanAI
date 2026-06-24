@@ -20,35 +20,35 @@ const traditions = [
 
 const defaultTasks = {
   hindu: [
-    { title: "Book Mehndi Artist", category: "ceremonies" },
-    { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
-    { title: "Hire Dhol Players & DJ", category: "music" },
-    { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
-    { title: "Select Mandap Decorator", category: "decor" },
+    { title: "Book Mehndi Artist", category: "ceremonies", ceremonyName: "Mehndi" },
+    { title: "Buy Wedding Lehenga & Sherwani", category: "apparel", ceremonyName: "Mandap Pheras" },
+    { title: "Hire Dhol Players & DJ", category: "music", ceremonyName: "Sangeet" },
+    { title: "Arrange Catering & Sweets (Mithai)", category: "catering", ceremonyName: "Reception" },
+    { title: "Select Mandap Decorator", category: "decor", ceremonyName: "Mandap Pheras" },
   ],
   muslim: [
-    { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
-    { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
-    { title: "Select Stage & Floral Decorator", category: "decor" },
-    { title: "Book Catering Menu for Valima Feast", category: "catering" },
+    { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies", ceremonyName: "Nikah" },
+    { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel", ceremonyName: "Nikah" },
+    { title: "Select Stage & Floral Decorator", category: "decor", ceremonyName: "Valima" },
+    { title: "Book Catering Menu for Valima Feast", category: "catering", ceremonyName: "Valima" },
   ],
   sikh: [
-    { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
-    { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
-    { title: "Finalize Langar or Catering Menu", category: "catering" },
-    { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
+    { title: "Book Gurdwara & Coordinate with Ragis", category: "venue", ceremonyName: "Anand Karaj" },
+    { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies", ceremonyName: "Anand Karaj" },
+    { title: "Finalize Langar or Catering Menu", category: "catering", ceremonyName: "Anand Karaj" },
+    { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel", ceremonyName: "Anand Karaj" },
   ],
   christian: [
-    { title: "Secure Church Venue & Priest", category: "venue" },
-    { title: "Purchase Wedding Dress & Tuxedo", category: "apparel" },
-    { title: "Order Wedding Cake & Floral Bouquets", category: "catering" },
-    { title: "Hire Wedding Choir & Organist", category: "music" },
+    { title: "Secure Church Venue & Priest", category: "venue", ceremonyName: "Church Ceremony" },
+    { title: "Purchase Wedding Dress & Tuxedo", category: "apparel", ceremonyName: "Church Ceremony" },
+    { title: "Order Wedding Cake & Floral Bouquets", category: "catering", ceremonyName: "Reception" },
+    { title: "Hire Wedding Choir & Organist", category: "music", ceremonyName: "Church Ceremony" },
   ],
   secular: [
-    { title: "Select Secular Celebrant", category: "ceremonies" },
-    { title: "Write Wedding Vows", category: "other" },
-    { title: "Arrange Catering & Open Bar", category: "catering" },
-    { title: "Coordinate Photographer/Videographer Contracts", category: "other" },
+    { title: "Select Secular Celebrant", category: "ceremonies", ceremonyName: "Vows" },
+    { title: "Write Wedding Vows", category: "other", ceremonyName: "Vows" },
+    { title: "Arrange Catering & Open Bar", category: "catering", ceremonyName: "Reception" },
+    { title: "Coordinate Photographer/Videographer Contracts", category: "other", ceremonyName: "Reception" },
   ],
 };
 
@@ -191,7 +191,7 @@ export default function WizardPage() {
   };
 
   // Customized list states
-  const [customTasks, setCustomTasks] = React.useState<{ title: string; category: string; dueDate: string }[]>([]);
+  const [customTasks, setCustomTasks] = React.useState<{ title: string; category: string; dueDate: string; ceremonyName?: string }[]>([]);
   const [customRituals, setCustomRituals] = React.useState<{
     name: string;
     description: string;
@@ -206,6 +206,7 @@ export default function WizardPage() {
   const [newTaskTitle, setNewTaskTitle] = React.useState("");
   const [newTaskCategory, setNewTaskCategory] = React.useState("other");
   const [newTaskDueDate, setNewTaskDueDate] = React.useState("");
+  const [newTaskCeremonyName, setNewTaskCeremonyName] = React.useState("");
 
   // Form states for adding new ritual
   const [newRitualName, setNewRitualName] = React.useState("");
@@ -224,11 +225,13 @@ export default function WizardPage() {
         title: newTaskTitle.trim(),
         category: newTaskCategory,
         dueDate: newTaskDueDate || weddingDate || new Date().toISOString().split("T")[0],
+        ceremonyName: newTaskCeremonyName || undefined,
       },
     ]);
     setNewTaskTitle("");
     setNewTaskCategory("other");
     setNewTaskDueDate("");
+    setNewTaskCeremonyName("");
   };
 
   const handleAddRitual = () => {
@@ -301,7 +304,8 @@ export default function WizardPage() {
               tasksMapped = parsedTasks.map(t => ({
                 title: t.title || "",
                 category: t.category || "other",
-                dueDate: calculateTaskDueDate(weddingDate, t.category || "other")
+                dueDate: calculateTaskDueDate(weddingDate, t.category || "other"),
+                ceremonyName: t.ceremonyName || undefined,
               }));
             }
           } catch (e) {
@@ -490,6 +494,7 @@ export default function WizardPage() {
           title: t.title,
           category: t.category,
           dueDate: t.dueDate,
+          ceremonyName: t.ceremonyName || undefined,
         })),
         customRituals: formattedRituals,
       });
@@ -959,7 +964,7 @@ export default function WizardPage() {
                 {customTasks.map((t, idx) => (
                   <Card key={idx} variant="default" className="p-4 border border-slate-100 shadow-sm relative bg-[#fefce8]">
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                      <div className="sm:col-span-6">
+                      <div className="sm:col-span-4">
                         <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
                         <Input
                           type="text"
@@ -969,7 +974,7 @@ export default function WizardPage() {
                           className="h-9 text-xs"
                         />
                       </div>
-                      <div className="sm:col-span-3">
+                      <div className="sm:col-span-2">
                         <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
                         <select
                           value={t.category}
@@ -985,6 +990,23 @@ export default function WizardPage() {
                               {cat.label}
                             </option>
                           ))}
+                        </select>
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Associated Ceremony</label>
+                        <select
+                          value={t.ceremonyName || ""}
+                          onChange={(e) => updateTask(idx, "ceremonyName", e.target.value)}
+                          className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                        >
+                          <option value="">No Ceremony</option>
+                          {customRituals
+                            .filter((r) => r.name.trim())
+                            .map((r) => (
+                              <option key={r.name} value={r.name}>
+                                {r.name}
+                              </option>
+                            ))}
                         </select>
                       </div>
                       <div className="sm:col-span-3 flex items-end gap-2">
@@ -1019,7 +1041,7 @@ export default function WizardPage() {
               <div className="border-t border-slate-100 pt-4 mt-4 bg-slate-50/50 p-4 rounded-xl border">
                 <h4 className="text-xs font-semibold text-[#6771ab] uppercase tracking-wider mb-2">Add New Planning Task</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-4">
                     <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Task Title</label>
                     <Input
                       type="text"
@@ -1029,7 +1051,7 @@ export default function WizardPage() {
                       className="h-9 text-xs"
                     />
                   </div>
-                  <div className="sm:col-span-3">
+                  <div className="sm:col-span-2">
                     <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Category</label>
                     <select
                       value={newTaskCategory}
@@ -1045,6 +1067,23 @@ export default function WizardPage() {
                           {cat.label}
                         </option>
                       ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-3">
+                    <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Associated Ceremony</label>
+                    <select
+                      value={newTaskCeremonyName}
+                      onChange={(e) => setNewTaskCeremonyName(e.target.value)}
+                      className="w-full h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab]"
+                    >
+                      <option value="">No Ceremony</option>
+                      {customRituals
+                        .filter((r) => r.name.trim())
+                        .map((r) => (
+                          <option key={r.name} value={r.name}>
+                            {r.name}
+                          </option>
+                        ))}
                     </select>
                   </div>
                   <div className="sm:col-span-3 flex gap-2">

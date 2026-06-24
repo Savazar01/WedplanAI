@@ -29,6 +29,7 @@ const createWeddingSchema = z.object({
     title: z.string(),
     category: z.string(),
     dueDate: z.string().optional().nullable(),
+    ceremonyName: z.string().optional().nullable(),
   })).optional(),
   customRituals: z.array(z.object({
     name: z.string(),
@@ -60,7 +61,7 @@ export async function createWeddingAction(data: {
   country?: string;
   pincode?: string;
   description?: string;
-  customTasks?: { title: string; category: string; dueDate?: string | null }[];
+  customTasks?: { title: string; category: string; dueDate?: string | null; ceremonyName?: string | null }[];
   customRituals?: {
     name: string;
     description?: string;
@@ -147,7 +148,7 @@ export async function createWeddingAction(data: {
       const todoColumnId = todoCol.id;
 
       // 2. Define custom seeds based on requirements
-      let seedTasks: { title: string; category: string; dueDate?: string | null }[] = [];
+      let seedTasks: { title: string; category: string; dueDate?: string | null; ceremonyName?: string | null }[] = [];
       let seedRituals: {
         name: string;
         description?: string;
@@ -167,39 +168,39 @@ export async function createWeddingAction(data: {
       } else {
         if (tradition === "hindu") {
           seedTasks = [
-            { title: "Book Mehndi Artist", category: "ceremonies" },
-            { title: "Buy Wedding Lehenga & Sherwani", category: "apparel" },
-            { title: "Hire Dhol Players & DJ", category: "music" },
-            { title: "Arrange Catering & Sweets (Mithai)", category: "catering" },
-            { title: "Select Mandap Decorator", category: "decor" },
+            { title: "Book Mehndi Artist", category: "ceremonies", ceremonyName: "Mehndi" },
+            { title: "Buy Wedding Lehenga & Sherwani", category: "apparel", ceremonyName: "Mandap Pheras" },
+            { title: "Hire Dhol Players & DJ", category: "music", ceremonyName: "Sangeet" },
+            { title: "Arrange Catering & Sweets (Mithai)", category: "catering", ceremonyName: "Reception" },
+            { title: "Select Mandap Decorator", category: "decor", ceremonyName: "Mandap Pheras" },
           ];
         } else if (tradition === "muslim") {
           seedTasks = [
-            { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies" },
-            { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel" },
-            { title: "Select Stage & Floral Decorator", category: "decor" },
-            { title: "Book Catering Menu for Valima Feast", category: "catering" },
+            { title: "Coordinate with Qazi & Print Nikah Nama", category: "ceremonies", ceremonyName: "Nikah" },
+            { title: "Purchase Wedding Attire (Sherwani/Gharara)", category: "apparel", ceremonyName: "Nikah" },
+            { title: "Select Stage & Floral Decorator", category: "decor", ceremonyName: "Valima" },
+            { title: "Book Catering Menu for Valima Feast", category: "catering", ceremonyName: "Valima" },
           ];
         } else if (tradition === "sikh") {
           seedTasks = [
-            { title: "Book Gurdwara & Coordinate with Ragis", category: "venue" },
-            { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies" },
-            { title: "Finalize Langar or Catering Menu", category: "catering" },
-            { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel" },
+            { title: "Book Gurdwara & Coordinate with Ragis", category: "venue", ceremonyName: "Anand Karaj" },
+            { title: "Purchase Rumalla Sahib for Guru Granth Sahib", category: "ceremonies", ceremonyName: "Anand Karaj" },
+            { title: "Finalize Langar or Catering Menu", category: "catering", ceremonyName: "Anand Karaj" },
+            { title: "Buy Anand Karaj Bridal/Groom Suit", category: "apparel", ceremonyName: "Anand Karaj" },
           ];
         } else if (tradition === "christian") {
           seedTasks = [
-            { title: "Secure Church Venue & Priest", category: "venue" },
-            { title: "Purchase Wedding Dress & Tuxedo", category: "apparel" },
-            { title: "Order Wedding Cake & Floral Bouquets", category: "catering" },
-            { title: "Hire Wedding Choir & Organist", category: "music" },
+            { title: "Secure Church Venue & Priest", category: "venue", ceremonyName: "Church Ceremony" },
+            { title: "Purchase Wedding Dress & Tuxedo", category: "apparel", ceremonyName: "Church Ceremony" },
+            { title: "Order Wedding Cake & Floral Bouquets", category: "catering", ceremonyName: "Reception" },
+            { title: "Hire Wedding Choir & Organist", category: "music", ceremonyName: "Church Ceremony" },
           ];
         } else if (tradition === "secular") {
           seedTasks = [
-            { title: "Select Secular Celebrant", category: "ceremonies" },
-            { title: "Write Wedding Vows", category: "other" },
-            { title: "Arrange Catering & Open Bar", category: "catering" },
-            { title: "Coordinate Photographer/Videographer Contracts", category: "other" },
+            { title: "Select Secular Celebrant", category: "ceremonies", ceremonyName: "Vows" },
+            { title: "Write Wedding Vows", category: "other", ceremonyName: "Vows" },
+            { title: "Arrange Catering & Open Bar", category: "catering", ceremonyName: "Reception" },
+            { title: "Coordinate Photographer/Videographer Contracts", category: "other", ceremonyName: "Reception" },
           ];
         } else {
           const dbTradList = await tx.select().from(weddingTraditions).where(eq(weddingTraditions.key, tradition)).limit(1);
@@ -260,21 +261,8 @@ export async function createWeddingAction(data: {
         }
       }
 
-      // Batch insert tasks
-      if (seedTasks.length > 0) {
-        const tasksToInsert = seedTasks.map((t, idx) => ({
-          weddingId: weddingId,
-          columnId: todoColumnId,
-          title: t.title,
-          status: "todo",
-          category: t.category,
-          position: idx,
-          dueDate: t.dueDate ? new Date(t.dueDate) : null,
-        }));
-        await tx.insert(tasks).values(tasksToInsert);
-      }
-
       // Batch insert rituals
+      let insertedRituals: { id: string; name: string; isFoodServed: boolean }[] = [];
       if (seedRituals.length > 0) {
         const ritualsToInsert = seedRituals.map((r) => {
           let startTime: Date;
@@ -312,7 +300,7 @@ export async function createWeddingAction(data: {
             isFoodServed: hasFood,
           };
         });
-        const insertedRituals = await tx.insert(rituals).values(ritualsToInsert).returning();
+        insertedRituals = await tx.insert(rituals).values(ritualsToInsert).returning();
 
         // Seed a default catering menu for each ceremony where food is served
         for (const ritual of insertedRituals) {
@@ -330,6 +318,32 @@ export async function createWeddingAction(data: {
             });
           }
         }
+      }
+
+      // Batch insert tasks
+      if (seedTasks.length > 0) {
+        const tasksToInsert = seedTasks.map((t, idx) => {
+          let ceremonyId: string | null = null;
+          if (t.ceremonyName) {
+            const matchedRitual = insertedRituals.find(
+              (r) => r.name.toLowerCase() === t.ceremonyName!.toLowerCase()
+            );
+            if (matchedRitual) {
+              ceremonyId = matchedRitual.id;
+            }
+          }
+          return {
+            weddingId: weddingId,
+            columnId: todoColumnId,
+            title: t.title,
+            status: "todo",
+            category: t.category,
+            position: idx,
+            dueDate: t.dueDate ? new Date(t.dueDate) : null,
+            ceremonyId,
+          };
+        });
+        await tx.insert(tasks).values(tasksToInsert);
       }
     });
 

@@ -60,6 +60,8 @@ export default async function GuestsPage() {
           ceremonies={dbCeremonies}
           guestRsvps={dbGuestRsvps}
           weddingId={wedding.id}
+          partnerA={wedding.partnerA ?? undefined}
+          partnerB={wedding.partnerB ?? undefined}
         />
       </main>
     </div>

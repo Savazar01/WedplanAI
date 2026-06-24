@@ -15,6 +15,7 @@ import {
 interface SeedTask {
   title: string;
   category: string;
+  ceremonyName?: string;
 }
 
 interface SeedCeremony {
@@ -328,72 +329,6 @@ export default function TraditionsAdminClient({
           <div className="space-y-2 border-t border-slate-100 pt-4">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                Seed Tasks
-              </label>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setSeedTaskRows([...seedTaskRows, { title: "", category: "other" }])}
-                className="h-7 px-2 text-xs"
-              >
-                + Add Task
-              </Button>
-            </div>
-            
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {seedTaskRows.map((row, idx) => (
-                <div key={idx} className="flex gap-2 items-center p-2 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-700">
-                  <Input
-                    type="text"
-                    placeholder="Task Title (e.g. Book Venue)"
-                    value={row.title}
-                    onChange={(e) => {
-                      const newRows = [...seedTaskRows];
-                      newRows[idx].title = e.target.value;
-                      setSeedTaskRows(newRows);
-                    }}
-                    required
-                    className="h-8 text-xs flex-1 bg-white"
-                  />
-                  <select
-                    value={row.category}
-                    onChange={(e) => {
-                      const newRows = [...seedTaskRows];
-                      newRows[idx].category = e.target.value;
-                      setSeedTaskRows(newRows);
-                    }}
-                    className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 min-w-[120px]"
-                  >
-                    {AVAILABLE_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSeedTaskRows(seedTaskRows.filter((_, i) => i !== idx));
-                    }}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded-lg text-xs"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              {seedTaskRows.length === 0 && (
-                <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-50 rounded-lg border border-dashed border-slate-200">
-                  No tasks added yet. Click "+ Add Task" to start.
-                </p>
-              )}
-            </div>
-            <p className="text-[10px] text-slate-400">Tasks added here will be auto-created in the Wedding Task Planner when this tradition is selected.</p>
-          </div>
-
-          <div className="space-y-2 border-t border-slate-100 pt-4">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
                 Seed Ceremonies
               </label>
               <Button
@@ -547,7 +482,7 @@ export default function TraditionsAdminClient({
               ))}
               {seedCeremonyRows.length === 0 && (
                 <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-50 rounded-lg border border-dashed border-slate-200">
-                  No ceremonies added yet. Click "+ Add Ceremony" to start.
+                  No ceremonies added yet. Click &quot;+ Add Ceremony&quot; to start.
                 </p>
               )}
             </div>
@@ -555,6 +490,90 @@ export default function TraditionsAdminClient({
               Ceremonies added here will populate the Wedding Ceremony Planner when this tradition is selected.
               Offset Days: 0 = wedding day, -1 = day before, -2 = two days before, 1 = day after.
             </p>
+          </div>
+
+          <div className="space-y-2 border-t border-slate-100 pt-4">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Seed Tasks
+              </label>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setSeedTaskRows([...seedTaskRows, { title: "", category: "other" }])}
+                className="h-7 px-2 text-xs"
+              >
+                + Add Task
+              </Button>
+            </div>
+            
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              {seedTaskRows.map((row, idx) => (
+                <div key={idx} className="flex gap-2 items-center p-2 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <Input
+                    type="text"
+                    placeholder="Task Title (e.g. Book Venue)"
+                    value={row.title}
+                    onChange={(e) => {
+                      const newRows = [...seedTaskRows];
+                      newRows[idx].title = e.target.value;
+                      setSeedTaskRows(newRows);
+                    }}
+                    required
+                    className="h-8 text-xs flex-1 bg-white"
+                  />
+                  <select
+                    value={row.category}
+                    onChange={(e) => {
+                      const newRows = [...seedTaskRows];
+                      newRows[idx].category = e.target.value;
+                      setSeedTaskRows(newRows);
+                    }}
+                    className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 min-w-[120px]"
+                  >
+                    {AVAILABLE_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={row.ceremonyName || ""}
+                    onChange={(e) => {
+                      const newRows = [...seedTaskRows];
+                      newRows[idx].ceremonyName = e.target.value || undefined;
+                      setSeedTaskRows(newRows);
+                    }}
+                    className="h-8 border border-slate-200 rounded-lg px-2 text-xs bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100 min-w-[120px]"
+                  >
+                    <option value="">No Ceremony</option>
+                    {seedCeremonyRows
+                      .filter((c) => c.name.trim())
+                      .map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSeedTaskRows(seedTaskRows.filter((_, i) => i !== idx));
+                    }}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded-lg text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {seedTaskRows.length === 0 && (
+                <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                  No tasks added yet. Click &quot;+ Add Task&quot; to start.
+                </p>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400">Tasks added here will be auto-created in the Wedding Task Planner when this tradition is selected.</p>
           </div>
 
           <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">

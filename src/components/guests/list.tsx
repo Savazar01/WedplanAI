@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { createGuestAction, updateGuestRSVPAction, deleteGuestAction, updateGuestAction } from "@/app/actions/guests";
 
+import { Share2, Copy } from "lucide-react";
+
 interface Guest {
   id: string;
   name: string;
@@ -44,6 +46,8 @@ interface ListProps {
   ceremonies: Ceremony[];
   guestRsvps: GuestRsvp[];
   weddingId?: string;
+  partnerA?: string;
+  partnerB?: string;
 }
 
 const parseInvitedCeremonies = (val: string | null | undefined): string[] => {
@@ -51,7 +55,14 @@ const parseInvitedCeremonies = (val: string | null | undefined): string[] => {
   return val.split(",").filter(Boolean);
 };
 
-export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddingId }: ListProps) {
+export default function GuestList({
+  initialGuests,
+  ceremonies,
+  guestRsvps,
+  weddingId,
+  partnerA,
+  partnerB,
+}: ListProps) {
   const [guestsList, setGuestsList] = React.useState<Guest[]>(initialGuests);
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
@@ -419,16 +430,21 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
 
   const handleCopyLink = () => {
     if (!inviteGuest) return;
-    navigator.clipboard.writeText(`${showcaseLink}?code=${inviteGuest.loginCode}`);
+    const link = `${showcaseLink}?code=${inviteGuest.loginCode}`;
+    const coupleNames = partnerA && partnerB ? `"${partnerA} and ${partnerB}"` : "our";
+    const fullMsg = `You're Invited to ${coupleNames} wedding! Click here to respond: ${link}`;
+    navigator.clipboard.writeText(fullMsg);
     setToast({ message: "Invitation link copied!", type: "success" });
   };
 
   const handleShare = async () => {
     if (!inviteGuest) return;
     const link = `${showcaseLink}?code=${inviteGuest.loginCode}`;
+    const coupleNames = partnerA && partnerB ? `"${partnerA} and ${partnerB}"` : "our";
+    const fullMsg = `You're Invited to ${coupleNames} wedding! Click here to respond: ${link}`;
     const shareData = {
-      title: `Wedding Invitation for ${inviteGuest.name}`,
-      text: `You're invited! View your personal wedding invitation and RSVP:`,
+      title: `You're Invited to ${coupleNames} wedding!`,
+      text: `You're Invited to ${coupleNames} wedding! Click here to respond:`,
       url: link,
     };
     try {
@@ -436,13 +452,13 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
         await navigator.share(shareData);
       } else {
         // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(link);
+        await navigator.clipboard.writeText(fullMsg);
         setToast({ message: "Link copied to clipboard!", type: "success" });
       }
     } catch (err) {
       // User cancelled share or error — silently ignore cancellation
       if (err instanceof Error && err.name !== 'AbortError') {
-        await navigator.clipboard.writeText(link);
+        await navigator.clipboard.writeText(fullMsg);
         setToast({ message: "Link copied to clipboard!", type: "success" });
       }
     }
@@ -758,16 +774,16 @@ export default function GuestList({ initialGuests, ceremonies, guestRsvps, weddi
                 <Button
                   variant="secondary"
                   onClick={handleCopyLink}
-                  className="border-slate-200"
+                  className="border-slate-200 flex items-center gap-2"
                 >
-                  📋 Copy Link
+                  <Copy className="h-4 w-4" /> Copy Link
                 </Button>
                 <Button
                   variant="secondary"
                   onClick={handleShare}
-                  className="border-[#6771ab]/30 text-[#6771ab] dark:text-[#8b93c5]"
+                  className="border-[#6771ab]/30 flex items-center gap-2"
                 >
-                  🔗 Share
+                  <Share2 className="h-4 w-4" /> Share
                 </Button>
                 <Button
                   variant="primary"

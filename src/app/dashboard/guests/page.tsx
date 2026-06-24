@@ -55,6 +55,8 @@ export default async function DashboardGuestsPage() {
         ceremonies={dbCeremonies}
         guestRsvps={dbGuestRsvps}
         weddingId={wedding.id}
+        partnerA={wedding.partnerA ?? undefined}
+        partnerB={wedding.partnerB ?? undefined}
       />
     </main>
   );

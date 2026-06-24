@@ -48,6 +48,7 @@ next-env.d.ts
 .agents/
 .opencode/
 .playwright-mcp/
+.graphify/
 graphify-out/
 skills-lock.json
 opencode.json
@@ -62,6 +63,8 @@ login-page-snapshot.md
 # Screenshot files
 docker-login-page.png
 docker-signup-page.png
+landing-page-full.png
+landing-page-snapshot.md
 
 # Playwright
 playwright.config.ts

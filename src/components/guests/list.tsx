@@ -10,8 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { createGuestAction, updateGuestRSVPAction, deleteGuestAction, updateGuestAction } from "@/app/actions/guests";
 
-import { Share2, Copy } from "lucide-react";
-
 interface Guest {
   id: string;
   name: string;
@@ -464,6 +462,24 @@ export default function GuestList({
     }
   };
 
+  const handleWhatsAppShare = () => {
+    if (!inviteGuest) return;
+    const link = `${showcaseLink}?code=${inviteGuest.loginCode}`;
+    const coupleNames = partnerA && partnerB ? `"${partnerA} and ${partnerB}"` : "our";
+    const text = `You're Invited to ${coupleNames} wedding! Click here to respond: ${link}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const handleEmailShare = () => {
+    if (!inviteGuest) return;
+    const link = `${showcaseLink}?code=${inviteGuest.loginCode}`;
+    const coupleNames = partnerA && partnerB ? `"${partnerA} and ${partnerB}"` : "our";
+    const subject = `You're Invited to ${coupleNames} wedding!`;
+    const body = `You're Invited to ${coupleNames} wedding! Click here to respond:\n\n${link}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+
   return (
     <div className="flex flex-col h-full font-sans space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -755,6 +771,36 @@ export default function GuestList({
                   Copy
                 </Button>
               </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Button
+                  variant="secondary"
+                  onClick={handleCopyLink}
+                  className="border-slate-200"
+                >
+                  Copy Message
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleWhatsAppShare}
+                  className="bg-[#25D366] hover:bg-[#20ba59] border-none text-white"
+                >
+                  WhatsApp
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={handleEmailShare}
+                  className="bg-[#ea4335] hover:bg-[#d63022] border-none text-white"
+                >
+                  Email
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={handleShare}
+                  className="border-slate-200"
+                >
+                  Share
+                </Button>
+              </div>
             </div>
 
 
@@ -770,29 +816,13 @@ export default function GuestList({
               <Button variant="ghost" onClick={() => setInviteGuest(null)} disabled={loading}>
                 Close
               </Button>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  onClick={handleCopyLink}
-                  className="border-slate-200 flex items-center gap-2"
-                >
-                  <Copy className="h-4 w-4" /> Copy Link
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={handleShare}
-                  className="border-[#6771ab]/30 flex items-center gap-2"
-                >
-                  <Share2 className="h-4 w-4" /> Share
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleSaveSendInvitedCeremonies}
-                  disabled={loading || sendInvitedCeremonies.length === 0}
-                >
-                  {loading ? "Saving..." : "Save Ceremonies"}
-                </Button>
-              </div>
+              <Button
+                variant="primary"
+                onClick={handleSaveSendInvitedCeremonies}
+                disabled={loading || sendInvitedCeremonies.length === 0}
+              >
+                {loading ? "Saving..." : "Save Ceremonies"}
+              </Button>
             </div>
           </div>
         )}

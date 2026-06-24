@@ -13,18 +13,22 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 | 🗂️ **Wedding Task Planner** | Drag-and-drop task management across Backlog, To-Do, In Progress, and Done — pre-seeded for your wedding tradition. Dynamic per-category follow-up question checklist |
 | 📅 **Calendar** | Month-view calendar showing all ceremonies and task due dates at a glance, with a ceremony/task filter bar |
 | ⏱️ **Wedding Ceremony Planner** | Chronological timeline of ceremonies with precise timings — date, dress code, food served, checklist, and assignee per ceremony |
-| 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP, bulk CSV import, ceremony-level guest invitations, `invited_ceremonies` CSV column, and personal invitation links that filter the Wedding Program by invited ceremonies |
+| 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP, bulk CSV import, ceremony-level guest invitations, `invited_ceremonies` CSV column, and personal invitation links that copy a formatted message or open native OS Share sheet |
 | 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, outstanding balances, dynamic currency by country, vendor-ceremony linking, and downloadable Budget & Vendors CSV Report |
 | 🍴 **Catering Menu Planner** | Design food & beverage menus for ceremonies. Link them directly to catering tasks and view them right from your day-of timeline planner |
 | 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, Wedding Program (filtered by guest's invited ceremonies via personal link), Gift Registry, and RSVP form |
 | 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
 | 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding and 7-step wizard to set up your first event |
 | 👤 **Personas** | Wedding Planner mode (manage multiple couples with client role + onboarding links) and DIY (Plan My Wedding) |
-| ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — no raw JSON |
-| 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` |
+| ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — pre-seeded with standard categories, fully editable |
+| 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` — pre-seeded with standard traditions (Hindu, Muslim, Sikh, Christian, Secular), fully editable |
+
+### Database Auto-Seeding at Startup
+The platform has built-in self-healing and auto-seeding logic registered in `src/instrumentation.ts` that runs on container startup. If default traditions or categories are missing from the database, it automatically seeds them so that the admin can view, modify, or enhance them immediately.
 
 ### Wedding Traditions Supported
-Hindu · Muslim · Sikh · Christian · Secular (and more)
+Hindu · Muslim · Sikh · Christian · Secular (and custom traditions)
+
 
 ---
 

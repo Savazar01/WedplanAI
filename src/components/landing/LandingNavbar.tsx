@@ -46,6 +46,7 @@ export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
 
       <div className="hidden md:flex items-center gap-8">
         <a href="#features" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">Features</a>
+        <a href="#personas" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">Personas</a>
         <a href="#how-it-works" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">How It Works</a>
         <Link href="/dashboard/docs" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">Docs</Link>
       </div>

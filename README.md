@@ -20,8 +20,8 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 | 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
 | 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding and 7-step wizard to set up your first event |
 | 👤 **Personas** | Wedding Planner mode (manage multiple couples with client role + onboarding links) and DIY (Plan My Wedding) |
-| ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — pre-seeded with standard categories, fully editable |
-| 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` — pre-seeded with standard traditions (Hindu, Muslim, Sikh, Christian, Secular), fully editable |
+| ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — pre-seeded with standard categories, fully editable. Full REST API at `/api/v1/categories` |
+| 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` — pre-seeded with standard traditions (Hindu, Muslim, Sikh, Christian, Secular), fully editable. Full REST API at `/api/v1/traditions` |
 
 ### Database Auto-Seeding at Startup
 The platform has built-in self-healing and auto-seeding logic registered in `src/instrumentation.ts` that runs on container startup. If default traditions or categories are missing from the database, it automatically seeds them so that the admin can view, modify, or enhance them immediately.
@@ -226,7 +226,7 @@ src/
 │   ├── actions/            # Server Actions (guests, vendors, weddings, auth, calendar)
 │   ├── api/                # Route handlers
 │   │   ├── auth/           # Better Auth API handler
-│   │   └── v1/             # REST API v1 (columns, guests, ceremonies, tasks, vendors, wedding)
+│   │   └── v1/             # REST API v1 (columns, guests, ceremonies, tasks, vendors, wedding, traditions, categories)
 │   ├── calendar/           # Public calendar view
 │   ├── dashboard/          # Authenticated dashboard pages
 │   │   ├── admin/          # Admin-only pages (appearance, api-keys, users)
@@ -319,18 +319,20 @@ WedPlanAI exposes a fully-functional REST API v1 for programmatic access and int
 
 ### Authentication
 
-All API requests require an API key passed in the `Authorization` header. You can generate and manage API keys under **App Administration > API Keys** in the dashboard.
+All API requests require an API key passed in the `x-api-key` header. You can generate and manage API keys under **App Administration > API Keys** in the dashboard.
 
 ```http
-Authorization: Bearer wpa_your_api_key_here
+x-api-key: wpa_your_api_key_here
 ```
 
 API keys are scoped per-wedding. All requests and responses are in JSON format. The base URL is `/api/v1/`.
 
+> **Note:** The auth header is `x-api-key` (not `Authorization: Bearer`). The legacy `Bearer` format is not supported.
+
 ### Endpoints Overview
 
 | Resource | Path | Methods | Description |
-|---|---|---|---|
+|---|---|---|---|---|
 | **Wedding** | `/api/v1/wedding` | `GET`, `PUT` | Manage active wedding info |
 | **Columns** | `/api/v1/columns` | `GET`, `POST` | Manage Kanban task columns |
 | **Columns (ID)** | `/api/v1/columns/:id` | `PUT`, `DELETE` | Update/delete specific Kanban column |
@@ -342,6 +344,10 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
 | **Guests (ID)** | `/api/v1/guests/:id` | `PUT`, `DELETE` | Update/delete specific guest |
 | **Vendors** | `/api/v1/vendors` | `GET`, `POST` | Manage vendor contracts & payments |
 | **Vendors (ID)** | `/api/v1/vendors/:id` | `PUT`, `DELETE` | Update/delete specific vendor |
+| **Traditions** | `/api/v1/traditions` | `GET`, `POST` | List/create wedding traditions (global config) |
+| **Traditions (ID)** | `/api/v1/traditions/:id` | `PUT`, `DELETE` | Update/delete specific tradition |
+| **Categories** | `/api/v1/categories` | `GET`, `POST` | List/create task categories (global config) |
+| **Categories (ID)** | `/api/v1/categories/:id` | `PUT`, `DELETE` | Update/delete specific category |
 
 ---
 
@@ -416,10 +422,10 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
       "description": "Dance and music night",
       "startTime": "2025-12-24T18:00:00Z",
       "endTime": "2025-12-24T22:00:00Z",
-      "location": "Banquet Lawn",
-      "foodServed": true
+      "location": "Banquet Lawn"
     }
     ```
+  - **Accepted fields:** `name` (required), `description`, `startTime` (required, ISO 8601), `endTime` (required, ISO 8601), `location` (required). Extra ceremony fields (dress code, food served, assignee) are managed via the UI only.
 
 * **PUT/DELETE `/api/v1/ceremonies/:id`**
   - **Description:** Update or delete a ceremony.
@@ -481,6 +487,83 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
 
 * **PUT/DELETE `/api/v1/columns/:id`**
   - **Description:** Update or delete a column.
+  - **Note:** Columns that still have tasks assigned cannot be deleted. Move or delete all tasks in the column before removing it.
+
+#### 7. Wedding Traditions (Global Config)
+* **GET `/api/v1/traditions`**
+  - **Description:** List all wedding traditions configured on the platform (global — not per-wedding).
+  - **Response (200 OK):**
+    ```json
+    [
+      {
+        "id": "uuid",
+        "key": "hindu",
+        "name": "Hindu",
+        "description": "Traditional Hindu wedding with Vedic ceremonies",
+        "seedTasks": "[{\"title\":\"Book priest\",\"category\":\"venue\",\"description\":\"\"}]",
+        "seedCeremonies": "[{\"name\":\"Mehendi\",\"offsetDays\":-2,\"startTime\":\"14:00\",\"endTime\":\"18:00\",\"description\":\"Henna ceremony\"}]",
+        "createdAt": "2025-01-01T00:00:00.000Z",
+        "updatedAt": "2025-01-01T00:00:00.000Z"
+      }
+    ]
+    ```
+
+* **POST `/api/v1/traditions`**
+  - **Description:** Create a new tradition.
+  - **Request Body:**
+    ```json
+    {
+      "key": "telugu_wedding",
+      "name": "Telugu Wedding",
+      "description": "Traditional Telugu Hindu wedding",
+      "seedTasks": "[{\"title\":\"...\",\"category\":\"...\",\"description\":\"...\"}]",
+      "seedCeremonies": "[{\"name\":\"...\",\"offsetDays\":-1,\"startTime\":\"09:00\",\"endTime\":\"12:00\",\"description\":\"...\"}]"
+    }
+    ```
+  - **Accepted fields:** `key` (required, will be lowercased/slugified), `name` (required), `description`, `seedTasks` (JSON string), `seedCeremonies` (JSON string).
+
+* **PUT `/api/v1/traditions/:id`**
+  - **Description:** Update a tradition. Any subset of fields can be updated.
+  - **Note:** Duplicate `key` values return a 409 Conflict error.
+
+* **DELETE `/api/v1/traditions/:id`**
+  - **Description:** Delete a tradition permanently.
+
+#### 8. Task Categories (Global Config)
+* **GET `/api/v1/categories`**
+  - **Description:** List all task categories configured on the platform (global — not per-wedding).
+  - **Response (200 OK):**
+    ```json
+    [
+      {
+        "id": "uuid",
+        "key": "catering",
+        "name": "Catering",
+        "followUpQuestions": "[{\"id\":\"q1\",\"label\":\"Cuisine type?\",\"type\":\"text\"}]",
+        "createdAt": "2025-01-01T00:00:00.000Z",
+        "updatedAt": "2025-01-01T00:00:00.000Z"
+      }
+    ]
+    ```
+
+* **POST `/api/v1/categories`**
+  - **Description:** Create a new task category.
+  - **Request Body:**
+    ```json
+    {
+      "key": "transportation",
+      "name": "Transportation",
+      "followUpQuestions": "[{\"id\":\"q1\",\"label\":\"Number of vehicles?\",\"type\":\"number\"}]"
+    }
+    ```
+  - **Accepted fields:** `key` (required, will be lowercased/slugified), `name` (required), `followUpQuestions` (JSON string).
+
+* **PUT `/api/v1/categories/:id`**
+  - **Description:** Update a category. Any subset of fields.
+  - **Note:** Duplicate `key` values return a 409 Conflict error.
+
+* **DELETE `/api/v1/categories/:id`**
+  - **Description:** Delete a category permanently.
 
 ---
 

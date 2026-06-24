@@ -360,7 +360,7 @@ const apiSection = {
     {
       title: "Overview & Authentication",
       content:
-        "WedPlanAI exposes a REST API at /api/v1/ for programmatic access to your wedding data. All endpoints require an API key passed in the Authorization header: Authorization: Bearer <your-api-key>. Generate API keys from Admin > API Keys. Each key is scoped to a specific wedding. All endpoints return JSON. Planned use: MCP (Model Context Protocol) integration in the next platform phase.",
+        "WedPlanAI exposes a REST API at /api/v1/ for programmatic access to your wedding data. All endpoints require an API key passed in the x-api-key header: x-api-key: wpa_your_api_key_here. Generate API keys from Admin > API Keys. Each key is scoped to a specific wedding. All endpoints return JSON. Planned use: MCP (Model Context Protocol) integration in the next platform phase.",
     },
     {
       title: "Wedding — GET /api/v1/wedding",
@@ -375,7 +375,7 @@ const apiSection = {
     {
       title: "Ceremonies — GET/POST /api/v1/ceremonies",
       content:
-        "GET: List all ceremonies for the active wedding. Returns array of: { id, name, description, startTime, endTime, location, dresscode, foodServed, assignee }. POST: Create a ceremony. Body (JSON): { name (required), startTime (ISO 8601), endTime (ISO 8601), location, description, dresscode, foodServed (boolean), assignee }.",
+        "GET: List all ceremonies for the active wedding. Returns array of ceremony objects. POST: Create a ceremony. Body (JSON): { name (required), startTime (ISO 8601, required), endTime (ISO 8601, required), location (required), description (optional) }. Additional ceremony fields (dress code, food served, assignee) are managed via the UI only.",
     },
     {
       title: "Ceremonies — PUT/DELETE /api/v1/ceremonies/:id",
@@ -420,17 +420,47 @@ const apiSection = {
     {
       title: "Kanban Columns — PUT/DELETE /api/v1/columns/:id",
       content:
-        "PUT: Update a column by ID (title, position). DELETE: Delete a column by ID (also deletes all tasks in that column).",
+        "PUT: Update a column by ID (title, position). DELETE: Delete a column by ID (returns 400 error if tasks still exist in the column — move or delete tasks first).",
     },
     {
       title: "Example: List Ceremonies",
       content:
-        "curl -X GET https://your-domain.com/api/v1/ceremonies -H 'Authorization: Bearer wpa_your_api_key_here' | Response: [{\"id\":\"uuid\",\"name\":\"Mehndi\",\"startTime\":\"2025-12-13T14:00:00Z\",\"endTime\":\"2025-12-13T18:00:00Z\",\"location\":\"Garden Terrace\",\"foodServed\":true}]",
+        "curl -X GET https://your-domain.com/api/v1/ceremonies -H 'x-api-key: wpa_your_api_key_here' | Lists all ceremonies for the active wedding.",
     },
     {
       title: "Example: Create a Task",
       content:
-        "curl -X POST https://your-domain.com/api/v1/tasks -H 'Authorization: Bearer wpa_your_key' -H 'Content-Type: application/json' -d '{\"title\":\"Book the florist\",\"category\":\"flowers\",\"columnId\":\"your-column-id\",\"dueDate\":\"2025-11-01T00:00:00Z\"}'",
+        "curl -X POST https://your-domain.com/api/v1/tasks -H 'x-api-key: wpa_your_key' -H 'Content-Type: application/json' -d '{\"title\":\"Book the florist\",\"category\":\"flowers\",\"columnId\":\"your-column-id\",\"dueDate\":\"2025-11-01T00:00:00Z\"}'",
+    },
+    {
+      title: "Traditions — GET/POST /api/v1/traditions",
+      content:
+        "GET: List all wedding traditions (global config — returns all traditions on the platform). POST: Create a tradition. Body (JSON): { key (required, slug), name (required), description, seedTasks (JSON string), seedCeremonies (JSON string) }. Duplicate keys return 409 Conflict.",
+    },
+    {
+      title: "Traditions — PUT/DELETE /api/v1/traditions/:id",
+      content:
+        "PUT: Update a tradition by ID. Body: any subset of tradition fields. DELETE: Permanently delete a tradition by ID.",
+    },
+    {
+      title: "Categories — GET/POST /api/v1/categories",
+      content:
+        "GET: List all task categories (global config). POST: Create a category. Body (JSON): { key (required, slug), name (required), followUpQuestions (JSON string) }. Duplicate keys return 409 Conflict.",
+    },
+    {
+      title: "Categories — PUT/DELETE /api/v1/categories/:id",
+      content:
+        "PUT: Update a category by ID. Body: any subset of category fields. DELETE: Permanently delete a category by ID.",
+    },
+    {
+      title: "Example: List Traditions",
+      content:
+        "curl -X GET https://your-domain.com/api/v1/traditions -H 'x-api-key: wpa_your_key' | Lists all wedding traditions configured on the platform.",
+    },
+    {
+      title: "Example: List Categories",
+      content:
+        "curl -X GET https://your-domain.com/api/v1/categories -H 'x-api-key: wpa_your_key' | Lists all task categories configured on the platform.",
     },
   ],
 };

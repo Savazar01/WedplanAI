@@ -479,7 +479,7 @@ export default function SidebarShell({
         {/* Page Content */}
         <main className="flex-1">
           <SampleWalkthroughCard 
-            isSampleWedding={activeWedding?.isSample || false} 
+            isSampleWedding={activeWedding?.isSample || (activeWedding?.partnerA === "Rahul" && activeWedding?.partnerB === "Priya") || false} 
             weddingId={activeWedding?.id} 
             userRole={userRole}
             previewCode={previewCode}

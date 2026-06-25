@@ -6,6 +6,20 @@ import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+export async function checkAndSelfHealSampleWedding(
+  w: typeof weddings.$inferSelect | null
+): Promise<typeof weddings.$inferSelect | null> {
+  if (!w) return null;
+  if (w.partnerA === "Rahul" && w.partnerB === "Priya" && !w.isSample) {
+    await db
+      .update(weddings)
+      .set({ isSample: true })
+      .where(eq(weddings.id, w.id));
+    w.isSample = true;
+  }
+  return w;
+}
+
 export async function getActiveWedding(userId: string) {
   // First check the user details
   const userResult = await db
@@ -72,7 +86,7 @@ export async function getActiveWedding(userId: string) {
       .from(weddings)
       .where(eq(weddings.id, activeWeddingId))
       .limit(1);
-    if (w) return w;
+    if (w) return await checkAndSelfHealSampleWedding(w);
   }
 
   // 2. If user has an assigned/default weddingId and it is allowed, use it
@@ -83,7 +97,7 @@ export async function getActiveWedding(userId: string) {
       .where(eq(weddings.id, userAssignedWeddingId))
       .limit(1);
     if (w) {
-      return w;
+      return await checkAndSelfHealSampleWedding(w);
     }
   }
 
@@ -115,7 +129,7 @@ export async function getActiveWedding(userId: string) {
   }
 
   if (fallbackWedding) {
-    return fallbackWedding;
+    return await checkAndSelfHealSampleWedding(fallbackWedding);
   }
 
   return null;

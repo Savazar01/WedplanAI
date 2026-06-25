@@ -108,7 +108,7 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
 
   const traditionLabel = traditionLabels[wedding.tradition] || "Wedding Celebration";
 
-  const isSampleWedding = wedding.isSample || false;
+  const isSampleWedding = wedding.isSample || (wedding.partnerA === "Rahul" && wedding.partnerB === "Priya");
   const previewCode = getPreviewCode(id);
 
   return (

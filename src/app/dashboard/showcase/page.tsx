@@ -6,6 +6,7 @@ import { rituals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Suspense } from "react";
 import BuildShowcaseClient from "./BuildShowcaseClient";
+import { getPreviewCode } from "@/lib/preview";
 
 export default async function ShowcasePage() {
   const session = await getServerSession();
@@ -33,7 +34,7 @@ export default async function ShowcasePage() {
       </div>
 
       <Suspense fallback={<div className="text-sm text-slate-500">Loading showcase builder...</div>}>
-        <BuildShowcaseClient wedding={wedding} rituals={dbRituals} />
+        <BuildShowcaseClient wedding={wedding} rituals={dbRituals} previewCode={getPreviewCode(wedding.id)} />
       </Suspense>
     </main>
   );

@@ -69,6 +69,7 @@ interface Ritual {
 interface BuildShowcaseClientProps {
   wedding: Wedding;
   rituals: Ritual[];
+  previewCode: string;
 }
 
 const fonts = [
@@ -119,7 +120,7 @@ function areRitualsEqual(arr1: Ritual[], arr2: Ritual[]): boolean {
   return true;
 }
 
-export default function BuildShowcaseClient({ wedding, rituals: initialRituals }: BuildShowcaseClientProps) {
+export default function BuildShowcaseClient({ wedding, rituals: initialRituals, previewCode }: BuildShowcaseClientProps) {
   const router = useRouter();
   
   // Theme styling state
@@ -577,7 +578,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals }
           </Button>
 
           <Link
-            href={`/wedding/${wedding.id}`}
+            href={`/wedding/${wedding.id}?code=${previewCode}`}
             target="_blank"
             className="w-full inline-flex items-center justify-center font-semibold rounded-xl border border-slate-200 bg-slate-50 text-slate-700 h-10 text-sm hover:bg-slate-100 transition-all active:scale-[0.97]"
           >

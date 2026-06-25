@@ -26,18 +26,27 @@ interface SampleWalkthroughCardProps {
   isSampleWedding: boolean;
   weddingId?: string;
   userRole?: string;
+  previewCode?: string;
 }
 
 export default function SampleWalkthroughCard({ 
   isSampleWedding,
   weddingId,
-  userRole 
+  userRole,
+  previewCode 
 }: SampleWalkthroughCardProps) {
   const pathname = usePathname();
   const router = useRouter();
 
   const [status, setStatus] = React.useState<'walking' | 'completed' | 'skipped' | null>(null);
-  const [currentStep, setCurrentStep] = React.useState(0);
+  const [currentStep, setCurrentStep] = React.useState(() => {
+    const stored = localStorage.getItem("sample_walkthrough_step");
+    return stored ? parseInt(stored, 10) : 0;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem("sample_walkthrough_step", String(currentStep));
+  }, [currentStep]);
 
   React.useEffect(() => {
     const stored = localStorage.getItem("sample_walkthrough_status");
@@ -114,7 +123,7 @@ export default function SampleWalkthroughCard({
         description: "Preview the beautiful public wedding showcase website where guests can view event details, stories, and RSVP.",
         icon: Globe,
         color: "text-sky-500 bg-sky-50 border-sky-100",
-        path: weddingId ? `/wedding/${weddingId}` : "/dashboard",
+        path: weddingId && previewCode ? `/wedding/${weddingId}?code=${previewCode}` : "/dashboard",
       },
       {
         id: "profile",
@@ -142,7 +151,7 @@ export default function SampleWalkthroughCard({
       }
     ];
     return allSteps;
-  }, [weddingId, userRole]);
+  }, [weddingId, userRole, previewCode]);
 
   // Synchronize step index with path changes
   React.useEffect(() => {
@@ -196,11 +205,13 @@ export default function SampleWalkthroughCard({
   const handleSkip = () => {
     setStatus("skipped");
     localStorage.setItem("sample_walkthrough_status", "skipped");
+    localStorage.removeItem("sample_walkthrough_step");
   };
 
   const handleComplete = () => {
     setStatus("completed");
     localStorage.setItem("sample_walkthrough_status", "completed");
+    localStorage.removeItem("sample_walkthrough_step");
     router.push("/dashboard");
   };
 

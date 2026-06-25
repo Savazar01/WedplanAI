@@ -8,6 +8,7 @@ import { formatDateTime, formatDate } from "@/lib/format";
 import SampleWalkthroughCard from "@/components/dashboard/SampleWalkthroughCard";
 import DynamicTheme from "@/components/theme/DynamicTheme";
 import Link from "next/link";
+import { getPreviewCode } from "@/lib/preview";
 
 // Define the async params type for Next.js 16
 interface PageProps {
@@ -35,14 +36,19 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
   let guestRecord: typeof guests.$inferSelect | null = null;
 
   if (code) {
-    const guestList = await db
-      .select()
-      .from(guests)
-      .where(eq(guests.loginCode, code))
-      .limit(1);
-    if (guestList.length > 0) {
+    const previewCode = getPreviewCode(id);
+    if (code === previewCode) {
       isValidGuest = true;
-      guestRecord = guestList[0];
+    } else {
+      const guestList = await db
+        .select()
+        .from(guests)
+        .where(eq(guests.loginCode, code))
+        .limit(1);
+      if (guestList.length > 0) {
+        isValidGuest = true;
+        guestRecord = guestList[0];
+      }
     }
   }
 
@@ -102,7 +108,8 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
 
   const traditionLabel = traditionLabels[wedding.tradition] || "Wedding Celebration";
 
-  const isSampleWedding = (wedding.description || "").includes("Sample Wedding");
+  const isSampleWedding = wedding.isSample || false;
+  const previewCode = getPreviewCode(id);
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-slate-800 flex flex-col items-center">
@@ -110,7 +117,7 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
       <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
 
       {isSampleWedding && (
-        <SampleWalkthroughCard isSampleWedding={true} weddingId={wedding.id} userRole="admin" />
+        <SampleWalkthroughCard isSampleWedding={true} weddingId={wedding.id} userRole="admin" previewCode={previewCode} />
       )}
 
       <section className="w-full max-w-4xl mx-auto px-6 pt-12 pb-8 flex flex-col items-center text-center">

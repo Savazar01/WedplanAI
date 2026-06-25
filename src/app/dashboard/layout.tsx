@@ -3,9 +3,10 @@ import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { db } from "@/db/client";
 import { weddings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import SidebarShell from "@/components/dashboard/SidebarShell";
 import DynamicTheme from "@/components/theme/DynamicTheme";
+import { getPreviewCode } from "@/lib/preview";
 import * as React from "react";
 
 interface LayoutProps {
@@ -31,20 +32,20 @@ export default async function DashboardLayout({ children }: LayoutProps) {
     allWeddings = await db
       .select()
       .from(weddings)
-      .where(eq(weddings.userId, session.user.id));
+      .where(and(eq(weddings.userId, session.user.id), eq(weddings.isArchived, false)));
   } else {
     if (userWeddingAccess === "all") {
       if (activeWedding) {
         allWeddings = await db
           .select()
           .from(weddings)
-          .where(eq(weddings.userId, activeWedding.userId));
+          .where(and(eq(weddings.userId, activeWedding.userId), eq(weddings.isArchived, false)));
       }
     } else {
       allWeddings = await db
         .select()
         .from(weddings)
-        .where(eq(weddings.id, userWeddingAccess));
+        .where(and(eq(weddings.id, userWeddingAccess), eq(weddings.isArchived, false)));
     }
   }
 
@@ -57,6 +58,7 @@ export default async function DashboardLayout({ children }: LayoutProps) {
         userName={session.user.name}
         userEmail={session.user.email}
         userRole={(session.user as { role?: string }).role || "user"}
+        previewCode={activeWedding ? getPreviewCode(activeWedding.id) : ""}
       >
         {children}
       </SidebarShell>

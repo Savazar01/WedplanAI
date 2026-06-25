@@ -87,13 +87,13 @@ export async function getActiveWedding(userId: string) {
     }
   }
 
-  // 3. Otherwise, fallback to the first allowed wedding ID
+  // 3. Otherwise, fallback to the first allowed non-archived wedding
   let fallbackWedding: typeof weddings.$inferSelect | null = null;
   if (role === "admin") {
     const [w] = await db
       .select()
       .from(weddings)
-      .where(eq(weddings.userId, userId))
+      .where(and(eq(weddings.userId, userId), eq(weddings.isArchived, false)))
       .limit(1);
     if (w) fallbackWedding = w;
   } else {
@@ -101,14 +101,14 @@ export async function getActiveWedding(userId: string) {
       const [w] = await db
         .select()
         .from(weddings)
-        .where(eq(weddings.id, weddingAccess))
+        .where(and(eq(weddings.id, weddingAccess), eq(weddings.isArchived, false)))
         .limit(1);
       if (w) fallbackWedding = w;
     } else if (allowedAdminUserId) {
       const [w] = await db
         .select()
         .from(weddings)
-        .where(eq(weddings.userId, allowedAdminUserId))
+        .where(and(eq(weddings.userId, allowedAdminUserId), eq(weddings.isArchived, false)))
         .limit(1);
       if (w) fallbackWedding = w;
     }

@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { tasks, guests, vendors, ceremonies, guestRsvps } from "@/db/schema";
+import { tasks, guests, vendors, ceremonies, guestRsvps, weddings } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding, ensureDefaultColumns } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { eq } from "drizzle-orm";
 import DashboardWeddingCard from "@/components/dashboard/DashboardWeddingCard";
 import { formatCurrency } from "@/lib/format";
+import WeddingActions from "@/components/dashboard/WeddingActions";
+import { and, ne } from "drizzle-orm";
 
 export default async function DashboardPage() {
   const session = await getServerSession();
@@ -56,6 +58,11 @@ export default async function DashboardPage() {
     .from(guestRsvps)
     .innerJoin(guests, eq(guestRsvps.guestId, guests.id))
     .where(eq(guests.weddingId, wedding.id));
+
+  const archivedWeddings = await db
+    .select()
+    .from(weddings)
+    .where(and(eq(weddings.userId, session.user.id), eq(weddings.isArchived, true)));
 
   const ceremonyAttendance = weddingCeremonies.map((c) => {
     const totalAttending = dbGuestRsvps
@@ -114,6 +121,7 @@ export default async function DashboardPage() {
         {/* ─── ROW 1: Wedding Card + Showcase Quick Nav ─── */}
         <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
           <DashboardWeddingCard wedding={wedding} />
+          <WeddingActions weddingId={wedding.id} isArchived={wedding.isArchived || false} />
           <div className="mt-6 pt-6 border-t border-slate-200/60">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-2">
@@ -229,6 +237,7 @@ export default async function DashboardPage() {
       {/* ─── ROW 1: Wedding Card + Showcase Quick Nav ─── */}
       <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
         <DashboardWeddingCard wedding={wedding} />
+        <WeddingActions weddingId={wedding.id} isArchived={wedding.isArchived || false} />
         <div className="mt-6 pt-6 border-t border-slate-200/60">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-2">
@@ -375,6 +384,35 @@ export default async function DashboardPage() {
           )}
         </div>
       </Card>
+
+      {/* ─── Archived Weddings ─── */}
+      {archivedWeddings.length > 0 && (
+        <Card variant="default" className="p-6 border-slate-200 shadow-sm bg-white">
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none">
+              <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest">
+                Archived Weddings ({archivedWeddings.length})
+              </h3>
+              <svg className="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div className="mt-4 space-y-3">
+              {archivedWeddings.map((aw) => (
+                <div key={aw.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <div>
+                    <span className="text-sm font-medium text-slate-700">{aw.partnerA} & {aw.partnerB}</span>
+                    <span className="text-xs text-slate-400 ml-2">({aw.tradition})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <WeddingActions weddingId={aw.id} isArchived={true} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+        </Card>
+      )}
 
       {/* ─── ROW 4: Budget Depletion ─── */}
       <Card 

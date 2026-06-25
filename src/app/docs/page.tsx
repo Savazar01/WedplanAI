@@ -14,12 +14,12 @@ const sections = [
       {
         title: "Sample Wedding",
         content:
-          "When you sign up, a sample Hindu wedding (Rahul & Priya) is automatically created with pre-seeded tasks, ceremonies, guests, and vendors. This lets you explore the platform immediately. The sample wedding is read-only and cannot be deleted, but you can hide the walkthrough banner after reviewing it.",
+          "When you sign up, a sample Hindu wedding (Rahul & Priya) is automatically created with pre-seeded tasks, ceremonies, guests, and vendors. This lets you explore the platform immediately. The sample wedding is marked with an isSample flag and displays an interactive walkthrough banner on the dashboard that guides you through all features. You can skip or complete the walkthrough at any time. The sample wedding can be archived or deleted like any other wedding.",
       },
       {
         title: "Creating Your Wedding — Event Wizard",
         content:
-          "Use the guided 7-step Event Creation Wizard (/wizard) to set up your wedding. The steps are: (1) Partner Names, (2) Date & Place — wedding date, city, country, and venue, (3) Tradition — choose from Hindu, Muslim, Sikh, Christian, Secular, or any custom tradition added by your admin, (4) Budget & Guests — total budget and estimated guest count, (5) Wedding Ceremonies — review and customize pre-seeded ceremonies or add your own, (6) Wedding Tasks Plan — review and customize pre-seeded tasks or add your own, (7) Review & Create — confirm all details before creation. All tasks and ceremonies are auto-generated from your chosen tradition.",
+          "Use the guided 7-step Event Creation Wizard (/wizard) to set up your wedding. The steps are: (1) Partner Names, (2) Date & Place — wedding date, location auto-format from venue, street, city, state, country, and pincode, with multi-location support for ceremonies at different venues, (3) Tradition — choose from Hindu, Muslim, Sikh, Christian, Secular, or any custom tradition added by your admin, (4) Budget & Guests — total budget and estimated guest count with country-based currency display, (5) Wedding Ceremonies — review and customize pre-seeded ceremonies or add your own, (6) Wedding Tasks Plan — review and customize pre-seeded tasks or add your own, (7) Review & Create — confirm all details before creation. All tasks and ceremonies are auto-generated from your chosen tradition.",
       },
       {
         title: "Auto-Seeding & Self-Healing Seeding",
@@ -27,9 +27,14 @@ const sections = [
           "When onboarding a couple or uploading their onboarding CSV, the platform automatically seeds default tasks and ceremonies based on their chosen wedding tradition. If tasks or ceremonies are ever completely deleted or missing, the platform self-heals by automatically re-seeding these defaults.",
       },
       {
+        title: "Archive & Delete Weddings",
+        content:
+          "Each wedding card on the dashboard includes Archive and Delete buttons. Archiving moves the wedding to a collapsed 'Archived Weddings' section — the wedding becomes view-only and is excluded from the sidebar wedding switcher. You can restore an archived wedding at any time. Deleting permanently removes the wedding and all related data (tasks, ceremonies, guests, vendors, menus) via cascade. Both actions require confirmation through a dialog.",
+      },
+      {
         title: "Dashboard Overview",
         content:
-          "The main dashboard shows your active wedding at a glance: task completion percentage (with To-Do, In Progress, Done, and Overdue counts), guest RSVP breakdown (attending, declined, pending — broken down per ceremony), budget status with color-coded depletion bar and breach alerts, and a Build Showcase Page quick-navigation button. The Guests section provides personal invitation links — each link has a 'Copy Link' button and a 'Share' button (using the Web Share API to launch WhatsApp, Email, SMS, etc.) plus a 'Save Ceremonies' button to persist which ceremonies the guest is invited to.",
+          "The main dashboard shows your active wedding at a glance: task completion percentage (with To-Do, In Progress, Done, and Overdue counts), guest RSVP breakdown (attending, declined, pending — broken down per ceremony), budget status with color-coded depletion bar and breach alerts, and a Build Showcase Page quick-navigation button. Each wedding card includes Archive and Delete buttons with confirmation dialogs. Archived weddings are moved to an 'Archived Weddings' collapsible section and can be restored or permanently deleted. The Guests section provides personal invitation links — each link has a 'Copy Link' button and a 'Share' button (using the Web Share API to launch WhatsApp, Email, SMS, etc.) plus a 'Save Ceremonies' button to persist which ceremonies the guest is invited to.",
       },
     ],
   },
@@ -181,7 +186,7 @@ const sections = [
       {
         title: "Budget Tracking",
         content:
-          "For each vendor, record the contract amount, amount already paid, and currency. The system automatically calculates the outstanding balance. Currency is dynamically set based on your wedding's country.",
+          "For each vendor, record the contract amount, amount already paid, and currency. The system automatically calculates the outstanding balance. Currency is dynamically set based on your wedding's country and displayed throughout the wizard and dashboard.",
       },
       {
         title: "Budget Breach Alerts",
@@ -203,7 +208,7 @@ const sections = [
       {
         title: "Building Your Showcase",
         content:
-          "Navigate to Build Showcase Page from the sidebar (admin only). Customize the hero banner image, welcome text, couple's story, primary/secondary colors, background theme, and RSVP form title and description. The live preview updates in real-time as you make changes.",
+          "Navigate to Build Showcase Page from the sidebar (admin only). Customize the hero banner image, welcome text, couple's story, primary/secondary colors, background theme, and RSVP form title and description. The live preview updates in real-time as you make changes. The 'View Public Page' link uses an internal preview code — a secure HMAC-based hash — so you can see the full showcase without needing a real guest invitation code.",
       },
       {
         title: "Sharing with Guests",

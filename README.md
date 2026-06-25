@@ -14,11 +14,12 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 | 📅 **Calendar** | Month-view calendar showing all ceremonies and task due dates at a glance, with a ceremony/task filter bar |
 | ⏱️ **Wedding Ceremony Planner** | Chronological timeline of ceremonies with precise timings — date, dress code, food served, checklist, and assignee per ceremony |
 | 👥 **Guest RSVP Management** | Track every guest with unique login codes for self-service RSVP, bulk CSV import, ceremony-level guest invitations, `invited_ceremonies` CSV column, and personal invitation links that copy a formatted message or open native OS Share sheet |
-| 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, outstanding balances, dynamic currency by country, vendor-ceremony linking, and downloadable Budget & Vendors CSV Report |
+| 💰 **Vendor & Budget Tracker** | Manage vendors with contract values, paid amounts, outstanding balances, dynamic currency by country (displayed in wizard and dashboard), vendor-ceremony linking, and downloadable Budget & Vendors CSV Report |
 | 🍴 **Catering Menu Planner** | Design food & beverage menus for ceremonies. Link them directly to catering tasks and view them right from your day-of timeline planner |
-| 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, Wedding Program (filtered by guest's invited ceremonies via personal link), Gift Registry, and RSVP form |
+| 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, Wedding Program (filtered by guest's invited ceremonies via personal link), Gift Registry, RSVP form, and internal preview mode using a secure hash-based preview code |
 | 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
-| 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding and 7-step wizard to set up your first event |
+| 🗄️ **Archive & Delete Weddings** | Archive weddings to a collapsed section (view-only, excluded from sidebar switcher), restore or permanently delete with cascade confirmation |
+| 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding (detected via isSample flag) and 7-step wizard to set up your first event — includes multi-location venue support with auto-formatted address fields and country-based currency display |
 | 👤 **Personas** | Wedding Planner mode (manage multiple couples with client role + onboarding links) and DIY (Plan My Wedding) |
 | ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — pre-seeded with standard categories, fully editable. Full REST API at `/api/v1/categories` |
 | 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` — pre-seeded with standard traditions (Hindu, Muslim, Sikh, Christian, Secular), fully editable. Full REST API at `/api/v1/traditions` |
@@ -250,7 +251,7 @@ src/
 │   └── page.tsx            # Landing page (public)
 ├── components/
 │   ├── calendar/           # Calendar, timeline, coordinator components
-│   ├── dashboard/          # Dashboard shell, sidebar, walkthrough, cards
+│   ├── dashboard/          # Dashboard shell, sidebar, walkthrough, cards, WeddingActions
 │   ├── guests/             # Guest list, CSV upload components
 │   ├── kanban/             # Wedding Task Planner (Kanban) board
 │   ├── theme/              # Theme/appearance utilities
@@ -262,13 +263,14 @@ src/
 │   ├── migrate.ts          # Migration runner
 │   ├── schema.ts           # Drizzle database schema
 │   ├── reset.ts            # Database reset script
-│   └── migrations/         # Auto-generated SQL migrations (0001–0008)
+│   └── migrations/         # Auto-generated SQL migrations (0001–0013)
 └── lib/                    # Utilities
     ├── auth-client.ts      # Better Auth client
     ├── auth-server.ts      # Better Auth server helpers
     ├── auth.ts             # Better Auth config
     ├── format.ts           # Date, time, and currency formatters
-    ├── seed-sample-wedding.ts  # Sample wedding seeder
+    ├── preview.ts          # HMAC-based preview code generation for showcase
+    ├── seed-sample-wedding.ts  # Sample wedding seeder (isSample=true)
     └── wedding-helper.ts   # Active wedding and column helpers
 ```
 

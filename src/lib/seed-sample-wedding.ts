@@ -23,6 +23,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         country: "India",
         pincode: "313001",
         showcaseTitleFont: "Playfair Display",
+        isSample: true,
         description:
           "🎉 Sample Wedding — Explore all features of WedPlanAI! This sample Hindu wedding includes tasks, rituals, guests with RSVPs, vendors, and budget tracking to help you understand the app.",
       })

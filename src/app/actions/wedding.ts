@@ -7,6 +7,8 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { switchWeddingAction } from "@/lib/wedding-helper";
 import { defaultTraditions, defaultCategories } from "@/lib/default-seeds";
 
 export async function createWizardTraditionAction(data: {
@@ -618,5 +620,75 @@ export async function getPublicCategories() {
   } catch (e) {
     console.error("Failed to list public categories:", e);
     return [];
+  }
+}
+
+export async function archiveWeddingAction(weddingId: string) {
+  try {
+    const session = await getServerSession();
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    const [wedding] = await db
+      .select()
+      .from(weddings)
+      .where(and(eq(weddings.id, weddingId), eq(weddings.userId, session.user.id)))
+      .limit(1);
+    if (!wedding) return { error: "Wedding not found or access denied" };
+
+    await db.update(weddings)
+      .set({ isArchived: true, updatedAt: new Date() })
+      .where(eq(weddings.id, weddingId));
+
+    revalidatePath("/dashboard", "layout");
+    return { success: true };
+  } catch (error) {
+    console.error("Error archiving wedding:", error);
+    return { error: "Failed to archive wedding." };
+  }
+}
+
+export async function unarchiveWeddingAction(weddingId: string) {
+  try {
+    const session = await getServerSession();
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    const [wedding] = await db
+      .select()
+      .from(weddings)
+      .where(and(eq(weddings.id, weddingId), eq(weddings.userId, session.user.id)))
+      .limit(1);
+    if (!wedding) return { error: "Wedding not found or access denied" };
+
+    await db.update(weddings)
+      .set({ isArchived: false, updatedAt: new Date() })
+      .where(eq(weddings.id, weddingId));
+
+    revalidatePath("/dashboard", "layout");
+    return { success: true };
+  } catch (error) {
+    console.error("Error unarchiving wedding:", error);
+    return { error: "Failed to unarchive wedding." };
+  }
+}
+
+export async function deleteWeddingAction(weddingId: string) {
+  try {
+    const session = await getServerSession();
+    if (!session?.user?.id) return { error: "Unauthorized" };
+
+    const [wedding] = await db
+      .select()
+      .from(weddings)
+      .where(and(eq(weddings.id, weddingId), eq(weddings.userId, session.user.id)))
+      .limit(1);
+    if (!wedding) return { error: "Wedding not found or access denied" };
+
+    await db.delete(weddings).where(eq(weddings.id, weddingId));
+
+    revalidatePath("/dashboard", "layout");
+    redirect("/dashboard");
+  } catch (error) {
+    console.error("Error deleting wedding:", error);
+    return { error: "Failed to delete wedding." };
   }
 }

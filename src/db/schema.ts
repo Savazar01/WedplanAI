@@ -82,6 +82,8 @@ export const weddings = pgTable("wedding", {
   country: text("country").default("India").notNull(),
   pincode: text("pincode"),
   description: text("description"),
+  isSample: boolean("is_sample").default(false).notNull(),
+  isArchived: boolean("is_archived").default(false).notNull(),
   themeFont: text("theme_font").default("Geist").notNull(),
   themePrimary: text("theme_primary").default("#6771ab").notNull(),
   themeSecondary: text("theme_secondary").default("#8b93c5").notNull(),

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { authClient } from "@/lib/auth-client";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, getCurrencyForCountry } from "@/lib/format";
 
 const traditions = [
   { id: "hindu", label: "Hindu", desc: "Mehndi, Haldi & Sangeet, Saat Phere, Reception" },
@@ -106,11 +106,21 @@ export default function WizardPage() {
   const [pincode, setPincode] = React.useState("");
   React.useEffect(() => {
     if (locationManuallyEdited.current) return;
-    const parts = [city, state, country].filter(Boolean);
-    if (parts.length >= 2) {
+    const parts = [locationName, street, city, state, country, pincode].filter(Boolean);
+    if (parts.length >= 1) {
       setLocation(parts.join(', '));
     }
-  }, [city, state, country]);
+  }, [locationName, street, city, state, country, pincode]);
+  const [multiLocationEnabled, setMultiLocationEnabled] = React.useState(false);
+  const [locationOptions, setLocationOptions] = React.useState<string[]>([]);
+  const [newLocationOption, setNewLocationOption] = React.useState("");
+  const allVenueOptions = React.useMemo(() => {
+    const venueList = location ? [location] : [];
+    locationOptions.forEach((loc) => {
+      if (!venueList.includes(loc)) venueList.push(loc);
+    });
+    return venueList;
+  }, [location, locationOptions]);
   const [description, setDescription] = React.useState("");
   const [tradition, setTradition] = React.useState<string>("secular");
   const [budget, setBudget] = React.useState(1000000);
@@ -544,39 +554,40 @@ export default function WizardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f19] flex items-center justify-center p-4 transition-colors duration-300">
-      <Card variant="default" className="w-full max-w-2xl bg-white p-8 shadow-xl border border-slate-100 flex flex-col relative">
+      <Card variant="default" className="w-full max-w-2xl bg-white p-8 shadow-xl border border-slate-100 flex flex-col relative overflow-x-hidden">
 
         {/* Top Progress Indicator */}
-        <div className="flex items-center justify-between mb-8">
-          {[1, 2, 3, 4, 5, 6, 7].map((s) => (
+        <div className="flex items-center justify-between mb-8 shrink-0 overflow-x-auto pb-1 gap-0">
+          {[1, 2, 3, 4, 5, 6, 7].map((s, i) => (
             <React.Fragment key={s}>
-              <div className="flex items-center">
+              <div className="flex items-center shrink-0">
                 <div
-                  className={`h-8 w-8 rounded-full flex items-center justify-center font-semibold text-xs transition-all ${
+                  className={`min-w-[28px] min-h-[28px] rounded-full flex items-center justify-center font-semibold text-[11px] leading-none transition-all ${
                     step >= s 
-                      ? "bg-[#6771ab] text-white" 
+                      ? "bg-[#6771ab] text-white shadow-sm" 
                       : "bg-slate-100 text-slate-400"
                   }`}
+                  style={{ width: '28px', height: '28px' }}
                 >
                   {s}
                 </div>
-                <span className="hidden md:inline text-xs ml-2 font-medium text-slate-500">
+                <span className="hidden lg:inline text-[11px] ml-1.5 font-medium text-slate-500 whitespace-nowrap">
                   {s === 1 && "Partners"}
                   {s === 2 && "Date & Place"}
                   {s === 3 && "Tradition"}
                   {s === 4 && "Budget & Guests"}
-                  {s === 5 && "Wedding Ceremonies"}
-                  {s === 6 && "Wedding Tasks Plan"}
+                  {s === 5 && "Ceremonies"}
+                  {s === 6 && "Tasks"}
                   {s === 7 && "Review"}
                 </span>
               </div>
-              {s < 7 && <div className={`flex-1 h-[2px] mx-1 ${step > s ? "bg-[#6771ab]" : "bg-slate-100"}`} />}
+              {i < 6 && <div className={`h-[2px] min-w-[6px] flex-1 mx-1 rounded-full ${step > s ? "bg-[#6771ab]" : "bg-slate-100"}`} />}
             </React.Fragment>
           ))}
         </div>
 
         {/* Wizard Form Content */}
-        <div className="flex-1 min-h-[300px]">
+        <div className="flex-1 min-h-[300px] overflow-y-auto max-h-[calc(100vh-380px)] overflow-x-hidden">
           {step === 1 && (
             <div className="space-y-6">
               <div>
@@ -715,6 +726,62 @@ export default function WizardPage() {
                   }}
                 />
               </div>
+              <div className="border-t border-slate-200 pt-4 mt-4 space-y-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={multiLocationEnabled}
+                    onChange={(e) => setMultiLocationEnabled(e.target.checked)}
+                    className="rounded border-slate-300 text-[#6771ab] focus:ring-[#6771ab]"
+                  />
+                  <span className="text-sm font-medium text-slate-700">
+                    My ceremonies are at different locations
+                  </span>
+                </label>
+                {multiLocationEnabled && (
+                  <div className="space-y-3 pl-2">
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Venue Name, Street Address, City, State, Country, ZIP"
+                        value={newLocationOption}
+                        onChange={(e) => setNewLocationOption(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          if (newLocationOption.trim()) {
+                            setLocationOptions(prev => [...prev, newLocationOption.trim()]);
+                            setNewLocationOption("");
+                          }
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    {locationOptions.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-slate-500 font-medium">Added Locations:</p>
+                        {locationOptions.map((loc, i) => (
+                          <div key={i} className="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-md text-sm">
+                            <span>{loc}</span>
+                            <button
+                              type="button"
+                              onClick={() => setLocationOptions(prev => prev.filter((_, j) => j !== i))}
+                              className="text-red-400 hover:text-red-600 text-xs font-medium"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -797,12 +864,16 @@ export default function WizardPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Total Budget</label>
-                  <Input
-                    type="number"
-                    value={budget}
-                    onChange={(e) => setBudget(Number(e.target.value))}
-                  />
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Total Budget ({getCurrencyForCountry(country)})</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-semibold">{getCurrencyForCountry(country).replace('USD', '$').replace('INR', '₹').replace('EUR', '€').replace('GBP', '£').replace('JPY', '¥') || getCurrencyForCountry(country)}</span>
+                    <Input
+                      type="number"
+                      value={budget}
+                      onChange={(e) => setBudget(Number(e.target.value))}
+                      className="pl-8"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Estimated Guest Count</label>
@@ -851,13 +922,36 @@ export default function WizardPage() {
                       </div>
                       <div className="md:col-span-4">
                         <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Location / Venue</label>
-                        <Input
-                          type="text"
-                          value={r.location || ""}
-                          onChange={(e) => updateRitual(idx, "location", e.target.value)}
-                          placeholder="e.g. Royal Banquet Hall"
-                          className="h-9 text-xs"
-                        />
+                        {multiLocationEnabled && allVenueOptions.length > 0 ? (
+                          <select
+                            value={r.location || ""}
+                            onChange={(e) => updateRitual(idx, "location", e.target.value)}
+                            className="h-9 text-xs w-full rounded-xl border border-slate-200 bg-white px-3 py-1 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#6771ab]/40"
+                          >
+                            <option value="">Select location...</option>
+                            {allVenueOptions.map((loc, i) => (
+                              <option key={i} value={loc}>{loc}</option>
+                            ))}
+                            <option value="__other__">Other (type below)</option>
+                          </select>
+                        ) : (
+                          <Input
+                            type="text"
+                            value={r.location || ""}
+                            onChange={(e) => updateRitual(idx, "location", e.target.value)}
+                            placeholder="e.g. Royal Banquet Hall"
+                            className="h-9 text-xs"
+                          />
+                        )}
+                        {multiLocationEnabled && r.location === "__other__" && (
+                          <Input
+                            type="text"
+                            value=""
+                            onChange={(e) => updateRitual(idx, "location", e.target.value)}
+                            placeholder="Enter custom location..."
+                            className="h-9 text-xs mt-1"
+                          />
+                        )}
                       </div>
                       
                       <div className="md:col-span-4">
@@ -944,13 +1038,27 @@ export default function WizardPage() {
                   </div>
                   <div className="md:col-span-4">
                     <label className="text-[10px] font-semibold text-[#6771ab] uppercase tracking-wider block mb-1">Location / Venue</label>
-                    <Input
-                      type="text"
-                      placeholder="Hotel Poolside"
-                      value={newRitualLocation}
-                      onChange={(e) => setNewRitualLocation(e.target.value)}
-                      className="h-9 text-xs"
-                    />
+                    {multiLocationEnabled && allVenueOptions.length > 0 ? (
+                      <select
+                        value={newRitualLocation}
+                        onChange={(e) => setNewRitualLocation(e.target.value === "__other__" ? "" : e.target.value)}
+                        className="h-9 text-xs w-full rounded-xl border border-slate-200 bg-white px-3 py-1 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#6771ab]/40"
+                      >
+                        <option value="">Select location...</option>
+                        {allVenueOptions.map((loc, i) => (
+                          <option key={i} value={loc}>{loc}</option>
+                        ))}
+                        <option value="">Other (type below)</option>
+                      </select>
+                    ) : (
+                      <Input
+                        type="text"
+                        placeholder="Hotel Poolside"
+                        value={newRitualLocation}
+                        onChange={(e) => setNewRitualLocation(e.target.value)}
+                        className="h-9 text-xs"
+                      />
+                    )}
                   </div>
                   
                   <div className="md:col-span-4">
@@ -1288,7 +1396,7 @@ export default function WizardPage() {
         )}
 
         {/* Wizard Controls */}
-        <div className="flex items-center gap-3 border-t border-slate-100 pt-6 mt-8">
+        <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-6 mt-8 shrink-0">
           <Button
             type="button"
             variant="error"

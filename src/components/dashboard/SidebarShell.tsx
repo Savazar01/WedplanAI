@@ -36,6 +36,8 @@ interface Wedding {
   id: string;
   partnerA: string;
   partnerB: string;
+  isSample?: boolean | null;
+  isArchived?: boolean | null;
   description?: string | null;
   themeFont?: string | null;
   themePrimary?: string | null;
@@ -51,6 +53,7 @@ interface SidebarShellProps {
   userName: string;
   userEmail: string;
   userRole: string;
+  previewCode: string;
   children: React.ReactNode;
 }
 
@@ -60,6 +63,7 @@ export default function SidebarShell({
   userName,
   userEmail,
   userRole,
+  previewCode,
   children,
 }: SidebarShellProps) {
   const pathname = usePathname();
@@ -475,9 +479,10 @@ export default function SidebarShell({
         {/* Page Content */}
         <main className="flex-1">
           <SampleWalkthroughCard 
-            isSampleWedding={activeWedding ? (activeWedding.description || "").includes("Sample Wedding") : false} 
+            isSampleWedding={activeWedding?.isSample || false} 
             weddingId={activeWedding?.id} 
-            userRole={userRole} 
+            userRole={userRole}
+            previewCode={previewCode}
           />
           {children}
         </main>

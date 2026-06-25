@@ -32,9 +32,23 @@ export default async function DashboardEventItineraryPage() {
     .from(users)
     .where(eq(users.weddingId, wedding.id));
 
+  let parsedLocationOptions: string[] = [];
+  if (wedding.locationOptions) {
+    try {
+      parsedLocationOptions = JSON.parse(wedding.locationOptions);
+    } catch (e) {
+      console.error("Failed to parse locationOptions:", e);
+    }
+  }
+
   return (
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8">
-      <EventItineraryOnly initialRituals={dbRituals} teamMembers={teamMembers} />
+      <EventItineraryOnly 
+        initialRituals={dbRituals} 
+        teamMembers={teamMembers} 
+        locationOptions={parsedLocationOptions}
+        defaultLocation={wedding.location}
+      />
     </main>
   );
 }

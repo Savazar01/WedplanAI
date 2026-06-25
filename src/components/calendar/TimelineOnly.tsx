@@ -33,11 +33,29 @@ interface TeamMember {
 interface EventItineraryOnlyProps {
   initialRituals: Ritual[];
   teamMembers: TeamMember[];
+  locationOptions?: string[];
+  defaultLocation?: string;
 }
 
-export default function EventItineraryOnly({ initialRituals, teamMembers = [] }: EventItineraryOnlyProps) {
+export default function EventItineraryOnly({ 
+  initialRituals, 
+  teamMembers = [],
+  locationOptions = [],
+  defaultLocation = ""
+}: EventItineraryOnlyProps) {
   const router = useRouter();
   const [ritualsList, setRitualsList] = React.useState<Ritual[]>(initialRituals);
+
+  const allVenueOptions = React.useMemo(() => {
+    const venueList = defaultLocation ? [defaultLocation] : [];
+    locationOptions.forEach((loc) => {
+      if (loc && !venueList.includes(loc)) {
+        venueList.push(loc);
+      }
+    });
+    return venueList;
+  }, [defaultLocation, locationOptions]);
+
 
   // Keep state synced with server components using a structural signature
   const initialRitualsSignature = React.useMemo(() => {
@@ -399,14 +417,48 @@ export default function EventItineraryOnly({ initialRituals, teamMembers = [] }:
 
           <div>
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Location / Venue Name</label>
-            <Input
-              type="text"
-              placeholder="e.g. Grand Plaza Ballroom"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-              disabled={loading}
-            />
+            {allVenueOptions.length > 0 ? (
+              <div className="space-y-2">
+                <select
+                  value={allVenueOptions.includes(location) ? location : (location ? "__other__" : "")}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "__other__") {
+                      setLocation("");
+                    } else {
+                      setLocation(val);
+                    }
+                  }}
+                  disabled={loading}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#6771ab]/40"
+                >
+                  <option value="">Select location...</option>
+                  {allVenueOptions.map((loc, i) => (
+                    <option key={i} value={loc}>{loc}</option>
+                  ))}
+                  <option value="__other__">Other / Custom Location</option>
+                </select>
+                {(!allVenueOptions.includes(location) || location === "") && (
+                  <Input
+                    type="text"
+                    placeholder="e.g. Poolside Cabana"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                )}
+              </div>
+            ) : (
+              <Input
+                type="text"
+                placeholder="e.g. Grand Plaza Ballroom"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                required
+                disabled={loading}
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

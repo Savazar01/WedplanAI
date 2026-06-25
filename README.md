@@ -354,8 +354,8 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
 | | Traditions (ID) | `/api/v1/traditions/:id` | `PUT`, `DELETE` | Update/delete specific tradition |
 | **Categories (Global Config)** | Categories | `/api/v1/categories` | `GET`, `POST` | List/create task categories |
 | | Categories (ID) | `/api/v1/categories/:id` | `PUT`, `DELETE` | Update/delete specific category |
-
-> **Note:** User Management is managed via the dashboard UI (Manage Your Team) and Better Auth server actions — no REST API endpoints are exposed for user CRUD at this time.
+| **Manage Your Team** | Users | `/api/v1/users` | `GET`, `POST` | List and create team members |
+| | Users (ID) | `/api/v1/users/:id` | `PUT`, `DELETE` | Update/delete specific team member |
 
 ---
 
@@ -377,6 +377,7 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
       "tradition": "hindu",
       "weddingDate": "2026-12-25T00:00:00.000Z",
       "location": "Umaid Bhawan Palace, Jodhpur",
+      "locationOptions": ["Umaid Bhawan Palace", "Mehrangarh Fort"],
       "budget": 50000,
       "guestCount": 150,
       "locationName": "Umaid Bhawan",
@@ -388,12 +389,12 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
       "description": "Our dream wedding"
     }
     ```
-  - **Accepted fields:** `partnerA` (required), `partnerB` (required), `tradition` (required), `weddingDate` (required, ISO 8601), `location` (required), `budget` (default 1000000), `guestCount` (default 150), `locationName`, `street`, `city`, `state`, `country` (default "India"), `pincode`, `description`.
+  - **Accepted fields:** `partnerA` (required), `partnerB` (required), `tradition` (required), `weddingDate` (required, ISO 8601), `location` (required), `locationOptions` (optional array of strings), `budget` (default 1000000), `guestCount` (default 150), `locationName`, `street`, `city`, `state`, `country` (default "India"), `pincode`, `description`.
   - **Response (201 Created):** Full wedding object.
 
 * **PUT `/api/v1/wedding`**
   - **Description:** Update any wedding metadata field including address, theme, and showcase settings.
-  - **Accepted fields:** `partnerA`, `partnerB`, `weddingDate`, `tradition`, `location`, `locationName`, `street`, `city`, `state`, `country`, `pincode`, `budget`, `guestCount`, `description`, `themeFont`, `themePrimary`, `themeSecondary`, `themeBackground`, `themeDarkPrimary`, `themeDarkSecondary`, `themeDarkBackground`, `logoUrl`, `logoData`, `showcaseFont`, `showcaseTitleFont`, `showcasePrimary`, `showcaseSecondary`, `showcaseBackground`, `showcaseHeroUrl`, `showcaseHeroData`, `showcaseWelcomeText`, `showcaseDetails`, `showcaseSubtitle`, `showcaseTitle`, `showcaseDescription`, `showcaseRsvpTitle`, `showcaseRsvpDescription`, `showcaseGiftUrl`, `showcaseGiftTitle`, `showcaseGiftDescription`.
+  - **Accepted fields:** `partnerA`, `partnerB`, `weddingDate`, `tradition`, `location`, `locationOptions` (array of strings or JSON string), `locationName`, `street`, `city`, `state`, `country`, `pincode`, `budget`, `guestCount`, `description`, `themeFont`, `themePrimary`, `themeSecondary`, `themeBackground`, `themeDarkPrimary`, `themeDarkSecondary`, `themeDarkBackground`, `logoUrl`, `logoData`, `showcaseFont`, `showcaseTitleFont`, `showcasePrimary`, `showcaseSecondary`, `showcaseBackground`, `showcaseHeroUrl`, `showcaseHeroData`, `showcaseWelcomeText`, `showcaseDetails`, `showcaseSubtitle`, `showcaseTitle`, `showcaseDescription`, `showcaseRsvpTitle`, `showcaseRsvpDescription`, `showcaseGiftUrl`, `showcaseGiftTitle`, `showcaseGiftDescription`.
   - **Response (200 OK):** Updated wedding object.
 
 #### 2. Wedding Ceremony Planner

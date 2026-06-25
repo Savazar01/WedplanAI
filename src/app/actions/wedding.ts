@@ -41,6 +41,7 @@ const createWeddingSchema = z.object({
   budget: z.number().min(0, "Budget must be positive").default(1000000),
   guestCount: z.number().min(0, "Guest count must be positive").default(150),
   location: z.string().min(1, "Location is required"),
+  locationOptions: z.array(z.string()).optional(),
   locationName: z.string().optional(),
   street: z.string().optional(),
   city: z.string().optional(),
@@ -77,6 +78,7 @@ export async function createWeddingAction(data: {
   budget: number;
   guestCount: number;
   location: string;
+  locationOptions?: string[];
   locationName?: string;
   street?: string;
   city?: string;
@@ -109,7 +111,7 @@ export async function createWeddingAction(data: {
     return { error: parsed.error.issues[0]?.message || "Validation failed" };
   }
 
-  const { partnerA, partnerB, tradition, weddingDate, budget, guestCount, location, locationName, street, city, state, country, pincode, description, customTasks, customRituals } = parsed.data;
+  const { partnerA, partnerB, tradition, weddingDate, budget, guestCount, location, locationOptions, locationName, street, city, state, country, pincode, description, customTasks, customRituals } = parsed.data;
   const weddingDateObj = new Date(weddingDate);
 
   let newlyCreatedWeddingId: string | null = null;
@@ -124,6 +126,7 @@ export async function createWeddingAction(data: {
         budget,
         guestCount,
         location,
+        locationOptions: locationOptions ? JSON.stringify(locationOptions) : null,
         locationName: locationName || null,
         street: street || null,
         city: city || null,
@@ -398,6 +401,7 @@ export async function updateWeddingAction(weddingId: string, data: {
   budget: number;
   guestCount: number;
   tradition: string;
+  locationOptions?: string[];
   locationName?: string;
   street?: string;
   city?: string;
@@ -421,6 +425,7 @@ export async function updateWeddingAction(weddingId: string, data: {
     partnerA: data.partnerA,
     partnerB: data.partnerB,
     location: data.location,
+    locationOptions: data.locationOptions !== undefined ? JSON.stringify(data.locationOptions) : existing[0].locationOptions,
     locationName: data.locationName ?? existing[0].locationName,
     street: data.street ?? existing[0].street,
     city: data.city ?? existing[0].city,

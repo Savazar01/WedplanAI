@@ -49,6 +49,7 @@ export async function PUT(request: NextRequest) {
       'weddingDate',
       'tradition',
       'location',
+      'locationOptions',
       'locationName',
       'street',
       'city',
@@ -98,6 +99,14 @@ export async function PUT(request: NextRequest) {
           } else {
             updates[field] = null;
           }
+        } else if (field === 'locationOptions') {
+          if (Array.isArray(body[field])) {
+            updates[field] = JSON.stringify(body[field]);
+          } else if (typeof body[field] === 'string') {
+            updates[field] = body[field];
+          } else {
+            updates[field] = null;
+          }
         } else {
           updates[field] = body[field];
         }
@@ -144,6 +153,7 @@ export async function POST(request: NextRequest) {
       budget,
       guestCount,
       location,
+      locationOptions,
       locationName,
       street,
       city,
@@ -174,6 +184,9 @@ export async function POST(request: NextRequest) {
         budget: budget ?? 1000000,
         guestCount: guestCount ?? 150,
         location,
+        locationOptions: Array.isArray(locationOptions)
+          ? JSON.stringify(locationOptions)
+          : (typeof locationOptions === 'string' ? locationOptions : null),
         locationName: locationName ?? null,
         street: street ?? null,
         city: city ?? null,

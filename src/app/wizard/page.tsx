@@ -108,6 +108,7 @@ export default function WizardPage() {
     if (locationManuallyEdited.current) return;
     const parts = [locationName, street, city, state, country, pincode].filter(Boolean);
     if (parts.length >= 1) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocation(parts.join(', '));
     }
   }, [locationName, street, city, state, country, pincode]);
@@ -523,6 +524,7 @@ export default function WizardPage() {
         budget,
         guestCount,
         location,
+        locationOptions: locationOptions.length > 0 ? locationOptions : undefined,
         locationName: locationName || undefined,
         street: street || undefined,
         city: city || undefined,

@@ -7,6 +7,7 @@ import PublicRsvpForm from "@/components/wedding/public-rsvp-form";
 import { formatDateTime, formatDate } from "@/lib/format";
 import SampleWalkthroughCard from "@/components/dashboard/SampleWalkthroughCard";
 import DynamicTheme from "@/components/theme/DynamicTheme";
+import Link from "next/link";
 
 // Define the async params type for Next.js 16
 interface PageProps {
@@ -18,7 +19,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
   const { id } = await params;
   const { code } = await searchParams;
 
-  // Retrieve wedding details
   const weddingList = await db
     .select()
     .from(weddings)
@@ -31,15 +31,9 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
 
   const wedding = weddingList[0];
 
-  // Retrieve wedding rituals
-  const dbRituals = await db
-    .select()
-    .from(rituals)
-    .where(eq(rituals.weddingId, wedding.id))
-    .orderBy(rituals.startTime);
+  let isValidGuest = false;
+  let guestRecord: typeof guests.$inferSelect | null = null;
 
-  // If accessed via personal invitation link, filter ceremonies to only those the guest is invited to
-  let visibleRituals = dbRituals;
   if (code) {
     const guestList = await db
       .select()
@@ -47,13 +41,50 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
       .where(eq(guests.loginCode, code))
       .limit(1);
     if (guestList.length > 0) {
-      const guestRecord = guestList[0];
-      const invitedCeremonies = guestRecord.invitedCeremonies;
-      if (invitedCeremonies && invitedCeremonies !== "all") {
-        const invitedIds = invitedCeremonies.split(",").map((s: string) => s.trim());
-        visibleRituals = dbRituals.filter((r) => invitedIds.includes(r.id));
-      }
-      // if invitedCeremonies === "all" or null, show everything
+      isValidGuest = true;
+      guestRecord = guestList[0];
+    }
+  }
+
+  if (!isValidGuest) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#faf5ff] to-white dark:from-[#0b0f19] dark:to-slate-900 text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center px-6">
+        <div className="max-w-md mx-auto text-center">
+          <div className="text-6xl mb-6">💒</div>
+          <h1 className="text-3xl font-bold text-[#2d336b] dark:text-slate-200 mb-4">
+            Private Wedding
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+            This wedding is private. You need a personal invitation link to view the details.
+          </p>
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-8 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            If you received an invitation, please use the link sent to you. This link is personal and uniquely assigned to you. Please do not share it.
+          </div>
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            Created with Love for {wedding.partnerA} &amp; {wedding.partnerB}
+          </p>
+        </div>
+        <footer className="w-full text-center py-6 mt-auto border-t border-slate-200 dark:border-slate-800">
+          <p className="text-xs text-slate-400 tracking-widest uppercase font-semibold">
+            Created with Love for {wedding.partnerA} &amp; {wedding.partnerB}
+          </p>
+        </footer>
+      </div>
+    );
+  }
+
+  const dbRituals = await db
+    .select()
+    .from(rituals)
+    .where(eq(rituals.weddingId, wedding.id))
+    .orderBy(rituals.startTime);
+
+  let visibleRituals = dbRituals;
+  if (guestRecord) {
+    const invitedCeremonies = guestRecord.invitedCeremonies;
+    if (invitedCeremonies && invitedCeremonies !== "all") {
+      const invitedIds = invitedCeremonies.split(",").map((s: string) => s.trim());
+      visibleRituals = dbRituals.filter((r) => invitedIds.includes(r.id));
     }
   }
 
@@ -76,15 +107,12 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-slate-800 flex flex-col items-center">
       <DynamicTheme wedding={wedding} mode="showcase" />
-      {/* Decorative Top Border */}
       <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
-
 
       {isSampleWedding && (
         <SampleWalkthroughCard isSampleWedding={true} weddingId={wedding.id} userRole="admin" />
       )}
 
-      {/* Hero Banner Section */}
       <section className="w-full max-w-4xl mx-auto px-6 pt-12 pb-8 flex flex-col items-center text-center">
         <div className="inline-block px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider mb-6">
           {wedding.showcaseSubtitle || traditionLabel}
@@ -97,7 +125,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
           {wedding.showcaseTitle || `${wedding.partnerA} & ${wedding.partnerB}`}
         </h1>
 
-        {/* Elegant Gold Divider */}
         <div className="flex items-center justify-center gap-4 py-4 w-full">
           <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-r from-transparent to-amber-400" />
           <span className="text-amber-500 text-lg">✨ 💍 ✨</span>
@@ -120,13 +147,11 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
           </p>
         )}
 
-        {/* Live Countdown */}
         <div className="w-full mt-8">
           <Countdown targetDate={wedding.weddingDate.toISOString()} />
         </div>
       </section>
 
-      {/* Hero Banner Image */}
       {(wedding.showcaseHeroData || wedding.showcaseHeroUrl) && (
         <div className="w-full max-w-4xl px-6 mb-8">
           <div className="relative w-full h-[250px] sm:h-[400px] overflow-hidden rounded-3xl shadow-md border border-slate-200/50">
@@ -139,7 +164,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
         </div>
       )}
 
-      {/* Our Story / Welcome Section */}
       {(wedding.showcaseWelcomeText || wedding.showcaseDetails) && (
         <section className="w-full max-w-2xl mx-auto px-6 py-6">
           <div className="bg-white border border-slate-200/60 p-6 sm:p-8 rounded-3xl shadow-xs text-center space-y-4">
@@ -160,7 +184,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
         </section>
       )}
 
-      {/* Itinerary Rituals Section */}
       <section className="w-full max-w-2xl mx-auto px-6 py-8">
         <h3 className="font-title text-2xl sm:text-3xl font-bold text-[var(--color-primary)] text-center mb-8 tracking-wide">
           Wedding Program
@@ -174,7 +197,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
               const endTimeStr = endStr.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
               return (
                 <div key={ritual.id} className="relative pl-6 sm:pl-8">
-                  {/* Timeline Dot */}
                   <div className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full bg-[var(--color-primary)] ring-4 ring-white" />
                   
                   <div className="space-y-1.5">
@@ -207,7 +229,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
         )}
       </section>
 
-      {/* RSVP Section */}
       <section className="w-full max-w-4xl mx-auto px-6 pt-6 pb-16">
         <PublicRsvpForm 
           weddingId={wedding.id} 
@@ -218,7 +239,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
         />
       </section>
 
-      {/* Gift Registry Section */}
       <section id="gift-registry" className="w-full max-w-xl mx-auto px-6 pb-16">
         <div className="bg-white/95 backdrop-blur-md border border-rose-200 rounded-3xl p-6 md:p-8 shadow-xl text-center relative overflow-hidden">
           <div className="text-4xl mb-3">🎁</div>
@@ -245,7 +265,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="w-full bg-slate-100/50 border-t border-slate-200 text-center py-6 mt-auto">
         <p className="text-xs text-slate-400 tracking-widest uppercase font-semibold">
           Created with Love for {wedding.partnerA} & {wedding.partnerB}

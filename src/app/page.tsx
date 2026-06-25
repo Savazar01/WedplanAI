@@ -2,6 +2,7 @@ import { getServerSession } from "@/lib/auth-server";
 import Link from "next/link";
 import { Cormorant_Infant } from "next/font/google";
 import LandingNavbar from "@/components/landing/LandingNavbar";
+import { CONTACT_EMAIL } from "@/lib/env";
 
 const cormorant = Cormorant_Infant({
   subsets: ["latin"],
@@ -445,9 +446,7 @@ export default async function LandingPage() {
               </p>
             </div>
             <a
-              href="https://savazar.com"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="shrink-0 px-6 py-3 rounded-xl bg-gradient-to-r from-[#6771ab] to-[#c484b0] text-white text-sm font-semibold shadow-md hover:opacity-90 transition-all hover:shadow-lg active:scale-[0.97] cursor-pointer"
             >
               Contact Savazar
@@ -514,7 +513,7 @@ export default async function LandingPage() {
                   <li><a href="#features" className="hover:text-white transition-colors cursor-pointer">Features</a></li>
                   <li><a href="#personas" className="hover:text-white transition-colors cursor-pointer">Personas</a></li>
                   <li><a href="#how-it-works" className="hover:text-white transition-colors cursor-pointer">How It Works</a></li>
-                  <li><Link href="/dashboard/docs" className="hover:text-white transition-colors cursor-pointer">Docs</Link></li>
+                  <li><Link href="/docs" className="hover:text-white transition-colors cursor-pointer">Docs</Link></li>
                 </ul>
               </div>
               <div>
@@ -528,7 +527,7 @@ export default async function LandingPage() {
                 <div className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">Company</div>
                 <ul className="space-y-2 text-white/70">
                   <li><a href="https://savazar.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors cursor-pointer">Savazar</a></li>
-                  <li><a href="https://savazar.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors cursor-pointer">Deployment Support</a></li>
+                  <li><a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-white transition-colors cursor-pointer">Deployment Support</a></li>
                 </ul>
               </div>
             </div>

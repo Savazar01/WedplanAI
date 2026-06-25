@@ -93,15 +93,24 @@ export default function WizardPage() {
   const [weddingDate, setWeddingDate] = React.useState("");
   const [location, setLocation] = React.useState("");
   const locationRef = React.useRef(location);
+  const locationManuallyEdited = React.useRef(false);
   React.useEffect(() => {
     locationRef.current = location;
   }, [location]);
+
   const [locationName, setLocationName] = React.useState("");
   const [street, setStreet] = React.useState("");
   const [city, setCity] = React.useState("");
   const [state, setState] = React.useState("");
   const [country, setCountry] = React.useState("India");
   const [pincode, setPincode] = React.useState("");
+  React.useEffect(() => {
+    if (locationManuallyEdited.current) return;
+    const parts = [city, state, country].filter(Boolean);
+    if (parts.length >= 2) {
+      setLocation(parts.join(', '));
+    }
+  }, [city, state, country]);
   const [description, setDescription] = React.useState("");
   const [tradition, setTradition] = React.useState<string>("secular");
   const [budget, setBudget] = React.useState(1000000);
@@ -124,6 +133,9 @@ export default function WizardPage() {
   const [dbTraditions, setDbTraditions] = React.useState<DBTradition[]>([]);
   const [dbCategories, setDbCategories] = React.useState<DBCategory[]>([]);
   const [customTraditionName, setCustomTraditionName] = React.useState("");
+  const [newTraditionDesc, setNewTraditionDesc] = React.useState("");
+  const [savingTradition, setSavingTradition] = React.useState(false);
+  const [toast, setToast] = React.useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   React.useEffect(() => {
     async function load() {
@@ -265,6 +277,34 @@ export default function WizardPage() {
 
   const deleteRitual = (index: number) => {
     setCustomRituals(customRituals.filter((_, i) => i !== index));
+  };
+
+  const handleSaveNewTradition = async () => {
+    if (!customTraditionName.trim()) return;
+    setSavingTradition(true);
+    setToast(null);
+    try {
+      const { createWizardTraditionAction } = await import("@/app/actions/wedding");
+      const res = await createWizardTraditionAction({
+        name: customTraditionName.trim(),
+        description: newTraditionDesc.trim() || undefined,
+      });
+      if (res.error) {
+        setToast({ message: res.error, type: 'error' });
+      } else {
+        setToast({ message: `Tradition "${customTraditionName.trim()}" created!`, type: 'success' });
+        setCustomTraditionName("");
+        setNewTraditionDesc("");
+        const { getPublicTraditions } = await import("@/app/actions/wedding");
+        const trads = await getPublicTraditions();
+        setDbTraditions(trads);
+        if (res.tradition) setTradition(res.tradition.key);
+      }
+    } catch (err) {
+      setToast({ message: 'Failed to save tradition.', type: 'error' });
+    } finally {
+      setSavingTradition(false);
+    }
   };
 
   const [error, setError] = React.useState("");
@@ -669,7 +709,10 @@ export default function WizardPage() {
                   type="text"
                   placeholder="e.g. Udaipur, India"
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={(e) => {
+                    locationManuallyEdited.current = true;
+                    setLocation(e.target.value);
+                  }}
                 />
               </div>
             </div>
@@ -682,11 +725,14 @@ export default function WizardPage() {
                 <p className="text-sm text-slate-500">Choose a cultural tradition. This will pre-populate your tasks and ceremonies.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  ...traditions.map(t => ({ id: t.id, label: t.label, desc: t.desc })),
-                  ...dbTraditions.map(t => ({ id: t.key, label: t.name, desc: t.description || "" })),
-                  { id: "other", label: "Other", desc: "Create a custom tradition with your own tasks and ceremonies" }
-                ].map((t) => {
+                {(() => {
+                  const tradMap = new Map<string, { id: string; label: string; desc: string }>();
+                  traditions.forEach(t => tradMap.set(t.id, { id: t.id, label: t.label, desc: t.desc }));
+                  dbTraditions.forEach(t => tradMap.set(t.key, { id: t.key, label: t.name, desc: t.description || "" }));
+                  const order = [...traditions.map(t => t.id), ...dbTraditions.map(t => t.key).filter(k => !traditions.some(h => h.id === k))];
+                  const deduped = order.map(id => tradMap.get(id)).filter(Boolean) as { id: string; label: string; desc: string }[];
+                  return [...deduped, { id: "other", label: "Other", desc: "Create a custom tradition with your own tasks and ceremonies" }];
+                })().map((t) => {
                   const isSelected = tradition === t.id;
                   return (
                     <Card
@@ -709,15 +755,35 @@ export default function WizardPage() {
                 })}
               </div>
               {tradition === "other" && (
-                <div className="space-y-1 mt-4">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest block mb-1">Custom Tradition Name</label>
-                  <Input
-                    type="text"
-                    placeholder="e.g. My Custom Tradition"
-                    value={customTraditionName}
-                    onChange={(e) => setCustomTraditionName(e.target.value)}
-                    required
-                  />
+                <div className="space-y-3 mt-4 border-t border-slate-100 pt-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest block mb-1">New Tradition Name</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Japanese Shinto Wedding"
+                      value={customTraditionName}
+                      onChange={(e) => setCustomTraditionName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest block mb-1">Description (optional)</label>
+                    <textarea
+                      value={newTraditionDesc}
+                      onChange={(e) => setNewTraditionDesc(e.target.value)}
+                      placeholder="Describe the tradition and its key ceremonies..."
+                      className="w-full min-h-[60px] rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#6771ab] focus:border-transparent resize-y"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleSaveNewTradition}
+                    variant="primary"
+                    disabled={savingTradition || !customTraditionName.trim()}
+                    className="text-xs rounded-xl bg-[#6771ab] text-white hover:bg-[#566198]"
+                  >
+                    {savingTradition ? "Saving..." : "Save New Tradition"}
+                  </Button>
                 </div>
               )}
             </div>
@@ -1209,6 +1275,15 @@ export default function WizardPage() {
         {error && (
           <div className="my-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">
             {error}
+          </div>
+        )}
+
+        {toast && (
+          <div className={`my-4 p-3 rounded-xl text-xs flex items-center justify-between ${
+            toast.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-600'
+          }`}>
+            <span>{toast.message}</span>
+            <button type="button" onClick={() => setToast(null)} className="ml-2 font-bold cursor-pointer">&times;</button>
           </div>
         )}
 

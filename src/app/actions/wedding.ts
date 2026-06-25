@@ -9,6 +9,26 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { defaultTraditions, defaultCategories } from "@/lib/default-seeds";
 
+export async function createWizardTraditionAction(data: {
+  name: string;
+  description?: string;
+}) {
+  const session = await getServerSession();
+  if (!session?.user) return { error: 'Unauthorized' };
+
+  const key = data.name.toLowerCase().replace(/\s+/g, '_');
+  const existing = await db.select().from(weddingTraditions).where(eq(weddingTraditions.key, key)).limit(1);
+  if (existing.length > 0) return { error: 'A tradition with this name already exists.' };
+
+  const [created] = await db.insert(weddingTraditions).values({
+    key,
+    name: data.name.trim(),
+    description: data.description?.trim() || null,
+  }).returning();
+
+  return { success: true, tradition: created };
+}
+
 const createWeddingSchema = z.object({
   partnerA: z.string().min(1, "Partner A name is required"),
   partnerB: z.string().min(1, "Partner B name is required"),

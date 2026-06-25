@@ -3,7 +3,8 @@
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { seedSampleWedding } from "@/lib/seed-sample-wedding";
 
 export async function signupAction(prevState: unknown, formData: FormData) {
@@ -17,31 +18,42 @@ export async function signupAction(prevState: unknown, formData: FormData) {
   }
 
   try {
-    const existingUsers = await db.select().from(users).limit(1);
-    if (existingUsers.length > 0) {
-      return { error: "Public registration is closed. Please contact the administrator." };
+    const rateLimit = checkRateLimit(`signup:${email}`, 'public');
+    if (!rateLimit.success) {
+      return { error: 'Too many registration attempts. Please try again later.' };
     }
 
-    const result = await auth.api.signUpEmail({
-      body: {
-        name,
-        email,
-        password,
-        persona,
-      },
-    });
+    await db.execute(sql`SELECT pg_advisory_lock(20260624)`);
 
-    if (!result || !result.user) {
-      return { error: "Failed to create user account." };
+    try {
+      const existingUsers = await db.select().from(users).limit(1);
+      if (existingUsers.length > 0) {
+        return { error: "Public registration is closed. Please contact the administrator." };
+      }
+
+      const result = await auth.api.signUpEmail({
+        body: {
+          name,
+          email,
+          password,
+          persona,
+        },
+      });
+
+      if (!result || !result.user) {
+        return { error: "Failed to create user account." };
+      }
+
+      await db.update(users)
+        .set({ role: "admin", persona })
+        .where(eq(users.id, result.user.id));
+
+      await seedSampleWedding(result.user.id);
+
+      return { success: true };
+    } finally {
+      await db.execute(sql`SELECT pg_advisory_unlock(20260624)`);
     }
-
-    await db.update(users)
-      .set({ role: "admin", persona })
-      .where(eq(users.id, result.user.id));
-
-    await seedSampleWedding(result.user.id);
-
-    return { success: true };
   } catch (error) {
     console.error("Signup error:", error);
     const errorMessage = error instanceof Error ? error.message : "An error occurred during signup.";

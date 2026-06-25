@@ -42,6 +42,11 @@ export default function DynamicTheme({ wedding, mode = "app" }: DynamicThemeProp
   const sanitizedTitle = titleFont?.replace(/[^a-zA-Z0-9\s-]/g, "") || "Playfair Display";
   const hasTitleFont = isShowcase && !!titleFont;
 
+  const sanitizeColor = (val: string | null | undefined, fallback: string) => {
+    if (!val || !/^#[0-9A-Fa-f]{6}$|^[a-zA-Z]+$/.test(val.trim())) return fallback;
+    return val.trim();
+  };
+
   return (
     <>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -62,18 +67,18 @@ export default function DynamicTheme({ wedding, mode = "app" }: DynamicThemeProp
         dangerouslySetInnerHTML={{
           __html: `
             :root {
-              --color-primary: ${primary || defaultPrimary};
-              --color-secondary: ${secondary || defaultSecondary};
-              --color-background: ${background || defaultBackground};
+              --color-primary: ${sanitizeColor(primary, defaultPrimary)};
+              --color-secondary: ${sanitizeColor(secondary, defaultSecondary)};
+              --color-background: ${sanitizeColor(background, defaultBackground)};
               --color-surface: #ffffff;
               --color-outline: #cbd5e1;
               --font-sans: "${sanitized}", var(--font-geist-sans), sans-serif;
               ${isShowcase ? `--font-title: "${sanitizedTitle}", Georgia, serif;` : ""}
             }
             .dark {
-              --color-primary: ${isShowcase ? (primary ? `color-mix(in srgb, ${primary} 30%, #ffffff 70%)` : '#e6b7d2') : themeDarkPrimary};
-              --color-secondary: ${isShowcase ? (secondary ? `color-mix(in srgb, ${secondary} 30%, #ffffff 70%)` : '#fce4f0') : themeDarkSecondary};
-              --color-background: ${isShowcase ? (background ? `color-mix(in srgb, ${background} 15%, #0b0f19 85%)` : '#0b0f19') : themeDarkBackground};
+              --color-primary: ${isShowcase ? (primary ? `color-mix(in srgb, ${sanitizeColor(primary, defaultPrimary)} 30%, #ffffff 70%)` : '#e6b7d2') : sanitizeColor(themeDarkPrimary, '#808bc6')};
+              --color-secondary: ${isShowcase ? (secondary ? `color-mix(in srgb, ${sanitizeColor(secondary, defaultSecondary)} 30%, #ffffff 70%)` : '#fce4f0') : sanitizeColor(themeDarkSecondary, '#9fa7d6')};
+              --color-background: ${isShowcase ? (background ? `color-mix(in srgb, ${sanitizeColor(background, defaultBackground)} 15%, #0b0f19 85%)` : '#0b0f19') : sanitizeColor(themeDarkBackground, '#0b0f19')};
               --color-surface: color-mix(in srgb, var(--color-background) 94%, #ffffff 6%);
               --color-surface-variant: color-mix(in srgb, var(--color-background) 90%, var(--color-primary) 10%);
               --color-outline: color-mix(in srgb, var(--color-background) 88%, #ffffff 12%);

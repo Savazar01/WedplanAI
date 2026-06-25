@@ -1,8 +1,9 @@
 import { db } from "@/db/client";
-import { apiKeys } from "@/db/schema";
+import { apiKeys, users, weddings } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import crypto from "crypto";
 import { NextRequest } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export interface AuthResult {
   weddingId: string;
@@ -16,6 +17,10 @@ export interface AuthResult {
 export async function validateApiKey(request: NextRequest): Promise<AuthResult | null> {
   const rawKey = request.headers.get("x-api-key");
   if (!rawKey) return null;
+
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const rl = checkRateLimit(`api:${ip}`, 'api');
+  if (!rl.success) return null;
 
   const keyHash = crypto.createHash("sha256").update(rawKey).digest("hex");
   const now = new Date();
@@ -37,6 +42,27 @@ export async function validateApiKey(request: NextRequest): Promise<AuthResult |
     weddingId: keyRecord.weddingId,
     keyId: keyRecord.id,
   };
+}
+
+export async function requireAdminScope(auth: AuthResult): Promise<boolean> {
+  const [keyRecord] = await db
+    .select({ weddingId: apiKeys.weddingId })
+    .from(apiKeys)
+    .where(eq(apiKeys.id, auth.keyId))
+    .limit(1);
+  if (!keyRecord) return false;
+  const [wedding] = await db
+    .select({ userId: weddings.userId })
+    .from(weddings)
+    .where(eq(weddings.id, keyRecord.weddingId))
+    .limit(1);
+  if (!wedding) return false;
+  const [user] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(eq(users.id, wedding.userId))
+    .limit(1);
+  return user?.role === 'admin';
 }
 
 export function unauthorizedResponse() {

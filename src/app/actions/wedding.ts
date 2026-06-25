@@ -446,6 +446,21 @@ export async function updateWeddingAppearanceAction(
       return { error: "Wedding not found" };
     }
 
+    const colorFields = ['themePrimary', 'themeSecondary', 'themeBackground', 'themeDarkPrimary', 'themeDarkSecondary', 'themeDarkBackground'] as const;
+    for (const field of colorFields) {
+      if (data[field] && !/^#[0-9A-Fa-f]{6}$/.test(data[field])) {
+        return { error: `Invalid color format for ${field}. Use hex format (#RRGGBB).` };
+      }
+    }
+
+    if (data.logoData) {
+      const base64Str = data.logoData.includes(',') ? data.logoData.split(',')[1] : data.logoData;
+      const decodedSize = Buffer.from(base64Str, 'base64').length;
+      if (decodedSize > 5 * 1024 * 1024) {
+        return { error: 'Logo image must be under 5MB.' };
+      }
+    }
+
     await db.update(weddings).set({
       themeFont: data.themeFont,
       themePrimary: data.themePrimary,
@@ -504,6 +519,21 @@ export async function updateWeddingShowcaseAction(
       .limit(1);
     if (!existing[0]) {
       return { error: "Wedding not found" };
+    }
+
+    const colorFields = ['showcasePrimary', 'showcaseSecondary', 'showcaseBackground'] as const;
+    for (const field of colorFields) {
+      if (data[field as keyof typeof data] && !/^#[0-9A-Fa-f]{6}$/.test(data[field as keyof typeof data] as string)) {
+        return { error: `Invalid color format for ${field}. Use hex format (#RRGGBB).` };
+      }
+    }
+
+    if (data.showcaseHeroData) {
+      const base64Str = data.showcaseHeroData.includes(',') ? data.showcaseHeroData.split(',')[1] : data.showcaseHeroData;
+      const decodedSize = Buffer.from(base64Str, 'base64').length;
+      if (decodedSize > 5 * 1024 * 1024) {
+        return { error: 'Hero image must be under 5MB.' };
+      }
     }
 
     await db.update(weddings).set({

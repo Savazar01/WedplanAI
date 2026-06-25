@@ -50,6 +50,9 @@ export async function updateColumnAction(columnId: string, data: { name: string;
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
     await db
       .update(kanbanColumns)
@@ -58,7 +61,7 @@ export async function updateColumnAction(columnId: string, data: { name: string;
         color: data.color,
         updatedAt: new Date(),
       })
-      .where(eq(kanbanColumns.id, columnId));
+      .where(and(eq(kanbanColumns.id, columnId), eq(kanbanColumns.weddingId, wedding.id)));
 
     revalidatePath("/wedding-task-planner");
     revalidatePath("/dashboard/wedding-task-planner");
@@ -76,18 +79,21 @@ export async function deleteColumnAction(columnId: string) {
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
     const existingTasks = await db
       .select({ id: tasks.id })
       .from(tasks)
-      .where(eq(tasks.columnId, columnId))
+      .where(and(eq(tasks.columnId, columnId), eq(tasks.weddingId, wedding.id)))
       .limit(1);
 
     if (existingTasks.length > 0) {
       return { error: "Cannot delete column containing tasks. Please move them first." };
     }
 
-    await db.delete(kanbanColumns).where(eq(kanbanColumns.id, columnId));
+    await db.delete(kanbanColumns).where(and(eq(kanbanColumns.id, columnId), eq(kanbanColumns.weddingId, wedding.id)));
 
     revalidatePath("/wedding-task-planner");
     revalidatePath("/dashboard/wedding-task-planner");
@@ -105,12 +111,15 @@ export async function reorderColumnsAction(columnIds: string[]) {
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
     for (let i = 0; i < columnIds.length; i++) {
       await db
         .update(kanbanColumns)
         .set({ position: i, updatedAt: new Date() })
-        .where(eq(kanbanColumns.id, columnIds[i]));
+        .where(and(eq(kanbanColumns.id, columnIds[i]), eq(kanbanColumns.weddingId, wedding.id)));
     }
 
     revalidatePath("/wedding-task-planner");
@@ -254,8 +263,11 @@ export async function deleteTaskAction(taskId: string) {
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
-    await db.delete(tasks).where(eq(tasks.id, taskId));
+    await db.delete(tasks).where(and(eq(tasks.id, taskId), eq(tasks.weddingId, wedding.id)));
 
     revalidatePath("/wedding-task-planner");
     revalidatePath("/dashboard/wedding-task-planner");
@@ -286,6 +298,9 @@ export async function updateTaskAction(
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
     await db
       .update(tasks)
@@ -300,7 +315,7 @@ export async function updateTaskAction(
         cateringMenuId: data.cateringMenuId !== undefined ? data.cateringMenuId : null,
         updatedAt: new Date(),
       })
-      .where(eq(tasks.id, taskId));
+      .where(and(eq(tasks.id, taskId), eq(tasks.weddingId, wedding.id)));
 
     revalidatePath("/wedding-task-planner");
     revalidatePath("/dashboard/wedding-task-planner");

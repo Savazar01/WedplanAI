@@ -6,6 +6,7 @@ import {
   validateApiKey,
   unauthorizedResponse,
   errorResponse,
+  requireAdminScope,
 } from '../auth-helper';
 
 export async function GET(request: NextRequest) {
@@ -29,6 +30,11 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
+
+    const isAdmin = await requireAdminScope(auth);
+    if (!isAdmin) {
+      return Response.json({ error: 'Admin access required.' }, { status: 403 });
+    }
 
     const body = await request.json();
     const { key, name, followUpQuestions } = body;

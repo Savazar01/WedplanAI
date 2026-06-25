@@ -7,6 +7,7 @@ import {
   unauthorizedResponse,
   notFoundResponse,
   errorResponse,
+  requireAdminScope,
 } from '../../auth-helper';
 
 interface RouteParams {
@@ -17,6 +18,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
+
+    const isAdmin = await requireAdminScope(auth);
+    if (!isAdmin) {
+      return Response.json({ error: 'Admin access required.' }, { status: 403 });
+    }
 
     const { id } = await params;
     const body = await request.json();
@@ -64,6 +70,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
+
+    const isAdmin = await requireAdminScope(auth);
+    if (!isAdmin) {
+      return Response.json({ error: 'Admin access required.' }, { status: 403 });
+    }
 
     const { id } = await params;
 

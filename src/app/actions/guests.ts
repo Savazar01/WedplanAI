@@ -4,8 +4,10 @@ import { db } from "@/db/client";
 import { guests, guestRsvps, ceremonies } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import crypto from "crypto";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function createGuestAction(data: {
   name: string;
@@ -29,11 +31,7 @@ export async function createGuestAction(data: {
   const weddingId = wedding.id;
 
   try {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let loginCode = "";
-    for (let i = 0; i < 6; i++) {
-      loginCode += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    const loginCode = crypto.randomBytes(3).toString('hex');
 
     await db.insert(guests).values({
       weddingId,
@@ -64,11 +62,14 @@ export async function updateGuestRSVPAction(guestId: string, status: "pending" |
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
     await db
       .update(guests)
       .set({ rsvpStatus: status, updatedAt: new Date() })
-      .where(eq(guests.id, guestId));
+      .where(and(eq(guests.id, guestId), eq(guests.weddingId, wedding.id)));
 
     revalidatePath("/guests");
     revalidatePath("/dashboard");
@@ -86,8 +87,11 @@ export async function deleteGuestAction(guestId: string) {
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
-    await db.delete(guests).where(eq(guests.id, guestId));
+    await db.delete(guests).where(and(eq(guests.id, guestId), eq(guests.weddingId, wedding.id)));
 
     revalidatePath("/guests");
     revalidatePath("/dashboard");
@@ -116,6 +120,9 @@ export async function updateGuestAction(
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+
   try {
     await db
       .update(guests)
@@ -129,7 +136,7 @@ export async function updateGuestAction(
         invitedCeremonies: data.invitedCeremonies !== undefined ? data.invitedCeremonies : "all",
         updatedAt: new Date(),
       })
-      .where(eq(guests.id, guestId));
+      .where(and(eq(guests.id, guestId), eq(guests.weddingId, wedding.id)));
 
     revalidatePath("/guests");
     revalidatePath("/dashboard/guests");
@@ -158,9 +165,19 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
     return { error: "Unauthorized" };
   }
 
+  const wedding = await getActiveWedding(session.user.id);
+  if (!wedding) return { error: "No wedding profile found." };
+  if (wedding.id !== weddingId) return { error: "Unauthorized." };
+
   try {
+    if (guestsList.length > 500) {
+      return { error: 'Maximum 500 guests per import.' };
+    }
+    if (guestsList.length === 0) {
+      return { error: 'No guests to import.' };
+    }
+
     const dbCeremonies = await db.select().from(ceremonies).where(eq(ceremonies.weddingId, weddingId));
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     const toInsert: {
       weddingId: string;
       name: string;
@@ -174,24 +191,7 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
     }[] = [];
 
     for (const guest of guestsList) {
-      // Generate unique login code
-      let loginCode = "";
-      let isUnique = false;
-      let attempts = 0;
-
-      while (!isUnique && attempts < 10) {
-        loginCode = "";
-        for (let i = 0; i < 6; i++) {
-          loginCode += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        // Check if exists in db or in currently to-be-inserted list
-        const existing = await db.select().from(guests).where(eq(guests.loginCode, loginCode)).limit(1);
-        const duplicateInBatch = toInsert.some(g => g.loginCode === loginCode);
-        if (existing.length === 0 && !duplicateInBatch) {
-          isUnique = true;
-        }
-        attempts++;
-      }
+      const loginCode = crypto.randomBytes(3).toString('hex');
 
       let resolved = "all";
       if (guest.invitedCeremonies && guest.invitedCeremonies.trim() !== "") {
@@ -214,7 +214,7 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
         phone: guest.phone || null,
         loginCode: loginCode,
         rsvpStatus: (guest.rsvpStatus || "pending") as "pending" | "attending" | "declined",
-        plusOneCount: typeof guest.plusOneCount === "number" ? guest.plusOneCount : parseInt(guest.plusOneCount || "0") || 0,
+        plusOneCount: Math.max(0, typeof guest.plusOneCount === "number" ? guest.plusOneCount : parseInt(guest.plusOneCount || "0") || 0),
         dietaryRestrictions: guest.dietaryRestrictions || null,
         invitedCeremonies: resolved,
       });
@@ -236,6 +236,11 @@ export async function batchInsertGuestsAction(weddingId: string, guestsList: Bat
 }
 
 export async function findGuestByCodeAction(weddingId: string, loginCode: string) {
+  const rl = checkRateLimit(`guest-code:${weddingId}:${loginCode.slice(0, 2)}`, 'public');
+  if (!rl.success) {
+    return { error: "Too many attempts. Please try again later." };
+  }
+
   try {
     const code = loginCode.trim().toUpperCase();
     const result = await db
@@ -245,12 +250,14 @@ export async function findGuestByCodeAction(weddingId: string, loginCode: string
       .limit(1);
 
     if (result.length === 0) {
-      return { error: "Invalid login code. Please check your invitation." };
+      console.warn(`[findGuestByCode] Code not found: ${code}`);
+      return { error: "Invalid or expired invitation code." };
     }
 
     const guest = result[0];
     if (guest.weddingId !== weddingId) {
-      return { error: "This code is for a different wedding." };
+      console.warn(`[findGuestByCode] Code ${code} belongs to wedding ${guest.weddingId}, not ${weddingId}`);
+      return { error: "Invalid or expired invitation code." };
     }
 
     const rsvps = await db
@@ -260,8 +267,8 @@ export async function findGuestByCodeAction(weddingId: string, loginCode: string
 
     return { success: true, guest, rsvps };
   } catch (error) {
-    console.error("Find guest error:", error);
-    return { error: "Failed to verify login code." };
+    console.error("[findGuestByCode] Error:", error);
+    return { error: "Invalid or expired invitation code." };
   }
 }
 

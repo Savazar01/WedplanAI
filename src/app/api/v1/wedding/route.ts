@@ -36,6 +36,13 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
 
+    const colorFields = ['themePrimary', 'themeSecondary', 'themeBackground', 'themeDarkPrimary', 'themeDarkSecondary', 'themeDarkBackground', 'showcasePrimary', 'showcaseSecondary', 'showcaseBackground'] as const;
+    for (const field of colorFields) {
+      if (field in body && body[field] && !/^#[0-9A-Fa-f]{6}$/.test(body[field])) {
+        return errorResponse(`Invalid color format for ${field}. Use hex format (#RRGGBB).`, 400);
+      }
+    }
+
     const allowedFields = [
       'partnerA',
       'partnerB',
@@ -83,7 +90,14 @@ export async function PUT(request: NextRequest) {
     for (const field of allowedFields) {
       if (field in body) {
         if (field === 'weddingDate') {
-          updates[field] = body[field] ? new Date(body[field]) : null;
+          if (body[field]) {
+            const parsedDate = new Date(body[field]);
+            if (isNaN(parsedDate.getTime())) return errorResponse('Invalid weddingDate format.', 400);
+            if (parsedDate <= new Date()) return errorResponse('Wedding date must be in the future.', 400);
+            updates[field] = parsedDate;
+          } else {
+            updates[field] = null;
+          }
         } else {
           updates[field] = body[field];
         }
@@ -143,6 +157,9 @@ export async function POST(request: NextRequest) {
     if (!partnerB || typeof partnerB !== 'string') return errorResponse('partnerB is required.', 400);
     if (!tradition || typeof tradition !== 'string') return errorResponse('tradition is required.', 400);
     if (!weddingDate) return errorResponse('weddingDate is required.', 400);
+    const parsedDate = new Date(weddingDate);
+    if (isNaN(parsedDate.getTime())) return errorResponse('Invalid weddingDate format.', 400);
+    if (parsedDate <= new Date()) return errorResponse('Wedding date must be in the future.', 400);
     if (!location || typeof location !== 'string') return errorResponse('location is required.', 400);
 
     let newlyCreatedWeddingId: string | null = null;
@@ -153,7 +170,7 @@ export async function POST(request: NextRequest) {
         partnerA,
         partnerB,
         tradition,
-        weddingDate: new Date(weddingDate),
+        weddingDate: parsedDate,
         budget: budget ?? 1000000,
         guestCount: guestCount ?? 150,
         location,

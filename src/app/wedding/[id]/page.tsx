@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { weddings, rituals, guests } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Countdown from "@/components/wedding/countdown";
 import PublicRsvpForm from "@/components/wedding/public-rsvp-form";
@@ -43,7 +43,12 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
       const guestList = await db
         .select()
         .from(guests)
-        .where(eq(guests.loginCode, code))
+        .where(
+          or(
+            eq(guests.loginCode, code.toLowerCase()),
+            eq(guests.loginCode, code.toUpperCase())
+          )
+        )
         .limit(1);
       if (guestList.length > 0) {
         isValidGuest = true;

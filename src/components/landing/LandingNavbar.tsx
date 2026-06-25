@@ -9,12 +9,12 @@ interface LandingNavbarProps {
 }
 
 export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
-  const [theme, setTheme] = React.useState<"light" | "dark">("light");
+  const [theme, setTheme] = React.useState<"light" | "dark">("dark");
 
   React.useEffect(() => {
     const saved = localStorage.getItem("theme");
     setTimeout(() => {
-      if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      if (saved === "dark" || !saved) {
         setTheme("dark");
       } else {
         setTheme("light");

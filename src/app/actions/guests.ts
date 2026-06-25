@@ -4,7 +4,7 @@ import { db } from "@/db/client";
 import { guests, guestRsvps, ceremonies } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -242,11 +242,16 @@ export async function findGuestByCodeAction(weddingId: string, loginCode: string
   }
 
   try {
-    const code = loginCode.trim().toUpperCase();
+    const code = loginCode.trim();
     const result = await db
       .select()
       .from(guests)
-      .where(eq(guests.loginCode, code))
+      .where(
+        or(
+          eq(guests.loginCode, code.toLowerCase()),
+          eq(guests.loginCode, code.toUpperCase())
+        )
+      )
       .limit(1);
 
     if (result.length === 0) {

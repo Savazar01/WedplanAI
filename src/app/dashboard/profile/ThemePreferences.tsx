@@ -5,12 +5,12 @@ import { Sun, Moon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 export default function ThemePreferences() {
-  const [theme, setTheme] = React.useState<"light" | "dark">("light");
+  const [theme, setTheme] = React.useState<"light" | "dark">("dark");
 
   React.useEffect(() => {
     const saved = localStorage.getItem("theme");
     setTimeout(() => {
-      if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      if (saved === "dark" || !saved) {
         setTheme("dark");
       } else {
         setTheme("light");

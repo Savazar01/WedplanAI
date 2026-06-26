@@ -7,6 +7,7 @@ import {
   unauthorizedResponse,
   notFoundResponse,
   errorResponse,
+  getRequestedWeddingId,
 } from '../auth-helper';
 
 export async function GET(request: NextRequest) {
@@ -14,10 +15,13 @@ export async function GET(request: NextRequest) {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
 
+    const targetWeddingId = getRequestedWeddingId(auth, request);
+    if (!targetWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const [wedding] = await db
       .select()
       .from(weddings)
-      .where(eq(weddings.id, auth.weddingId))
+      .where(eq(weddings.id, targetWeddingId))
       .limit(1);
 
     if (!wedding) return notFoundResponse('Wedding');
@@ -33,6 +37,9 @@ export async function PUT(request: NextRequest) {
   try {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
+
+    const targetWeddingId = getRequestedWeddingId(auth, request);
+    if (!targetWeddingId) return errorResponse('weddingId required for global key.', 400);
 
     const body = await request.json();
 
@@ -122,7 +129,7 @@ export async function PUT(request: NextRequest) {
     const [updated] = await db
       .update(weddings)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(weddings.id, auth.weddingId))
+      .where(eq(weddings.id, targetWeddingId))
       .returning();
 
     if (!updated) return notFoundResponse('Wedding');
@@ -139,12 +146,20 @@ export async function POST(request: NextRequest) {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
 
-    const sourceWedding = await db
-      .select()
-      .from(weddings)
-      .where(eq(weddings.id, auth.weddingId))
-      .limit(1);
-    if (!sourceWedding[0]) return notFoundResponse('Source wedding');
+    let userId: string;
+    if (auth.scope === 'global' && auth.userId) {
+      userId = auth.userId;
+    } else if (auth.weddingId) {
+      const sourceWedding = await db
+        .select()
+        .from(weddings)
+        .where(eq(weddings.id, auth.weddingId))
+        .limit(1);
+      if (!sourceWedding[0]) return notFoundResponse('Source wedding');
+      userId = sourceWedding[0].userId;
+    } else {
+      return errorResponse('No wedding context available for key.', 400);
+    }
 
     const body = await request.json();
     const {
@@ -163,6 +178,9 @@ export async function POST(request: NextRequest) {
       country,
       pincode,
       description,
+      showcaseContent,
+      showcaseTemplate,
+      showcaseTopLabel,
     } = body;
 
     if (!partnerA || typeof partnerA !== 'string') return errorResponse('partnerA is required.', 400);
@@ -178,7 +196,7 @@ export async function POST(request: NextRequest) {
 
     await db.transaction(async (tx) => {
       const [insertedWedding] = await tx.insert(weddings).values({
-        userId: sourceWedding[0].userId,
+        userId,
         partnerA,
         partnerB,
         tradition,

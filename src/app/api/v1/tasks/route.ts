@@ -6,6 +6,8 @@ import {
   validateApiKey,
   unauthorizedResponse,
   errorResponse,
+  getRequestedWeddingId,
+  getBodyWeddingId,
 } from '../auth-helper';
 
 export async function GET(request: NextRequest) {
@@ -13,10 +15,13 @@ export async function GET(request: NextRequest) {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
 
+    const targetWeddingId = getRequestedWeddingId(auth, request);
+    if (!targetWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const result = await db
       .select()
       .from(tasks)
-      .where(eq(tasks.weddingId, auth.weddingId));
+      .where(eq(tasks.weddingId, targetWeddingId));
 
     return Response.json(result);
   } catch (error) {
@@ -41,10 +46,13 @@ export async function POST(request: NextRequest) {
       return errorResponse('category is required.', 400);
     }
 
+    const bodyWeddingId = getBodyWeddingId(auth, body);
+    if (!bodyWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const [created] = await db
       .insert(tasks)
       .values({
-        weddingId: auth.weddingId,
+        weddingId: bodyWeddingId,
         title,
         description: description ?? null,
         dueDate: dueDate ? new Date(dueDate) : null,

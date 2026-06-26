@@ -4,9 +4,9 @@ This is a Model Context Protocol (MCP) server that exposes tools to interact wit
 
 ## Tools Exposed
 
-The server exposes the following tools:
+The server exposes the following tools. For global API keys, list/read tools accept an optional `weddingId` parameter; create tools accept `weddingId` in the body.
 
-- **Wedding**: `get_wedding`, `update_wedding`
+- **Wedding**: `get_wedding`, `create_wedding`, `update_wedding`
 - **Guests**: `list_guests`, `create_guest`, `update_guest`, `delete_guest`
 - **Tasks**: `list_tasks`, `create_task`, `update_task`, `delete_task`
 - **Ceremonies**: `list_ceremonies`, `create_ceremony`, `update_ceremony`, `delete_ceremony`
@@ -16,7 +16,7 @@ The server exposes the following tools:
 
 - Node.js (v18 or higher)
 - A running instance of WedPlanAI
-- A valid WedPlanAI API Key (generated from the Admin Panel under **API Keys**)
+- A valid WedPlanAI API Key (generated from the Admin Panel under **API Keys**) — supports both Wedding-Scoped and Global Access keys
 
 ## Claude Desktop Configuration
 

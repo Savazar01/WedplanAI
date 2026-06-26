@@ -120,77 +120,105 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
     <div className={`min-h-screen bg-[var(--color-background)] text-slate-800 flex flex-col items-center w-full relative template-${wedding.showcaseTemplate || "classic"} overflow-hidden pb-12`}>
       {/* Template Specific Frame/Borders */}
       {wedding.showcaseTemplate === "classic" && (
-        <div className="absolute inset-4 border-2 border-double pointer-events-none rounded-2xl z-10" style={{ borderColor: "var(--color-primary)" }} />
+        <div className="absolute inset-4 border-2 border-double pointer-events-none rounded-2xl z-10 flex items-start justify-center" style={{ borderColor: "var(--color-primary)" }}>
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px] text-center" style={{ color: "var(--color-primary)" }}>✧ ✧ ✧ ✧ ✧</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px] text-center" style={{ color: "var(--color-primary)" }}>✧ ✧ ✧</div>
+          <div className="absolute -top-3 -left-3 text-base" style={{ color: "var(--color-primary)" }}>✧</div>
+          <div className="absolute -top-3 -right-3 text-base" style={{ color: "var(--color-primary)" }}>✧</div>
+          <div className="absolute -bottom-3 -left-3 text-base" style={{ color: "var(--color-primary)" }}>✧</div>
+          <div className="absolute -bottom-3 -right-3 text-base" style={{ color: "var(--color-primary)" }}>✧</div>
+        </div>
       )}
       {wedding.showcaseTemplate === "modern" && (
-        <div className="absolute inset-4 border border-slate-200 pointer-events-none rounded-2xl z-10" />
+        <div className="absolute inset-4 border border-slate-200 pointer-events-none rounded-2xl z-10 flex items-start justify-center">
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px] text-slate-400">▬ ▬ ▬ ▬ ▬</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px] text-slate-400">▬ ▬ ▬</div>
+          <div className="absolute -top-3 -left-3 text-base text-slate-400">◇</div>
+          <div className="absolute -top-3 -right-3 text-base text-slate-400">◆</div>
+          <div className="absolute -bottom-3 -left-3 text-base text-slate-400">◇</div>
+          <div className="absolute -bottom-3 -right-3 text-base text-slate-400">◆</div>
+        </div>
       )}
       {wedding.showcaseTemplate === "royal" && (
-        <div className="absolute inset-4 border border-amber-600/30 pointer-events-none rounded-2xl z-10">
-          <div className="absolute top-2 left-2 text-amber-600 text-xs">⚜</div>
-          <div className="absolute top-2 right-2 text-amber-600 text-xs">⚜</div>
-          <div className="absolute bottom-2 left-2 text-amber-600 text-xs">⚜</div>
-          <div className="absolute bottom-2 right-2 text-amber-600 text-xs">⚜</div>
+        <div className="absolute inset-4 border border-amber-600/30 pointer-events-none rounded-2xl z-10 flex items-start justify-center">
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px] text-amber-600">👑 ⚜ 👑 ⚜ 👑</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px] text-amber-600">⚜ ⚜ ⚜</div>
+          <div className="absolute -top-3 -left-3 text-base text-amber-600">👑</div>
+          <div className="absolute -top-3 -right-3 text-base text-amber-600">👑</div>
+          <div className="absolute -bottom-3 -left-3 text-base text-amber-600">👑</div>
+          <div className="absolute -bottom-3 -right-3 text-base text-amber-600">👑</div>
         </div>
       )}
       {wedding.showcaseTemplate === "floral" && (
-        <div className="absolute inset-4 border border-pink-200 pointer-events-none rounded-2xl z-10">
-          <div className="absolute top-2 left-2 text-xs">🌸🌿</div>
-          <div className="absolute top-2 right-2 text-xs">🌸🌿</div>
-          <div className="absolute bottom-2 left-2 text-xs">🌸🌿</div>
-          <div className="absolute bottom-2 right-2 text-xs">🌸🌿</div>
+        <div className="absolute inset-4 border border-pink-200 pointer-events-none rounded-2xl z-10 flex items-start justify-center">
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px]">🌸 🌿 🌺 🌿 🌸 🌿 🌺 🌿 🌸</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px]">🌿 🌸 🌿</div>
+          <div className="absolute -top-3 -left-3 text-sm">🌸🌿</div>
+          <div className="absolute -top-3 -right-3 text-sm">🌸🌿</div>
+          <div className="absolute -bottom-3 -left-3 text-sm">🌸🌿</div>
+          <div className="absolute -bottom-3 -right-3 text-sm">🌸🌿</div>
         </div>
       )}
       {wedding.showcaseTemplate === "beach" && (
-        <div className="absolute inset-4 border border-cyan-200 pointer-events-none rounded-2xl z-10">
-          <div className="absolute top-2 left-2 text-xs">🐚</div>
-          <div className="absolute top-2 right-2 text-xs">🐚</div>
-          <div className="absolute bottom-2 left-2 text-xs">🐚</div>
-          <div className="absolute bottom-2 right-2 text-xs">🐚</div>
+        <div className="absolute inset-4 border border-cyan-200 pointer-events-none rounded-2xl z-10 flex items-start justify-center">
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px]">🐚 🌊 🐚 🌊 🐚 🌊 🐚</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px]">🌊 🐚 🌊</div>
+          <div className="absolute -top-3 -left-3 text-sm">🐚</div>
+          <div className="absolute -top-3 -right-3 text-sm">🐚</div>
+          <div className="absolute -bottom-3 -left-3 text-sm">🐚</div>
+          <div className="absolute -bottom-3 -right-3 text-sm">🐚</div>
         </div>
       )}
       {wedding.showcaseTemplate === "indian" && (
         <div className="absolute inset-4 border-2 border-orange-500/30 border-dashed pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
-          <span className="text-xs bg-orange-50 text-orange-800 px-3 py-1 rounded-full font-serif border border-orange-200 shadow-sm relative -top-5">
+          <span className="text-xs bg-orange-50 text-orange-800 px-3 py-1 rounded-full font-serif border border-orange-200 shadow-sm relative -top-5 z-20">
             {wedding.showcaseTopLabel || "शुभ विवाह"}
           </span>
-          <div className="absolute top-2 left-2 text-xs">🪔</div>
-          <div className="absolute top-2 right-2 text-xs">🪔</div>
-          <div className="absolute bottom-2 left-2 text-xs">🪔</div>
-          <div className="absolute bottom-2 right-2 text-xs">🪔</div>
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px]">🪔 🌼 🪔 🌼 🪔 🌼 🪔 🌼 🪔</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px]">🌼 🪔 🌼</div>
+          <div className="absolute -top-3 -left-3 text-sm">🪔</div>
+          <div className="absolute -top-3 -right-3 text-sm">🪔</div>
+          <div className="absolute -bottom-3 -left-3 text-sm">🪔</div>
+          <div className="absolute -bottom-3 -right-3 text-sm">🪔</div>
         </div>
       )}
       {wedding.showcaseTemplate === "indian_royal" && (
         <div className="absolute inset-4 border-2 border-red-800/40 pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
-          <span className="text-xs bg-red-900 text-amber-200 px-3 py-1 rounded-full font-serif border border-amber-500 shadow-md relative -top-5">
+          <span className="text-xs bg-red-900 text-amber-200 px-3 py-1 rounded-full font-serif border border-amber-500 shadow-md relative -top-5 z-20">
             {wedding.showcaseTopLabel || "शुभ विवाह"}
           </span>
-          <div className="absolute top-2 left-2 text-amber-500 text-xs">⚜</div>
-          <div className="absolute top-2 right-2 text-amber-500 text-xs">⚜</div>
-          <div className="absolute bottom-2 left-2 text-amber-500 text-xs">⚜</div>
-          <div className="absolute bottom-2 right-2 text-amber-500 text-xs">⚜</div>
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px]">👑 🪔 👑 🪔 👑 🪔 👑 🪔 👑</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px]">⚜ 🪔 ⚜</div>
+          <div className="absolute -top-3 -left-3 text-amber-500 text-sm">👑</div>
+          <div className="absolute -top-3 -right-3 text-amber-500 text-sm">👑</div>
+          <div className="absolute -bottom-3 -left-3 text-amber-500 text-sm">👑</div>
+          <div className="absolute -bottom-3 -right-3 text-amber-500 text-sm">👑</div>
         </div>
       )}
       {wedding.showcaseTemplate === "indian_marigold" && (
         <div className="absolute inset-4 border-2 border-yellow-500/40 border-double pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
-          <span className="text-xs bg-yellow-50 text-amber-800 px-3 py-1 rounded-full font-serif border border-yellow-300 shadow-sm relative -top-5">
+          <span className="text-xs bg-yellow-50 text-amber-800 px-3 py-1 rounded-full font-serif border border-yellow-300 shadow-sm relative -top-5 z-20">
             {wedding.showcaseTopLabel || "शुभ विवाह"}
           </span>
-          <div className="absolute top-2 left-2 text-xs">🌼</div>
-          <div className="absolute top-2 right-2 text-xs">🌼</div>
-          <div className="absolute bottom-2 left-2 text-xs">🌼</div>
-          <div className="absolute bottom-2 right-2 text-xs">🌼</div>
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px]">🌼 🌼 🌼 🌼 🌼 🌼 🌼 🌼 🌼</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px]">🌼 🌼 🌼</div>
+          <div className="absolute -top-3 -left-3 text-sm">🌼</div>
+          <div className="absolute -top-3 -right-3 text-sm">🌼</div>
+          <div className="absolute -bottom-3 -left-3 text-sm">🌼</div>
+          <div className="absolute -bottom-3 -right-3 text-sm">🌼</div>
         </div>
       )}
       {wedding.showcaseTemplate === "indian_modern" && (
         <div className="absolute inset-4 border border-pink-500/30 pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
-          <span className="text-xs bg-pink-50 text-pink-700 px-3 py-1 rounded-full font-sans border border-pink-200 shadow-sm relative -top-5">
+          <span className="text-xs bg-pink-50 text-pink-700 px-3 py-1 rounded-full font-sans border border-pink-200 shadow-sm relative -top-5 z-20">
             {wedding.showcaseTopLabel || "शुभ विवाह"}
           </span>
-          <div className="absolute top-2 left-2 text-xs">🪔</div>
-          <div className="absolute top-2 right-2 text-xs">🪔</div>
-          <div className="absolute bottom-2 left-2 text-xs">🪔</div>
-          <div className="absolute bottom-2 right-2 text-xs">🪔</div>
+          <div className="absolute -top-3 left-0 right-0 flex justify-center text-[8px]">✦ 🪔 ✦ 🪔 ✦ 🪔 ✦ 🪔 ✦</div>
+          <div className="absolute -bottom-3 left-0 right-0 flex justify-center text-[8px]">✦ ✦ ✦</div>
+          <div className="absolute -top-3 -left-3 text-sm">✦</div>
+          <div className="absolute -top-3 -right-3 text-sm">✦</div>
+          <div className="absolute -bottom-3 -left-3 text-sm">✦</div>
+          <div className="absolute -bottom-3 -right-3 text-sm">✦</div>
         </div>
       )}
 

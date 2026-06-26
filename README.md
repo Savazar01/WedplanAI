@@ -31,8 +31,8 @@ The platform has built-in self-healing and auto-seeding logic registered in `src
 Hindu · Muslim · Sikh · Christian · Secular (and custom traditions)
 
 ### Languages Supported
-15 languages supported (with full-name select dropdown in navigation header/sidebar):
-English · हिन्दी (Hindi) · తెలుగు (Telugu) · मराठी (Marathi) · বাংলা (Bengali) · தமிழ் (Tamil) · ಕನ್ನಡ (Kannada) · ગુજરાતી (Gujarati) · ଓଡ଼ିଆ (Odia) · മലയാളം (Malayalam) · অসমীয়া (Assamese) · ਪੰਜਾਬੀ (Punjabi) · Español (Spanish) · Deutsch (German) · Français (French)
+3 languages supported (with full-name select dropdown in navigation header/sidebar):
+English · हिन्दी (Hindi) · తెలుగు (Telugu)
 
 ### Premium Showcase Design Templates
 9 premium design templates (selectable via Build Showcase Page, featuring custom borders, ornaments, and divider icons):
@@ -334,7 +334,7 @@ All API requests require an API key passed in the `x-api-key` header. You can ge
 x-api-key: wpa_your_api_key_here
 ```
 
-API keys are scoped per-wedding. All requests and responses are in JSON format. The base URL is `/api/v1/`.
+API keys support two scopes: **Wedding-Scoped** (restricted to one wedding) and **Global Access** (unrestricted). For global keys, pass `?weddingId=xxx` query param on GET requests or `weddingId` in the request body on POST/PUT requests. All requests and responses are in JSON format. The base URL is `/api/v1/`.
 
 > **Note:** The auth header is `x-api-key` (not `Authorization: Bearer`). The legacy `Bearer` format is not supported.
 
@@ -375,7 +375,7 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
   - **Response (200 OK):** Full wedding object including partner names, date, budget, guest count, location details, address fields, theme settings, and all showcase fields.
 
 * **POST `/api/v1/wedding`**
-  - **Description:** Create a new wedding. Auto-seeds default Kanban columns, tradition-based ceremonies, catering menus for food-served ceremonies, and planning tasks. The new wedding is created under the same user account that owns the API key.
+  - **Description:** Create a new wedding. Requires a Global Access API key. Auto-seeds default Kanban columns, tradition-based ceremonies, catering menus for food-served ceremonies, and planning tasks.
   - **Request Body:**
     ```json
     {
@@ -400,18 +400,18 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
   - **Response (201 Created):** Full wedding object.
 
 * **PUT `/api/v1/wedding`**
-  - **Description:** Update any wedding metadata field including address, theme, and showcase settings.
+  - **Description:** Update any wedding metadata field including address, theme, and showcase settings. For global API keys, pass `?weddingId=xxx` or `weddingId` in the request body.
   - **Accepted fields:** `partnerA`, `partnerB`, `weddingDate`, `tradition`, `location`, `locationOptions` (array of strings or JSON string), `locationName`, `street`, `city`, `state`, `country`, `pincode`, `budget`, `guestCount`, `description`, `themeFont`, `themePrimary`, `themeSecondary`, `themeBackground`, `themeDarkPrimary`, `themeDarkSecondary`, `themeDarkBackground`, `logoUrl`, `logoData`, `showcaseFont`, `showcaseTitleFont`, `showcasePrimary`, `showcaseSecondary`, `showcaseBackground`, `showcaseHeroUrl`, `showcaseHeroData`, `showcaseWelcomeText`, `showcaseDetails`, `showcaseSubtitle`, `showcaseTitle`, `showcaseDescription`, `showcaseRsvpTitle`, `showcaseRsvpDescription`, `showcaseGiftUrl`, `showcaseGiftTitle`, `showcaseGiftDescription`.
   - **Response (200 OK):** Updated wedding object.
 
 #### 2. Wedding Ceremony Planner
 
 * **GET `/api/v1/ceremonies`**
-  - **Description:** Get all ceremonies for the wedding.
+  - **Description:** Get all ceremonies for the wedding. For global API keys, pass `?weddingId=xxx`.
   - **Response (200 OK):** Array of ceremony objects with all fields.
 
 * **POST `/api/v1/ceremonies`**
-  - **Description:** Create a new ceremony.
+  - **Description:** Create a new ceremony. For global API keys, include `weddingId` in the request body.
   - **Request Body:**
     ```json
     {
@@ -464,11 +464,11 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
 
 ##### 3b. Tasks
 * **GET `/api/v1/tasks`**
-  - **Description:** Get all tasks with all fields (including ceremony, assignee, and catering menu links).
+  - **Description:** Get all tasks with all fields (including ceremony, assignee, and catering menu links). For global API keys, pass `?weddingId=xxx`.
   - **Response (200 OK):** Array of task objects.
 
 * **POST `/api/v1/tasks`**
-  - **Description:** Create a new planning task.
+  - **Description:** Create a new planning task. For global API keys, include `weddingId` in the request body.
   - **Request Body:**
     ```json
     {
@@ -530,11 +530,11 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
 
 ##### 5a. Guests
 * **GET `/api/v1/guests`**
-  - **Description:** List all guests with invitation codes and invited ceremonies.
+  - **Description:** List all guests with invitation codes and invited ceremonies. For global API keys, pass `?weddingId=xxx`.
   - **Response (200 OK):** Array of guest objects.
 
 * **POST `/api/v1/guests`**
-  - **Description:** Create a guest.
+  - **Description:** Create a guest. For global API keys, include `weddingId` in the request body.
   - **Request Body:**
     ```json
     {
@@ -584,11 +584,11 @@ API keys are scoped per-wedding. All requests and responses are in JSON format. 
 #### 6. Vendor & Budget Tracker
 
 * **GET `/api/v1/vendors`**
-  - **Description:** List all vendors with payment progress and ceremony links.
+  - **Description:** List all vendors with payment progress and ceremony links. For global API keys, pass `?weddingId=xxx`.
   - **Response (200 OK):** Array of vendor objects.
 
 * **POST `/api/v1/vendors`**
-  - **Description:** Create a vendor entry.
+  - **Description:** Create a vendor entry. For global API keys, include `weddingId` in the request body.
   - **Request Body:**
     ```json
     {

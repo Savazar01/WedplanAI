@@ -235,7 +235,7 @@ const sections = [
       {
         title: "Profile Management",
         content:
-          "The User Profile page lets you edit your name, address, country, and spoken languages. You can also select the application language using the full-name language dropdown selector in the navigation header/sidebar, which supports 15 languages: English, हिन्दी (Hindi), తెలుగు (Telugu), मराठी (Marathi), বাংলা (Bengali), தமிழ் (Tamil), ಕನ್ನಡ (Kannada), ગુજરાતી (Gujarati), ଓଡ଼ିଆ (Odia), മലയാളം (Malayalam), অসমীয়া (Assamese), ਪੰਜਾਬੀ (Punjabi), Español (Spanish), Deutsch (German), and Français (French). Your country selection affects currency formatting throughout the app.",
+          "The User Profile page lets you edit your name, address, country, and spoken languages. You can also select the application language using the full-name language dropdown selector in the navigation header/sidebar, which supports 3 languages: English, हिन्दी (Hindi), and తెలుగు (Telugu). Your country selection affects currency formatting throughout the app.",
       },
       {
         title: "Change Password",
@@ -365,7 +365,7 @@ const apiSection = {
     {
       title: "Overview & Authentication",
       content:
-        "WedPlanAI exposes a REST API at /api/v1/ for programmatic access to your wedding data. All endpoints require an API key passed in the x-api-key header: x-api-key: wpa_your_api_key_here. Generate API keys from Admin > API Keys. Each key is scoped to a specific wedding. All endpoints return JSON. Planned use: MCP (Model Context Protocol) integration in the next platform phase.",
+        "WedPlanAI exposes a REST API at /api/v1/ for programmatic access to your wedding data. All endpoints require an API key passed in the x-api-key header: x-api-key: wpa_your_api_key_here. Generate API keys from Admin > API Keys. Keys support two scopes: Wedding-Scoped (restricted to one wedding) and Global Access (unrestricted, can create weddings and operate on any wedding via weddingId parameter). For global keys, pass ?weddingId=xxx query param on GET requests or weddingId in the request body on POST requests. All endpoints return JSON.",
     },
     {
       title: "Wedding — GET /api/v1/wedding",

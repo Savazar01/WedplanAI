@@ -8,12 +8,16 @@ import {
   unauthorizedResponse,
   errorResponse,
   requireAdminScope,
+  getRequestedWeddingId,
 } from '../auth-helper';
 
 export async function GET(request: NextRequest) {
   try {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
+
+    const targetWeddingId = getRequestedWeddingId(auth, request);
+    if (!targetWeddingId) return errorResponse('weddingId is required.', 400);
 
     const result = await db
       .select({
@@ -28,7 +32,7 @@ export async function GET(request: NextRequest) {
         updatedAt: users.updatedAt,
       })
       .from(users)
-      .where(eq(users.weddingId, auth.weddingId))
+      .where(eq(users.weddingId, targetWeddingId))
       .orderBy(users.createdAt);
 
     return Response.json(result);

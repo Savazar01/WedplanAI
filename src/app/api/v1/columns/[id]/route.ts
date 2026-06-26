@@ -7,6 +7,7 @@ import {
   unauthorizedResponse,
   notFoundResponse,
   errorResponse,
+  getRequestedWeddingId,
 } from '../../auth-helper';
 
 interface RouteParams {
@@ -19,6 +20,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
+
     const body = await request.json();
 
     const allowedFields = ['name', 'color', 'position'] as const;
@@ -37,7 +41,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const [updatedColumn] = await db
       .update(kanbanColumns)
       .set({ ...updates, updatedAt: new Date() })
-      .where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.weddingId, auth.weddingId)))
+      .where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.weddingId, weddingId)))
       .returning();
 
     if (!updatedColumn) return notFoundResponse('Column');
@@ -55,12 +59,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
 
     // Check if there are tasks referencing this column
     const existingTasks = await db
       .select({ id: tasks.id })
       .from(tasks)
-      .where(and(eq(tasks.columnId, id), eq(tasks.weddingId, auth.weddingId)))
+      .where(and(eq(tasks.columnId, id), eq(tasks.weddingId, weddingId)))
       .limit(1);
 
     if (existingTasks.length > 0) {
@@ -69,7 +75,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const [deletedColumn] = await db
       .delete(kanbanColumns)
-      .where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.weddingId, auth.weddingId)))
+      .where(and(eq(kanbanColumns.id, id), eq(kanbanColumns.weddingId, weddingId)))
       .returning();
 
     if (!deletedColumn) return notFoundResponse('Column');

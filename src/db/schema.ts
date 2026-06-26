@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { pgTable, text, timestamp, boolean, integer, uuid } from "drizzle-orm/pg-core";
 
 // Better Auth tables (text IDs as required by default setup)
@@ -190,7 +191,7 @@ export const guests = pgTable("guest", {
     .unique()
     .notNull()
     .$defaultFn(() => {
-      return Math.random().toString(16).substring(2, 8);
+      return crypto.randomBytes(3).toString('hex');
     }),
   rsvpStatus: text("rsvp_status").default("pending").notNull(), // pending, attending, declined
   plusOneCount: integer("plus_one_count").default(0).notNull(),
@@ -219,7 +220,9 @@ export const vendors = pgTable("vendor", {
 
 export const apiKeys = pgTable("api_key", {
   id: uuid("id").defaultRandom().primaryKey(),
-  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  weddingId: uuid("wedding_id").references((): any => weddings.id, { onDelete: "cascade" }),
+  scope: text("scope").default("wedding").notNull(),
+  userId: text("user_id"),
   name: text("name").notNull(),
   keyHash: text("key_hash").unique().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

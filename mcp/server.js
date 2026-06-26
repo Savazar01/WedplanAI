@@ -43,45 +43,76 @@ function getToolsList() {
   return [
     {
       name: "get_wedding",
-      description: "Retrieve the active wedding event details.",
+      description: "Retrieve a wedding event details. For global API keys, provide weddingId.",
       inputSchema: {
         type: "object",
-        properties: {}
+        properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" }
+        }
+      }
+    },
+    {
+      name: "create_wedding",
+      description: "Create a new wedding event with tradition-based seeding of ceremonies and tasks.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          partnerA: { type: "string", description: "Name of partner A (required)" },
+          partnerB: { type: "string", description: "Name of partner B (required)" },
+          tradition: { type: "string", description: "Wedding tradition: hindu, muslim, sikh, christian, secular (required)" },
+          weddingDate: { type: "string", description: "Wedding date (future ISO date string, required)" },
+          location: { type: "string", description: "Wedding location/venue (required)" },
+          budget: { type: "number", description: "Total wedding budget" },
+          guestCount: { type: "number", description: "Estimated guest count" },
+          locationName: { type: "string", description: "Venue/Event Space Name" },
+          street: { type: "string" },
+          city: { type: "string" },
+          state: { type: "string" },
+          country: { type: "string", description: "Country (default: India)" },
+          pincode: { type: "string" },
+          description: { type: "string", description: "General wedding description" },
+          locationOptions: { type: "array", items: { type: "string" }, description: "Additional venue options" }
+        },
+        required: ["partnerA", "partnerB", "tradition", "weddingDate", "location"]
       }
     },
     {
       name: "update_wedding",
-      description: "Update the active wedding details.",
+      description: "Update wedding details. For global API keys, provide weddingId.",
       inputSchema: {
         type: "object",
         properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" },
           partnerA: { type: "string", description: "Name of partner A" },
           partnerB: { type: "string", description: "Name of partner B" },
           weddingDate: { type: "string", description: "Wedding date (future ISO date string)" },
-          tradition: { type: "string", description: "Wedding tradition (e.g. Hindu, Muslim, Secular)" },
+          tradition: { type: "string", description: "Wedding tradition" },
           location: { type: "string", description: "Wedding location/city" },
           budget: { type: "number", description: "Total wedding budget" },
           guestCount: { type: "number", description: "Estimated guest count" },
           description: { type: "string", description: "General wedding description" },
           showcaseTemplate: { type: "string", description: "Design template for the showcase page" },
-          showcaseTopLabel: { type: "string", description: "Top welcome banner label/text for the showcase page" }
+          showcaseTopLabel: { type: "string", description: "Top welcome banner label for the showcase page" }
         }
       }
     },
     {
       name: "list_guests",
-      description: "List all guests invited to the wedding.",
+      description: "List all guests. For global API keys, provide weddingId.",
       inputSchema: {
         type: "object",
-        properties: {}
+        properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" }
+        }
       }
     },
     {
       name: "create_guest",
-      description: "Create/invite a new guest.",
+      description: "Create/invite a new guest. For global API keys, provide weddingId in body.",
       inputSchema: {
         type: "object",
         properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" },
           name: { type: "string", description: "Full name of the guest" },
           email: { type: "string", description: "Email address" },
           phone: { type: "string", description: "Phone number" },
@@ -124,18 +155,21 @@ function getToolsList() {
     },
     {
       name: "list_tasks",
-      description: "List all wedding tasks.",
+      description: "List all wedding tasks. For global API keys, provide weddingId.",
       inputSchema: {
         type: "object",
-        properties: {}
+        properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" }
+        }
       }
     },
     {
       name: "create_task",
-      description: "Create a new wedding task.",
+      description: "Create a new wedding task. For global API keys, provide weddingId in body.",
       inputSchema: {
         type: "object",
         properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" },
           title: { type: "string", description: "Task title" },
           description: { type: "string", description: "Detailed description" },
           status: { type: "string", enum: ["backlog", "todo", "in_progress", "done"], description: "Task status" },
@@ -180,18 +214,21 @@ function getToolsList() {
     },
     {
       name: "list_ceremonies",
-      description: "List all wedding ceremonies.",
+      description: "List all wedding ceremonies. For global API keys, provide weddingId.",
       inputSchema: {
         type: "object",
-        properties: {}
+        properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" }
+        }
       }
     },
     {
       name: "create_ceremony",
-      description: "Create a new wedding ceremony.",
+      description: "Create a new wedding ceremony. For global API keys, provide weddingId in body.",
       inputSchema: {
         type: "object",
         properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" },
           name: { type: "string", description: "Name of the ceremony (e.g. Reception, Haldi)" },
           description: { type: "string", description: "Ceremony description" },
           startTime: { type: "string", description: "Start time (ISO date string)" },
@@ -238,18 +275,21 @@ function getToolsList() {
     },
     {
       name: "list_vendors",
-      description: "List all wedding vendors.",
+      description: "List all wedding vendors. For global API keys, provide weddingId.",
       inputSchema: {
         type: "object",
-        properties: {}
+        properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" }
+        }
       }
     },
     {
       name: "create_vendor",
-      description: "Create a new wedding vendor.",
+      description: "Create a new wedding vendor. For global API keys, provide weddingId in body.",
       inputSchema: {
         type: "object",
         properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" },
           name: { type: "string", description: "Vendor name" },
           category: { type: "string", description: "Vendor category (e.g. catering, photography)" },
           contactName: { type: "string", description: "Contact person name" },
@@ -297,18 +337,30 @@ function getToolsList() {
 
 async function callTool(name, args) {
   let result;
+
+  // Helper: build query string with optional weddingId for global keys
+  const qs = (args && args.weddingId) ? `?weddingId=${encodeURIComponent(args.weddingId)}` : '';
+  // Helper: strip weddingId from args for create tools (it goes in the body as weddingId field for global keys)
+  const bodyArgs = (args) => {
+    if (!args || !args.weddingId) return args;
+    return { ...args, weddingId: args.weddingId }; // API accepts weddingId in body for global keys
+  };
+
   switch (name) {
     case 'get_wedding':
-      result = await apiRequest('/api/v1/wedding', 'GET');
+      result = await apiRequest(`/api/v1/wedding${qs}`, 'GET');
+      break;
+    case 'create_wedding':
+      result = await apiRequest('/api/v1/wedding', 'POST', args);
       break;
     case 'update_wedding':
-      result = await apiRequest('/api/v1/wedding', 'PUT', args);
+      result = await apiRequest(`/api/v1/wedding${qs}`, 'PUT', bodyArgs(args));
       break;
     case 'list_guests':
-      result = await apiRequest('/api/v1/guests', 'GET');
+      result = await apiRequest(`/api/v1/guests${qs}`, 'GET');
       break;
     case 'create_guest':
-      result = await apiRequest('/api/v1/guests', 'POST', args);
+      result = await apiRequest('/api/v1/guests', 'POST', bodyArgs(args));
       break;
     case 'update_guest':
       result = await apiRequest(`/api/v1/guests/${args.id}`, 'PUT', args);
@@ -317,10 +369,10 @@ async function callTool(name, args) {
       result = await apiRequest(`/api/v1/guests/${args.id}`, 'DELETE');
       break;
     case 'list_tasks':
-      result = await apiRequest('/api/v1/tasks', 'GET');
+      result = await apiRequest(`/api/v1/tasks${qs}`, 'GET');
       break;
     case 'create_task':
-      result = await apiRequest('/api/v1/tasks', 'POST', args);
+      result = await apiRequest('/api/v1/tasks', 'POST', bodyArgs(args));
       break;
     case 'update_task':
       result = await apiRequest(`/api/v1/tasks/${args.id}`, 'PUT', args);
@@ -329,10 +381,10 @@ async function callTool(name, args) {
       result = await apiRequest(`/api/v1/tasks/${args.id}`, 'DELETE');
       break;
     case 'list_ceremonies':
-      result = await apiRequest('/api/v1/ceremonies', 'GET');
+      result = await apiRequest(`/api/v1/ceremonies${qs}`, 'GET');
       break;
     case 'create_ceremony':
-      result = await apiRequest('/api/v1/ceremonies', 'POST', args);
+      result = await apiRequest('/api/v1/ceremonies', 'POST', bodyArgs(args));
       break;
     case 'update_ceremony':
       result = await apiRequest(`/api/v1/ceremonies/${args.id}`, 'PUT', args);
@@ -341,10 +393,10 @@ async function callTool(name, args) {
       result = await apiRequest(`/api/v1/ceremonies/${args.id}`, 'DELETE');
       break;
     case 'list_vendors':
-      result = await apiRequest('/api/v1/vendors', 'GET');
+      result = await apiRequest(`/api/v1/vendors${qs}`, 'GET');
       break;
     case 'create_vendor':
-      result = await apiRequest('/api/v1/vendors', 'POST', args);
+      result = await apiRequest('/api/v1/vendors', 'POST', bodyArgs(args));
       break;
     case 'update_vendor':
       result = await apiRequest(`/api/v1/vendors/${args.id}`, 'PUT', args);
@@ -375,7 +427,6 @@ async function handleMessage(message) {
   }
   
   if (id === undefined || id === null) {
-    // Notification (ignore or log if needed)
     return;
   }
   
@@ -388,7 +439,7 @@ async function handleMessage(message) {
         },
         serverInfo: {
           name: "wedplanai-mcp",
-          version: "1.0.0"
+          version: "1.1.0"
         }
       });
       break;
@@ -455,7 +506,6 @@ process.stdin.on('data', (chunk) => {
   }
 });
 
-// Add exit and error handlers
 process.on('uncaughtException', (err) => {
   logError('Uncaught exception', err);
 });

@@ -8,6 +8,7 @@ import {
   notFoundResponse,
   errorResponse,
   requireAdminScope,
+  getRequestedWeddingId,
 } from '../../auth-helper';
 
 interface RouteParams {
@@ -51,11 +52,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return errorResponse('No valid fields provided for update.', 400);
     }
 
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
+
     // Verify user belongs to same wedding
     const [existing] = await db
       .select()
       .from(users)
-      .where(and(eq(users.id, id), eq(users.weddingId, auth.weddingId)))
+      .where(and(eq(users.id, id), eq(users.weddingId, weddingId)))
       .limit(1);
 
     if (!existing) return notFoundResponse('Team member');
@@ -101,11 +105,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
 
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
+
     // Verify user belongs to same wedding
     const [existing] = await db
       .select()
       .from(users)
-      .where(and(eq(users.id, id), eq(users.weddingId, auth.weddingId)))
+      .where(and(eq(users.id, id), eq(users.weddingId, weddingId)))
       .limit(1);
 
     if (!existing) return notFoundResponse('Team member');

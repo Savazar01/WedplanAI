@@ -7,6 +7,7 @@ import {
   unauthorizedResponse,
   notFoundResponse,
   errorResponse,
+  getRequestedWeddingId,
 } from '../../auth-helper';
 
 interface RouteParams {
@@ -19,6 +20,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
+
     const body = await request.json();
 
     const allowedFields = [
@@ -47,7 +51,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const [updatedMenu] = await db
       .update(cateringMenus)
       .set({ ...updates, updatedAt: new Date() })
-      .where(and(eq(cateringMenus.id, id), eq(cateringMenus.weddingId, auth.weddingId)))
+      .where(and(eq(cateringMenus.id, id), eq(cateringMenus.weddingId, weddingId)))
       .returning();
 
     if (!updatedMenu) return notFoundResponse('Catering menu');
@@ -65,10 +69,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
 
     const [deletedMenu] = await db
       .delete(cateringMenus)
-      .where(and(eq(cateringMenus.id, id), eq(cateringMenus.weddingId, auth.weddingId)))
+      .where(and(eq(cateringMenus.id, id), eq(cateringMenus.weddingId, weddingId)))
       .returning();
 
     if (!deletedMenu) return notFoundResponse('Catering menu');

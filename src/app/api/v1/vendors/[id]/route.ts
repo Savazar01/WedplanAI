@@ -7,6 +7,7 @@ import {
   unauthorizedResponse,
   notFoundResponse,
   errorResponse,
+  getRequestedWeddingId,
 } from '../../auth-helper';
 
 interface RouteParams {
@@ -19,6 +20,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
+
     const body = await request.json();
 
     const allowedFields = [
@@ -48,7 +52,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const [updatedVendor] = await db
       .update(vendors)
       .set({ ...updates, updatedAt: new Date() })
-      .where(and(eq(vendors.id, id), eq(vendors.weddingId, auth.weddingId)))
+      .where(and(eq(vendors.id, id), eq(vendors.weddingId, weddingId)))
       .returning();
 
     if (!updatedVendor) return notFoundResponse('Vendor');
@@ -66,10 +70,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
 
     const [deletedVendor] = await db
       .delete(vendors)
-      .where(and(eq(vendors.id, id), eq(vendors.weddingId, auth.weddingId)))
+      .where(and(eq(vendors.id, id), eq(vendors.weddingId, weddingId)))
       .returning();
 
     if (!deletedVendor) return notFoundResponse('Vendor');

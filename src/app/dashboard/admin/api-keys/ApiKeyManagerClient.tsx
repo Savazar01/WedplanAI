@@ -12,7 +12,8 @@ import { Key, Copy, Trash2, Check } from "lucide-react";
 
 interface SerializedApiKey {
   id: string;
-  weddingId: string;
+  weddingId: string | null;
+  scope: string;
   name: string;
   keyHash: string;
   createdAt: string;
@@ -27,6 +28,7 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
   const router = useRouter();
   const [keys, setKeys] = React.useState<SerializedApiKey[]>(initialKeys);
   const [keyName, setKeyName] = React.useState("");
+  const [keyScope, setKeyScope] = React.useState<"wedding" | "global">("wedding");
   const [rawKey, setRawKey] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
@@ -53,7 +55,7 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
 
     setIsGenerating(true);
     try {
-      const result = await createApiKeyAction(keyName);
+      const result = await createApiKeyAction(keyName, keyScope);
       if (result.success && result.rawKey) {
         setRawKey(result.rawKey);
         setKeyName("");
@@ -142,6 +144,35 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
                   required
                 />
               </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest block mb-1">
+                  Scope
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="scope"
+                      value="wedding"
+                      checked={keyScope === "wedding"}
+                      onChange={() => setKeyScope("wedding")}
+                      className="accent-[#6771ab]"
+                    />
+                    <span className="text-sm text-slate-700">Wedding-Scoped</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="scope"
+                      value="global"
+                      checked={keyScope === "global"}
+                      onChange={() => setKeyScope("global")}
+                      className="accent-[#6771ab]"
+                    />
+                    <span className="text-sm text-slate-700">Global Access</span>
+                  </label>
+                </div>
+              </div>
               <Button 
                 type="submit" 
                 variant="primary" 
@@ -191,6 +222,7 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
                   <thead className="bg-slate-50">
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Name</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Scope</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Created At</th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Expires At</th>
                       <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Actions</th>
@@ -200,6 +232,13 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
                     {keys.map((k) => (
                       <tr key={k.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-800">{k.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            k.scope === 'global' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {k.scope === 'global' ? 'Global' : 'Wedding'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                           {new Date(k.createdAt).toLocaleDateString(undefined, {
                             year: 'numeric',

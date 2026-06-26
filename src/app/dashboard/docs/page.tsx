@@ -232,7 +232,7 @@ const sections = [
       {
         title: "Profile Management",
         content:
-          "The User Profile page lets you edit your name, address, country, and spoken languages. You can also select the application language using the full-name language dropdown selector in the navigation header/sidebar, which supports 15 languages: English, हिन्दी (Hindi), తెలుగు (Telugu), मराठी (Marathi), বাংলা (Bengali), தமிழ் (Tamil), ಕನ್ನಡ (Kannada), ગુજરાતી (Gujarati), ଓଡ଼ିଆ (Odia), മലയാളം (Malayalam), অসমীয়া (Assamese), ਪੰਜਾਬੀ (Punjabi), Español (Spanish), Deutsch (German), and Français (French). Your country selection affects currency formatting throughout the app.",
+          "The User Profile page lets you edit your name, address, country, and spoken languages. You can also select the application language using the full-name language dropdown selector in the navigation header/sidebar, which supports 3 languages: English, हिन्दी (Hindi), and తెలుగు (Telugu). Your country selection affects currency formatting throughout the app.",
       },
       {
         title: "Change Password",

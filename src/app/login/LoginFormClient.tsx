@@ -5,10 +5,12 @@ import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 export default function LoginFormClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
@@ -27,14 +29,14 @@ export default function LoginFormClient() {
       });
 
       if (res?.error) {
-        setError(res.error.message || "Invalid email or password.");
+        setError(t("login.error.invalid"));
       } else {
         router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {
       console.error(err);
-      setError("An unexpected error occurred.");
+      setError(t("login.error.unknown"));
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,7 @@ export default function LoginFormClient() {
 
       <div>
         <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-          Email Address
+          {t("login.emailLabel")}
         </label>
         <Input
           type="email"
@@ -64,7 +66,7 @@ export default function LoginFormClient() {
 
       <div>
         <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-          Password
+          {t("login.passwordLabel")}
         </label>
         <Input
           type="password"
@@ -83,7 +85,7 @@ export default function LoginFormClient() {
       )}
 
       <Button type="submit" variant="primary" className="w-full mt-2" disabled={loading}>
-        {loading ? "Signing In..." : "Sign In"}
+        {loading ? t("login.submitButton") + "..." : t("login.submitButton")}
       </Button>
     </form>
   );

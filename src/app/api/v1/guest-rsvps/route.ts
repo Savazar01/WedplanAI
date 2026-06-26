@@ -7,6 +7,8 @@ import {
   unauthorizedResponse,
   notFoundResponse,
   errorResponse,
+  getRequestedWeddingId,
+  getBodyWeddingId,
 } from '../auth-helper';
 
 export async function GET(request: NextRequest) {
@@ -14,12 +16,15 @@ export async function GET(request: NextRequest) {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
 
+    const targetWeddingId = getRequestedWeddingId(auth, request);
+    if (!targetWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const result = await db
       .select()
       .from(guestRsvps)
       .innerJoin(guests, eq(guestRsvps.guestId, guests.id))
       .innerJoin(ceremonies, eq(guestRsvps.ceremonyId, ceremonies.id))
-      .where(eq(guests.weddingId, auth.weddingId));
+      .where(eq(guests.weddingId, targetWeddingId));
 
     return Response.json(result);
   } catch (error) {
@@ -44,10 +49,13 @@ export async function POST(request: NextRequest) {
       return errorResponse('rsvpStatus must be "attending" or "declined".', 400);
     }
 
+    const targetWeddingId = getBodyWeddingId(auth, body);
+    if (!targetWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const [guest] = await db
       .select({ id: guests.id })
       .from(guests)
-      .where(and(eq(guests.id, guestId), eq(guests.weddingId, auth.weddingId)))
+      .where(and(eq(guests.id, guestId), eq(guests.weddingId, targetWeddingId)))
       .limit(1);
 
     if (!guest) return notFoundResponse('Guest');

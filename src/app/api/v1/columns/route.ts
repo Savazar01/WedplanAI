@@ -6,6 +6,8 @@ import {
   validateApiKey,
   unauthorizedResponse,
   errorResponse,
+  getRequestedWeddingId,
+  getBodyWeddingId,
 } from '../auth-helper';
 
 export async function GET(request: NextRequest) {
@@ -13,10 +15,13 @@ export async function GET(request: NextRequest) {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
 
+    const targetWeddingId = getRequestedWeddingId(auth, request);
+    if (!targetWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const result = await db
       .select()
       .from(kanbanColumns)
-      .where(eq(kanbanColumns.weddingId, auth.weddingId));
+      .where(eq(kanbanColumns.weddingId, targetWeddingId));
 
     return Response.json(result);
   } catch (error) {
@@ -37,10 +42,13 @@ export async function POST(request: NextRequest) {
       return errorResponse('name is required.', 400);
     }
 
+    const bodyWeddingId = getBodyWeddingId(auth, body);
+    if (!bodyWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const [created] = await db
       .insert(kanbanColumns)
       .values({
-        weddingId: auth.weddingId,
+        weddingId: bodyWeddingId,
         name,
         color: color ?? '#6771ab',
         position: position ?? 0,

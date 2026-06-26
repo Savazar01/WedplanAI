@@ -8,15 +8,20 @@ import { eq } from "drizzle-orm";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 
-export async function createApiKeyAction(name: string) {
+export async function createApiKeyAction(name: string, scope: 'wedding' | 'global' = 'wedding') {
   const session = await getServerSession();
   if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
     throw new Error("Unauthorized");
   }
 
-  const wedding = await getActiveWedding(session.user.id);
-  if (!wedding) {
-    throw new Error("No active wedding found");
+  let weddingId: string | null = null;
+
+  if (scope === 'wedding') {
+    const wedding = await getActiveWedding(session.user.id);
+    if (!wedding) {
+      throw new Error("No active wedding found");
+    }
+    weddingId = wedding.id;
   }
 
   const token = crypto.randomBytes(24).toString("hex");
@@ -27,7 +32,9 @@ export async function createApiKeyAction(name: string) {
   expiresAt.setFullYear(expiresAt.getFullYear() + 1);
 
   await db.insert(apiKeys).values({
-    weddingId: wedding.id,
+    weddingId,
+    scope,
+    userId: scope === 'global' ? session.user.id : null,
     name,
     keyHash,
     expiresAt,

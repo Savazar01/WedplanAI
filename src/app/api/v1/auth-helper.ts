@@ -6,8 +6,10 @@ import { NextRequest } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export interface AuthResult {
-  weddingId: string;
+  weddingId: string | null;
   keyId: string;
+  scope: 'global' | 'wedding';
+  userId: string | null;
 }
 
 /**
@@ -38,29 +40,42 @@ export async function validateApiKey(request: NextRequest): Promise<AuthResult |
 
   if (!keyRecord) return null;
 
+  if (keyRecord.scope === 'global') {
+    return {
+      weddingId: null,
+      keyId: keyRecord.id,
+      scope: 'global' as const,
+      userId: keyRecord.userId,
+    };
+  }
+
   return {
     weddingId: keyRecord.weddingId,
     keyId: keyRecord.id,
+    scope: 'wedding' as const,
+    userId: null,
   };
 }
 
 export async function requireAdminScope(auth: AuthResult): Promise<boolean> {
-  const [keyRecord] = await db
-    .select({ weddingId: apiKeys.weddingId })
-    .from(apiKeys)
-    .where(eq(apiKeys.id, auth.keyId))
-    .limit(1);
-  if (!keyRecord) return false;
-  const [wedding] = await db
-    .select({ userId: weddings.userId })
-    .from(weddings)
-    .where(eq(weddings.id, keyRecord.weddingId))
-    .limit(1);
-  if (!wedding) return false;
+  let userId: string | null = null;
+
+  if (auth.scope === 'global' && auth.userId) {
+    userId = auth.userId;
+  } else if (auth.weddingId) {
+    const [wedding] = await db
+      .select({ userId: weddings.userId })
+      .from(weddings)
+      .where(eq(weddings.id, auth.weddingId))
+      .limit(1);
+    if (wedding) userId = wedding.userId;
+  }
+
+  if (!userId) return false;
   const [user] = await db
     .select({ role: users.role })
     .from(users)
-    .where(eq(users.id, wedding.userId))
+    .where(eq(users.id, userId))
     .limit(1);
   return user?.role === 'admin';
 }
@@ -78,4 +93,19 @@ export function notFoundResponse(entity: string = "Resource") {
 
 export function errorResponse(message: string, status = 500) {
   return Response.json({ error: message }, { status });
+}
+
+export function getRequestedWeddingId(auth: AuthResult, request: NextRequest): string | null {
+  if (auth.scope === 'global') {
+    const url = new URL(request.url);
+    return url.searchParams.get('weddingId') || null;
+  }
+  return auth.weddingId;
+}
+
+export function getBodyWeddingId(auth: AuthResult, body: any): string | null {
+  if (auth.scope === 'global') {
+    return body?.weddingId || null;
+  }
+  return auth.weddingId;
 }

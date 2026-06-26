@@ -12,20 +12,15 @@ export default async function ApiKeysPage() {
     redirect("/dashboard");
   }
 
-  const wedding = await getActiveWedding(session.user.id);
-  if (!wedding) {
-    redirect("/dashboard");
-  }
-
   const initialKeys = await db
     .select()
     .from(apiKeys)
-    .where(eq(apiKeys.weddingId, wedding.id))
     .orderBy(desc(apiKeys.createdAt));
 
   const serializedKeys = initialKeys.map((key) => ({
     id: key.id,
     weddingId: key.weddingId,
+    scope: key.scope,
     name: key.name,
     keyHash: key.keyHash,
     createdAt: key.createdAt.toISOString(),

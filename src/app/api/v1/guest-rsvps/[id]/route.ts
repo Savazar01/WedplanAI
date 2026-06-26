@@ -7,6 +7,7 @@ import {
   unauthorizedResponse,
   notFoundResponse,
   errorResponse,
+  getRequestedWeddingId,
 } from '../../auth-helper';
 
 interface RouteParams {
@@ -19,6 +20,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
+
     const body = await request.json();
 
     const allowedFields = ['rsvpStatus', 'guestCount'] as const;
@@ -39,7 +43,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .from(guestRsvps)
       .innerJoin(guests, eq(guestRsvps.guestId, guests.id))
       .where(
-        and(eq(guestRsvps.id, id), eq(guests.weddingId, auth.weddingId))
+        and(eq(guestRsvps.id, id), eq(guests.weddingId, weddingId))
       )
       .limit(1);
 
@@ -64,13 +68,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!auth) return unauthorizedResponse();
 
     const { id } = await params;
+    const weddingId = getRequestedWeddingId(auth, request);
+    if (!weddingId) return errorResponse('weddingId is required.', 400);
 
     const [existing] = await db
       .select({ id: guestRsvps.id })
       .from(guestRsvps)
       .innerJoin(guests, eq(guestRsvps.guestId, guests.id))
       .where(
-        and(eq(guestRsvps.id, id), eq(guests.weddingId, auth.weddingId))
+        and(eq(guestRsvps.id, id), eq(guests.weddingId, weddingId))
       )
       .limit(1);
 

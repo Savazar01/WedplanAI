@@ -6,12 +6,17 @@ import {
   validateApiKey,
   unauthorizedResponse,
   errorResponse,
+  getRequestedWeddingId,
+  getBodyWeddingId,
 } from '../auth-helper';
 
 export async function GET(request: NextRequest) {
   try {
     const auth = await validateApiKey(request);
     if (!auth) return unauthorizedResponse();
+
+    const targetWeddingId = getRequestedWeddingId(auth, request);
+    if (!targetWeddingId) return errorResponse('weddingId required for global key.', 400);
 
     const result = await db
       .select({
@@ -32,7 +37,7 @@ export async function GET(request: NextRequest) {
       })
       .from(cateringMenus)
       .leftJoin(ceremonies, eq(cateringMenus.ceremonyId, ceremonies.id))
-      .where(eq(cateringMenus.weddingId, auth.weddingId));
+      .where(eq(cateringMenus.weddingId, targetWeddingId));
 
     return Response.json(result);
   } catch (error) {
@@ -53,10 +58,13 @@ export async function POST(request: NextRequest) {
       return errorResponse('ceremonyId is required.', 400);
     }
 
+    const bodyWeddingId = getBodyWeddingId(auth, body);
+    if (!bodyWeddingId) return errorResponse('weddingId required for global key.', 400);
+
     const [created] = await db
       .insert(cateringMenus)
       .values({
-        weddingId: auth.weddingId,
+        weddingId: bodyWeddingId,
         ceremonyId,
         vendorId: vendorId ?? null,
         cuisine: cuisine ?? null,

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getLocaleServer } from "@/lib/i18n-server";
+import { translations } from "@/lib/translations";
 
 const sections = [
   {
@@ -203,7 +205,7 @@ const sections = [
       {
         title: "Building Your Showcase",
         content:
-          "Navigate to Build Showcase Page from the sidebar (admin only). Customize the hero banner image, welcome text, couple's story, primary/secondary colors, background theme, and RSVP form title and description. The live preview updates in real-time as you make changes.",
+          "Navigate to Build Showcase Page from the sidebar (admin only). Select from 9 premium design templates (Classic Elegance, Modern Minimalist, Royal Heritage, Garden Blossom, Indian Wedding, Indian Royal Heritage, Indian Festive Marigold, Indian Fusion Modern, and Beach Destination). Customize the hero banner image, welcome text, couple's story, primary/secondary colors, background theme, top welcome banner label, and RSVP form. The live preview updates in real-time as you make changes.",
       },
       {
         title: "Sharing with Guests",
@@ -230,7 +232,7 @@ const sections = [
       {
         title: "Profile Management",
         content:
-          "The User Profile page lets you edit your name, address, country, and spoken languages. Your country selection affects currency formatting throughout the app.",
+          "The User Profile page lets you edit your name, address, country, and spoken languages. You can also select the application language using the full-name language dropdown selector in the navigation header/sidebar, which supports 15 languages: English, हिन्दी (Hindi), తెలుగు (Telugu), मराठी (Marathi), বাংলা (Bengali), தமிழ் (Tamil), ಕನ್ನಡ (Kannada), ગુજરાતી (Gujarati), ଓଡ଼ିଆ (Odia), മലയാളം (Malayalam), অসমীয়া (Assamese), ਪੰਜਾਬੀ (Punjabi), Español (Spanish), Deutsch (German), and Français (French). Your country selection affects currency formatting throughout the app.",
       },
       {
         title: "Change Password",
@@ -528,13 +530,15 @@ function SectionCard({
   );
 }
 
-export default function DocsPage() {
+export default async function DocsPage() {
+  const locale = await getLocaleServer();
+  const tDict = translations[locale] || translations["en"];
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
       <div className="mb-10">
         <div className="inline-block px-3 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-[#6771ab] dark:text-violet-300 text-xs font-bold uppercase tracking-widest mb-3">
-          Documentation
+          {tDict.docs}
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-[#2d336b] dark:text-slate-100 mb-3">
           WedPlanAI User Guide

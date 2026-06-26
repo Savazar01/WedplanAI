@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Globe, ChevronDown } from "lucide-react";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
+import { languagesList, LanguageCode } from "@/lib/translations";
 
 interface LandingNavbarProps {
   isLoggedIn: boolean;
@@ -10,16 +12,27 @@ interface LandingNavbarProps {
 
 export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
   const [theme, setTheme] = React.useState<"light" | "dark">("dark");
+  const { t, locale, setLocale } = useTranslation();
 
   React.useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    setTimeout(() => {
-      if (saved === "dark" || !saved) {
-        setTheme("dark");
-      } else {
+    const syncTheme = () => {
+      const saved = localStorage.getItem("theme");
+      if (saved === "light") {
         setTheme("light");
+      } else {
+        setTheme("dark");
       }
-    }, 0);
+    };
+
+    syncTheme();
+
+    window.addEventListener("theme-change", syncTheme);
+    window.addEventListener("storage", syncTheme);
+
+    return () => {
+      window.removeEventListener("theme-change", syncTheme);
+      window.removeEventListener("storage", syncTheme);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -31,6 +44,7 @@ export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
     } else {
       document.documentElement.classList.remove("dark");
     }
+    window.dispatchEvent(new Event("theme-change"));
   };
 
   return (
@@ -45,10 +59,10 @@ export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
       </Link>
 
       <div className="hidden md:flex items-center gap-8">
-        <a href="#features" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">Features</a>
-        <a href="#personas" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">Personas</a>
-        <a href="#how-it-works" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">How It Works</a>
-        <Link href="/docs" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">Docs</Link>
+        <a href="#features" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">{t("features")}</a>
+        <a href="#personas" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">{t("personas")}</a>
+        <a href="#how-it-works" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">{t("howItWorks")}</a>
+        <Link href="/docs" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-[#6771ab] dark:hover:text-violet-400 transition-colors cursor-pointer">{t("docs")}</Link>
       </div>
 
       <div className="flex items-center gap-3">
@@ -66,19 +80,39 @@ export default function LandingNavbar({ isLoggedIn }: LandingNavbarProps) {
           )}
         </button>
 
+        {/* Language Switcher */}
+        <div className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">
+          <Globe className="h-4.5 w-4.5 text-slate-500 dark:text-slate-400 shrink-0" />
+          <select
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as LanguageCode)}
+            className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-transparent border-none focus:outline-none cursor-pointer pr-4 appearance-none"
+            title={t("language")}
+          >
+            {languagesList.map((lang) => (
+              <option key={lang.code} value={lang.code} className="dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+                {lang.name}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+            <ChevronDown className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+          </div>
+        </div>
+
         {isLoggedIn ? (
           <Link
             href="/dashboard"
             className="px-5 py-2 rounded-xl bg-[#6771ab] dark:bg-violet-600 text-white text-sm font-semibold shadow-md hover:bg-[#566198] dark:hover:bg-violet-500 transition-all active:scale-[0.97] cursor-pointer"
           >
-            Go to Dashboard
+            {t("goToDashboard")}
           </Link>
         ) : (
           <Link
             href="/signup"
             className="px-5 py-2 rounded-xl bg-[#6771ab] dark:bg-violet-600 text-white text-sm font-semibold shadow-md hover:bg-[#566198] dark:hover:bg-violet-500 transition-all active:scale-[0.97] cursor-pointer"
           >
-            Sign In
+            {t("signIn")}
           </Link>
         )}
       </div>

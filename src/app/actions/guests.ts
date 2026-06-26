@@ -1,8 +1,9 @@
 "use server";
 
 import { db } from "@/db/client";
-import { guests, guestRsvps, ceremonies } from "@/db/schema";
+import { guests, guestRsvps, ceremonies, emailConfigurations, weddings } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
+import { sendEmail } from "@/lib/mailer";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { eq, and, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -349,6 +350,87 @@ export async function saveGuestRsvpAction(
     console.error("Save guest RSVP error:", error);
     const errorMessage = error instanceof Error ? error.message : "Failed to save RSVPs";
     return { error: errorMessage };
+  }
+}
+
+export async function sendGuestInvitationEmailAction(guestId: string, showcaseUrl: string) {
+  const session = await getServerSession();
+  if (!session || !session.user) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const [guest] = await db.select().from(guests).where(eq(guests.id, guestId)).limit(1);
+    if (!guest) {
+      return { error: "Guest not found." };
+    }
+
+    if (!guest.email) {
+      return { error: "Guest does not have an email address." };
+    }
+
+    const [wedding] = await db.select().from(weddings).where(eq(weddings.id, guest.weddingId)).limit(1);
+    if (!wedding) {
+      return { error: "Wedding profile not found." };
+    }
+
+    let personalUrl = showcaseUrl;
+    if (!personalUrl.includes("code=")) {
+      const separator = personalUrl.includes("?") ? "&" : "?";
+      personalUrl = `${personalUrl}${separator}code=${guest.loginCode}`;
+    }
+
+    const subject = `You're Invited! Join us for ${wedding.partnerA} & ${wedding.partnerB}'s Wedding`;
+    const html = `
+      <div style="font-family: 'Playfair Display', Georgia, serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; text-align: center; background-color: #fffafb; border: 1px solid #e6b7d2; border-radius: 16px;">
+        <h3 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.25em; color: #8b93c5; margin-bottom: 20px; font-family: sans-serif;">Wedding Invitation</h3>
+        <h1 style="font-size: 28px; color: #2d336b; font-weight: normal; margin-bottom: 24px; font-style: italic;">
+          ${wedding.partnerA} <span style="font-size: 20px; font-style: normal; color: #94a3b8;">&amp;</span> ${wedding.partnerB}
+        </h1>
+        <p style="font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 30px; font-family: sans-serif;">
+          Dear ${guest.name},<br/><br/>
+          We are overjoyed to invite you to celebrate our wedding. Your presence would mean the world to us as we begin this new chapter of our lives together.
+        </p>
+        <div style="margin: 32px 0;">
+          <a href="${personalUrl}" style="background-color: #c484b0; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block; font-family: sans-serif; box-shadow: 0 4px 6px rgba(196, 132, 176, 0.2); transition: background-color 0.2s;">
+            View Invitation &amp; RSVP
+          </a>
+        </div>
+        <p style="font-size: 13px; color: #94a3b8; margin-top: 40px; border-top: 1px solid #f1f5f9; padding-top: 20px; font-family: sans-serif;">
+          If the button above does not work, you can copy and paste this URL into your browser:<br/>
+          <a href="${personalUrl}" style="color: #6771ab; word-break: break-all;">${personalUrl}</a>
+        </p>
+      </div>
+    `;
+
+    const result = await sendEmail({
+      to: guest.email,
+      subject,
+      html,
+    });
+
+    if (result.error) {
+      return { error: result.error };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("sendGuestInvitationEmailAction error:", error);
+    return { error: error instanceof Error ? error.message : "Failed to send guest invitation email." };
+  }
+}
+
+export async function isEmailConfiguredAction() {
+  try {
+    const [config] = await db
+      .select({ provider: emailConfigurations.provider, isActive: emailConfigurations.isActive })
+      .from(emailConfigurations)
+      .where(eq(emailConfigurations.isActive, true))
+      .limit(1);
+    return { configured: !!config && config.provider !== "disabled" };
+  } catch (err) {
+    console.error("isEmailConfiguredAction error:", err);
+    return { configured: false };
   }
 }
 

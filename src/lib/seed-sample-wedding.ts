@@ -2,7 +2,7 @@ import { db } from "@/db/client";
 import { weddings, tasks, rituals, guests, vendors, kanbanColumns, cateringMenus } from "@/db/schema";
 
 export async function seedSampleWedding(userId: string): Promise<string> {
-  const weddingDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const weddingDate = new Date("2027-03-01T10:00:00Z");
 
   const weddingId = await db.transaction(async (tx) => {
     const [wedding] = await tx
@@ -23,6 +23,8 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         country: "India",
         pincode: "313001",
         showcaseTitleFont: "Playfair Display",
+        showcaseTemplate: "indian",
+        showcaseTopLabel: "शुभ विवाह",
         isSample: true,
         description:
           "🎉 Sample Wedding — Explore all features of WedPlanAI! This sample Hindu wedding includes tasks, rituals, guests with RSVPs, vendors, and budget tracking to help you understand the app.",
@@ -168,7 +170,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "ceremonies",
         isCustom: false,
         position: 0,
-        dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-09T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -178,7 +180,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "apparel",
         isCustom: false,
         position: 1,
-        dueDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-01T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -188,7 +190,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "music",
         isCustom: false,
         position: 2,
-        dueDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-14T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -198,7 +200,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "decor",
         isCustom: false,
         position: 3,
-        dueDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-01T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -208,7 +210,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "invitations",
         isCustom: false,
         position: 4,
-        dueDate: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2026-12-01T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -218,7 +220,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "invitations",
         isCustom: false,
         position: 5,
-        dueDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-01-01T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -228,7 +230,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "other",
         isCustom: false,
         position: 6,
-        dueDate: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-04T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -238,7 +240,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "catering",
         isCustom: false,
         position: 7,
-        dueDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-17T12:00:00Z"),
         cateringMenuId: sampleMenu.id,
       },
       {
@@ -249,7 +251,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "other",
         isCustom: false,
         position: 8,
-        dueDate: new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-24T12:00:00Z"),
       },
       {
         weddingId: id,
@@ -259,7 +261,7 @@ export async function seedSampleWedding(userId: string): Promise<string> {
         category: "apparel",
         isCustom: false,
         position: 9,
-        dueDate: new Date(now.getTime() + 18 * 24 * 60 * 60 * 1000),
+        dueDate: new Date("2027-02-19T12:00:00Z"),
       },
     ]);
 

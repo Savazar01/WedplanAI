@@ -8,14 +8,24 @@ export default function ThemePreferences() {
   const [theme, setTheme] = React.useState<"light" | "dark">("dark");
 
   React.useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    setTimeout(() => {
-      if (saved === "dark" || !saved) {
-        setTheme("dark");
-      } else {
+    const syncTheme = () => {
+      const saved = localStorage.getItem("theme");
+      if (saved === "light") {
         setTheme("light");
+      } else {
+        setTheme("dark");
       }
-    }, 0);
+    };
+
+    syncTheme();
+
+    window.addEventListener("theme-change", syncTheme);
+    window.addEventListener("storage", syncTheme);
+
+    return () => {
+      window.removeEventListener("theme-change", syncTheme);
+      window.removeEventListener("storage", syncTheme);
+    };
   }, []);
 
   const setThemeMode = (mode: "light" | "dark") => {
@@ -26,6 +36,7 @@ export default function ThemePreferences() {
     } else {
       document.documentElement.classList.remove("dark");
     }
+    window.dispatchEvent(new Event("theme-change"));
   };
 
   return (

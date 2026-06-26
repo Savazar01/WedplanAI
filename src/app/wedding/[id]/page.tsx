@@ -117,7 +117,83 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
   const previewCode = getPreviewCode(id);
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] text-slate-800 flex flex-col items-center">
+    <div className={`min-h-screen bg-[var(--color-background)] text-slate-800 flex flex-col items-center w-full relative template-${wedding.showcaseTemplate || "classic"} overflow-hidden pb-12`}>
+      {/* Template Specific Frame/Borders */}
+      {wedding.showcaseTemplate === "classic" && (
+        <div className="absolute inset-4 border-2 border-double pointer-events-none rounded-2xl z-10" style={{ borderColor: "var(--color-primary)" }} />
+      )}
+      {wedding.showcaseTemplate === "modern" && (
+        <div className="absolute inset-4 border border-slate-200 pointer-events-none rounded-2xl z-10" />
+      )}
+      {wedding.showcaseTemplate === "royal" && (
+        <div className="absolute inset-4 border border-amber-600/30 pointer-events-none rounded-2xl z-10">
+          <div className="absolute top-2 left-2 text-amber-600 text-xs">⚜</div>
+          <div className="absolute top-2 right-2 text-amber-600 text-xs">⚜</div>
+          <div className="absolute bottom-2 left-2 text-amber-600 text-xs">⚜</div>
+          <div className="absolute bottom-2 right-2 text-amber-600 text-xs">⚜</div>
+        </div>
+      )}
+      {wedding.showcaseTemplate === "floral" && (
+        <div className="absolute inset-4 border border-pink-200 pointer-events-none rounded-2xl z-10">
+          <div className="absolute top-2 left-2 text-xs">🌸🌿</div>
+          <div className="absolute top-2 right-2 text-xs">🌸🌿</div>
+          <div className="absolute bottom-2 left-2 text-xs">🌸🌿</div>
+          <div className="absolute bottom-2 right-2 text-xs">🌸🌿</div>
+        </div>
+      )}
+      {wedding.showcaseTemplate === "beach" && (
+        <div className="absolute inset-4 border border-cyan-200 pointer-events-none rounded-2xl z-10">
+          <div className="absolute top-2 left-2 text-xs">🐚</div>
+          <div className="absolute top-2 right-2 text-xs">🐚</div>
+          <div className="absolute bottom-2 left-2 text-xs">🐚</div>
+          <div className="absolute bottom-2 right-2 text-xs">🐚</div>
+        </div>
+      )}
+      {wedding.showcaseTemplate === "indian" && (
+        <div className="absolute inset-4 border-2 border-orange-500/30 border-dashed pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+          <span className="text-xs bg-orange-50 text-orange-800 px-3 py-1 rounded-full font-serif border border-orange-200 shadow-sm relative -top-5">
+            {wedding.showcaseTopLabel || "शुभ विवाह"}
+          </span>
+          <div className="absolute top-2 left-2 text-xs">🪔</div>
+          <div className="absolute top-2 right-2 text-xs">🪔</div>
+          <div className="absolute bottom-2 left-2 text-xs">🪔</div>
+          <div className="absolute bottom-2 right-2 text-xs">🪔</div>
+        </div>
+      )}
+      {wedding.showcaseTemplate === "indian_royal" && (
+        <div className="absolute inset-4 border-2 border-red-800/40 pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+          <span className="text-xs bg-red-900 text-amber-200 px-3 py-1 rounded-full font-serif border border-amber-500 shadow-md relative -top-5">
+            {wedding.showcaseTopLabel || "शुभ विवाह"}
+          </span>
+          <div className="absolute top-2 left-2 text-amber-500 text-xs">⚜</div>
+          <div className="absolute top-2 right-2 text-amber-500 text-xs">⚜</div>
+          <div className="absolute bottom-2 left-2 text-amber-500 text-xs">⚜</div>
+          <div className="absolute bottom-2 right-2 text-amber-500 text-xs">⚜</div>
+        </div>
+      )}
+      {wedding.showcaseTemplate === "indian_marigold" && (
+        <div className="absolute inset-4 border-2 border-yellow-500/40 border-double pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+          <span className="text-xs bg-yellow-50 text-amber-800 px-3 py-1 rounded-full font-serif border border-yellow-300 shadow-sm relative -top-5">
+            {wedding.showcaseTopLabel || "शुभ विवाह"}
+          </span>
+          <div className="absolute top-2 left-2 text-xs">🌼</div>
+          <div className="absolute top-2 right-2 text-xs">🌼</div>
+          <div className="absolute bottom-2 left-2 text-xs">🌼</div>
+          <div className="absolute bottom-2 right-2 text-xs">🌼</div>
+        </div>
+      )}
+      {wedding.showcaseTemplate === "indian_modern" && (
+        <div className="absolute inset-4 border border-pink-500/30 pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+          <span className="text-xs bg-pink-50 text-pink-700 px-3 py-1 rounded-full font-sans border border-pink-200 shadow-sm relative -top-5">
+            {wedding.showcaseTopLabel || "शुभ विवाह"}
+          </span>
+          <div className="absolute top-2 left-2 text-xs">🪔</div>
+          <div className="absolute top-2 right-2 text-xs">🪔</div>
+          <div className="absolute bottom-2 left-2 text-xs">🪔</div>
+          <div className="absolute bottom-2 right-2 text-xs">🪔</div>
+        </div>
+      )}
+
       <DynamicTheme wedding={wedding} mode="showcase" />
       <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
 
@@ -138,9 +214,19 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
         </h1>
 
         <div className="flex items-center justify-center gap-4 py-4 w-full">
-          <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-r from-transparent to-amber-400" />
-          <span className="text-amber-500 text-lg">✨ 💍 ✨</span>
-          <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-l from-transparent to-amber-400" />
+          <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-r from-transparent to-[var(--color-primary)]" />
+          <span className="text-[var(--color-primary)] text-lg">
+            {(wedding.showcaseTemplate || "classic") === "classic" && "✨ 💍 ✨"}
+            {wedding.showcaseTemplate === "modern" && "✦ ✦ ✦"}
+            {wedding.showcaseTemplate === "royal" && "👑 ⚜️ 👑"}
+            {wedding.showcaseTemplate === "floral" && "🌸 🌺 🌸"}
+            {wedding.showcaseTemplate === "indian" && "🪔 🕉️ 🪔"}
+            {wedding.showcaseTemplate === "indian_royal" && "⚜️ 🪔 ⚜️"}
+            {wedding.showcaseTemplate === "indian_marigold" && "🌼 🪔 🌼"}
+            {wedding.showcaseTemplate === "indian_modern" && "✦ ✨ ✦"}
+            {wedding.showcaseTemplate === "beach" && "🌊 🐚 🌊"}
+          </span>
+          <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-l from-transparent to-[var(--color-primary)]" />
         </div>
 
         <p className="text-base sm:text-lg text-[var(--color-primary)] font-medium tracking-wide">

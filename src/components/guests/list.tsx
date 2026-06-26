@@ -8,8 +8,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { createGuestAction, updateGuestRSVPAction, deleteGuestAction, updateGuestAction } from "@/app/actions/guests";
-import { Copy, Share2 } from "lucide-react";
+import { createGuestAction, updateGuestRSVPAction, deleteGuestAction, updateGuestAction, sendGuestInvitationEmailAction, isEmailConfiguredAction } from "@/app/actions/guests";
+import { Copy, Share2, Mail } from "lucide-react";
 
 interface Guest {
   id: string;
@@ -95,6 +95,15 @@ export default function GuestList({
 
   const [deleteConfirm, setDeleteConfirm] = React.useState<Guest | null>(null);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const [isMailConfigured, setIsMailConfigured] = React.useState(false);
+  const [isSendingEmail, setIsSendingEmail] = React.useState(false);
+
+  React.useEffect(() => {
+    isEmailConfiguredAction().then((res) => {
+      setIsMailConfigured(!!res.configured);
+    });
+  }, []);
 
   const handleCeremonyToggle = (
     id: string,
@@ -430,9 +439,7 @@ export default function GuestList({
   const handleCopyLink = () => {
     if (!inviteGuest) return;
     const link = `${showcaseLink}?code=${inviteGuest.loginCode}`;
-    const coupleNames = partnerA && partnerB ? `"${partnerA} and ${partnerB}"` : "our";
-    const fullMsg = `You're Invited to ${coupleNames} wedding! Click here to respond: ${link}`;
-    navigator.clipboard.writeText(fullMsg);
+    navigator.clipboard.writeText(link);
     setToast({ message: "Invitation link copied!", type: "success" });
   };
 
@@ -460,6 +467,28 @@ export default function GuestList({
         await navigator.clipboard.writeText(fullMsg);
         setToast({ message: "Link copied to clipboard!", type: "success" });
       }
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!inviteGuest) return;
+    if (!inviteGuest.email) {
+      setToast({ message: "Guest does not have an email address.", type: "error" });
+      return;
+    }
+    setIsSendingEmail(true);
+    try {
+      const res = await sendGuestInvitationEmailAction(inviteGuest.id, showcaseLink);
+      if (res.error) {
+        setToast({ message: `Failed to send email: ${res.error}`, type: "error" });
+      } else {
+        setToast({ message: `Invitation email sent successfully to ${inviteGuest.email}!`, type: "success" });
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({ message: "An unexpected error occurred while sending email.", type: "error" });
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
@@ -771,22 +800,34 @@ export default function GuestList({
                 Close
               </Button>
               <div className="flex items-center gap-2">
+                {inviteGuest?.email && isMailConfigured && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={handleSendEmail}
+                    className="border-slate-200 flex items-center gap-1.5"
+                    disabled={loading || isSendingEmail}
+                  >
+                    <Mail className="h-4 w-4" />
+                    {isSendingEmail ? "Sending..." : "Send Email"}
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={handleCopyLink}
                   className="border-slate-200 flex items-center gap-1.5"
-                  disabled={loading}
+                  disabled={loading || isSendingEmail}
                 >
                   <Copy className="h-4 w-4" />
-                  Copy
+                  Copy Link
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={handleShare}
                   className="border-slate-200 flex items-center gap-1.5"
-                  disabled={loading}
+                  disabled={loading || isSendingEmail}
                 >
                   <Share2 className="h-4 w-4" />
                   Share
@@ -794,7 +835,7 @@ export default function GuestList({
                 <Button
                   variant="primary"
                   onClick={handleSaveSendInvitedCeremonies}
-                  disabled={loading || sendInvitedCeremonies.length === 0}
+                  disabled={loading || isSendingEmail || sendInvitedCeremonies.length === 0}
                 >
                   {loading ? "Saving..." : "Save Ceremonies"}
                 </Button>

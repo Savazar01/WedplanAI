@@ -1,4 +1,3 @@
-import crypto from "crypto";
 import { pgTable, text, timestamp, boolean, integer, uuid } from "drizzle-orm/pg-core";
 
 // Better Auth tables (text IDs as required by default setup)
@@ -111,6 +110,8 @@ export const weddings = pgTable("wedding", {
   showcaseGiftUrl: text("showcase_gift_url"),
   showcaseGiftTitle: text("showcase_gift_title"),
   showcaseGiftDescription: text("showcase_gift_description"),
+  showcaseTemplate: text("showcase_template").default("classic").notNull(),
+  showcaseTopLabel: text("showcase_top_label").default("").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -189,7 +190,7 @@ export const guests = pgTable("guest", {
     .unique()
     .notNull()
     .$defaultFn(() => {
-      return crypto.randomBytes(3).toString('hex');
+      return Math.random().toString(16).substring(2, 8);
     }),
   rsvpStatus: text("rsvp_status").default("pending").notNull(), // pending, attending, declined
   plusOneCount: integer("plus_one_count").default(0).notNull(),
@@ -251,6 +252,19 @@ export const taskCategories = pgTable("task_cat_config", {
   key: text("key").unique().notNull(),
   name: text("name").notNull(),
   followUpQuestions: text("follow_up_questions"), // JSON string
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const emailConfigurations = pgTable("email_configuration", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  provider: text("provider").notNull(), // 'gmail', 'sendgrid', or 'disabled'
+  senderEmail: text("sender_email").notNull(),
+  clientId: text("client_id"),
+  clientSecret: text("client_secret"),
+  refreshToken: text("refresh_token"),
+  apiKey: text("api_key"),
+  isActive: boolean("is_active").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

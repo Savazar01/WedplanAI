@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 import { 
   createTaskAction, 
   updateTaskStatusAction, 
@@ -180,6 +181,7 @@ export default function PlanningBoard({
   teamMembers = [],
   cateringMenus = [],
 }: BoardProps) {
+  const { t } = useTranslation();
   const [tasksList, setTasksList] = React.useState<Task[]>(initialTasks);
   const [columnsList, setColumnsList] = React.useState<Column[]>(initialColumns);
   const [activeMobileCol, setActiveMobileCol] = React.useState<string>(initialColumns[0]?.id || "todo");
@@ -571,7 +573,7 @@ export default function PlanningBoard({
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Wedding Task Planner</h1>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">{t("taskPlanner")}</h1>
           <p className="text-xs text-slate-500 mt-0.5 font-sans">Click a card to edit · Drag to change status</p>
         </div>
         <div className="flex items-center gap-3">

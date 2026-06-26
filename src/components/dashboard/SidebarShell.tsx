@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import WeddingSwitcher from "./WeddingSwitcher";
 import SampleWalkthroughCard from "./SampleWalkthroughCard";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
+import { languagesList, LanguageCode } from "@/lib/translations";
 import {
   LayoutDashboard,
   KanbanSquare,
@@ -28,6 +30,9 @@ import {
   BookOpen,
   Sparkles,
   Tags,
+  Sun,
+  Moon,
+  Mail,
 } from "lucide-react";
 
 const DEFAULT_LOGO = "https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png";
@@ -68,10 +73,63 @@ export default function SidebarShell({
 }: SidebarShellProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { t, locale, setLocale } = useTranslation();
+
+  const getTranslatedLabel = (label: string) => {
+    switch (label) {
+      case "Guests": return t("guests");
+      case "Build Showcase Page": return t("showcase");
+      case "User Profile": return t("profile");
+      case "Documentation": return t("docs");
+      case "Dashboard": return t("dashboard");
+      case "Wedding Ceremony Planner": return t("ceremonyPlanner");
+      case "Wedding Task Planner": return t("taskPlanner");
+      case "Calendar": return t("calendar");
+      case "Menu Plan": return t("menuPlan");
+      case "Vendors": return t("vendors");
+      default: return label;
+    }
+  };
+
+  const [theme, setTheme] = React.useState<"light" | "dark">("dark");
+
+  React.useEffect(() => {
+    const syncTheme = () => {
+      const saved = localStorage.getItem("theme");
+      if (saved === "light") {
+        setTheme("light");
+      } else {
+        setTheme("dark");
+      }
+    };
+
+    syncTheme();
+
+    window.addEventListener("theme-change", syncTheme);
+    window.addEventListener("storage", syncTheme);
+
+    return () => {
+      window.removeEventListener("theme-change", syncTheme);
+      window.removeEventListener("storage", syncTheme);
+    };
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    localStorage.setItem("theme", nextTheme);
+    if (nextTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    window.dispatchEvent(new Event("theme-change"));
+  };
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = React.useState(() =>
-    ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories"].includes(pathname)
+    ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email"].includes(pathname)
   );
 
   React.useEffect(() => {
@@ -86,7 +144,7 @@ export default function SidebarShell({
   const [prevPathname, setPrevPathname] = React.useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
-    if (["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories"].includes(pathname)) {
+    if (["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email"].includes(pathname)) {
       setIsAdminMenuOpen(true);
     }
   }
@@ -150,7 +208,7 @@ export default function SidebarShell({
 
   const sidebarContent = (isMobile = false) => {
     const showCollapsed = isCollapsed && !isMobile;
-    const isSubpageActive = ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories"].includes(pathname);
+    const isSubpageActive = ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email"].includes(pathname);
     const logoSource = activeWedding?.logoData || activeWedding?.logoUrl || DEFAULT_LOGO;
 
     return (
@@ -186,6 +244,7 @@ export default function SidebarShell({
         <nav className="flex-1 space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
+            const translatedLabel = getTranslatedLabel(item.label);
             return (
               <Link
                 key={item.href}
@@ -193,7 +252,7 @@ export default function SidebarShell({
                 target={item.target}
                 rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
                 onClick={() => isMobile && setIsMobileMenuOpen(false)}
-                title={item.label}
+                title={translatedLabel}
                 className={`flex items-center rounded-xl text-sm font-semibold transition-all duration-100 ${
                   showCollapsed
                     ? "justify-center h-10 w-10 mx-auto"
@@ -205,7 +264,7 @@ export default function SidebarShell({
                 }`}
               >
                 <item.icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? "text-[#6771ab]" : "text-slate-400"}`} />
-                {!showCollapsed && <span>{item.label}</span>}
+                {!showCollapsed && <span>{translatedLabel}</span>}
               </Link>
             );
           })}
@@ -215,7 +274,7 @@ export default function SidebarShell({
             showCollapsed ? (
               <div className="relative group mx-auto">
                 <button
-                  title="App Administration"
+                  title={t("appAdmin")}
                   className={`flex items-center justify-center h-10 w-10 mx-auto rounded-xl transition-all duration-100 cursor-pointer ${
                     isSubpageActive
                       ? "bg-[#eef0f7] text-[#2d336b] shadow-sm"
@@ -228,7 +287,7 @@ export default function SidebarShell({
                 {/* Floating Tooltip Box */}
                 <div className="absolute left-full top-0 ml-2 hidden group-hover:flex flex-col bg-white border border-slate-200 shadow-md p-2.5 rounded-xl z-50 w-48 text-left space-y-1">
                   <div className="px-2 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
-                    App Administration
+                    {t("appAdmin")}
                   </div>
                   <Link
                     href="/dashboard/admin/appearance"
@@ -238,7 +297,7 @@ export default function SidebarShell({
                     }`}
                   >
                     <Palette className="h-3.5 w-3.5 text-slate-400" />
-                    Appearance
+                    {t("appearance")}
                   </Link>
                   <Link
                     href="/dashboard/admin/api-keys"
@@ -248,7 +307,7 @@ export default function SidebarShell({
                     }`}
                   >
                     <KeyRound className="h-3.5 w-3.5 text-slate-400" />
-                    API Keys
+                    {t("apiKeys")}
                   </Link>
                   <Link
                     href="/dashboard/admin/users"
@@ -258,7 +317,7 @@ export default function SidebarShell({
                     }`}
                   >
                     <UserCog className="h-3.5 w-3.5 text-slate-400" />
-                    Manage Your Team
+                    {t("manageTeam")}
                   </Link>
                   <Link
                     href="/dashboard/admin/traditions"
@@ -268,7 +327,7 @@ export default function SidebarShell({
                     }`}
                   >
                     <Sparkles className="h-3.5 w-3.5 text-slate-400" />
-                    Traditions
+                    {t("traditions")}
                   </Link>
                   <Link
                     href="/dashboard/admin/categories"
@@ -278,7 +337,17 @@ export default function SidebarShell({
                     }`}
                   >
                     <Tags className="h-3.5 w-3.5 text-slate-400" />
-                    Categories
+                    {t("categories")}
+                  </Link>
+                  <Link
+                    href="/dashboard/admin/email"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#f0f1fa] hover:text-[#3d4580] transition-colors ${
+                      pathname === "/dashboard/admin/email" ? "bg-[#eef0f7] text-[#2d336b]" : "text-[#475569]"
+                    }`}
+                  >
+                    <Mail className="h-3.5 w-3.5 text-slate-400" />
+                    {t("emailSettings")}
                   </Link>
                 </div>
               </div>
@@ -294,7 +363,7 @@ export default function SidebarShell({
                 >
                   <div className="flex items-center gap-3">
                     <ShieldAlert className={`h-4.5 w-4.5 shrink-0 ${isSubpageActive ? "text-[#6771ab]" : "text-slate-400"}`} />
-                    <span>App Administration</span>
+                    <span>{t("appAdmin")}</span>
                   </div>
                   <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${isAdminMenuOpen ? "rotate-180" : ""}`} />
                 </button>
@@ -311,7 +380,7 @@ export default function SidebarShell({
                       }`}
                     >
                       <Palette className="h-4 w-4 text-slate-400" />
-                      <span>Appearance</span>
+                      <span>{t("appearance")}</span>
                     </Link>
                     <Link
                       href="/dashboard/admin/api-keys"
@@ -323,7 +392,7 @@ export default function SidebarShell({
                       }`}
                     >
                       <KeyRound className="h-4 w-4 text-slate-400" />
-                      <span>API Keys</span>
+                      <span>{t("apiKeys")}</span>
                     </Link>
                     <Link
                       href="/dashboard/admin/users"
@@ -335,7 +404,7 @@ export default function SidebarShell({
                       }`}
                     >
                       <UserCog className="h-4 w-4 text-slate-400" />
-                      <span>Manage Your Team</span>
+                      <span>{t("manageTeam")}</span>
                     </Link>
                     <Link
                       href="/dashboard/admin/traditions"
@@ -347,7 +416,7 @@ export default function SidebarShell({
                       }`}
                     >
                       <Sparkles className="h-4 w-4 text-slate-400" />
-                      <span>Traditions</span>
+                      <span>{t("traditions")}</span>
                     </Link>
                     <Link
                       href="/dashboard/admin/categories"
@@ -359,7 +428,19 @@ export default function SidebarShell({
                       }`}
                     >
                       <Tags className="h-4 w-4 text-slate-400" />
-                      <span>Categories</span>
+                      <span>{t("categories")}</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/admin/email"
+                      onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-100 ${
+                        pathname === "/dashboard/admin/email"
+                          ? "bg-[#eef0f7] text-[#2d336b]"
+                          : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                      }`}
+                    >
+                      <Mail className="h-4 w-4 text-slate-400" />
+                      <span>{t("emailSettings")}</span>
                     </Link>
                   </div>
                 )}
@@ -390,9 +471,69 @@ export default function SidebarShell({
               </div>
             </div>
           )}
+          <div className={`flex ${showCollapsed ? "flex-col items-center gap-1" : "flex-row items-center gap-2 px-1"} mb-1`}>
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+              className={`flex items-center rounded-xl text-sm font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-all cursor-pointer active:scale-[0.98] ${
+                showCollapsed
+                  ? "justify-center h-10 w-10"
+                  : "flex-1 gap-2.5 px-2.5 py-2"
+              }`}
+            >
+              {theme === "light" ? (
+                <Sun className="h-4.5 w-4.5 text-amber-500 shrink-0" />
+              ) : (
+                <Moon className="h-4.5 w-4.5 text-[#8b93c5] shrink-0" />
+              )}
+              {!showCollapsed && (
+                <span>{theme === "light" ? t("lightMode") : t("darkMode")}</span>
+              )}
+            </button>
+
+            {/* Language Switcher */}
+            <div className={`relative ${showCollapsed ? "h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800" : "flex-1"}`}>
+              {showCollapsed ? (
+                <>
+                  <select
+                    value={locale}
+                    onChange={(e) => setLocale(e.target.value as LanguageCode)}
+                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10 language-selector"
+                    title={t("language")}
+                  >
+                    {languagesList.map((lang) => (
+                      <option key={lang.code} value={lang.code} className="dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+                        {lang.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Globe className="h-4.5 w-4.5 text-slate-400" />
+                </>
+              ) : (
+                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 relative">
+                  <Globe className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <select
+                    value={locale}
+                    onChange={(e) => setLocale(e.target.value as LanguageCode)}
+                    className="w-full text-xs font-semibold text-slate-600 dark:text-slate-300 bg-transparent border-none focus:outline-none cursor-pointer pr-4 appearance-none language-selector"
+                  >
+                    {languagesList.map((lang) => (
+                      <option key={lang.code} value={lang.code} className="dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+                        {lang.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <ChevronDown className="h-3 w-3 text-slate-400" />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           <button
             onClick={handleSignOut}
-            title={showCollapsed ? "Sign Out" : undefined}
+            title={showCollapsed ? t("signOut") : undefined}
             className={`flex items-center rounded-xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all cursor-pointer active:scale-[0.98] ${
               showCollapsed
                 ? "justify-center h-10 w-10 mx-auto"
@@ -400,7 +541,7 @@ export default function SidebarShell({
             }`}
           >
             <LogOut className="h-4.5 w-4.5 text-slate-400 group-hover:text-red-500" />
-            {!showCollapsed && <span>Sign Out</span>}
+            {!showCollapsed && <span>{t("signOut")}</span>}
           </button>
         </div>
       </div>

@@ -208,7 +208,7 @@ const sections = [
       {
         title: "Building Your Showcase",
         content:
-          "Navigate to Build Showcase Page from the sidebar (admin only). Customize the hero banner image, welcome text, couple's story, primary/secondary colors, background theme, and RSVP form title and description. The live preview updates in real-time as you make changes. The 'View Public Page' link uses an internal preview code — a secure HMAC-based hash — so you can see the full showcase without needing a real guest invitation code.",
+          "Navigate to Build Showcase Page from the sidebar (admin only). Select from 9 premium design templates (Classic Elegance, Modern Minimalist, Royal Heritage, Garden Blossom, Indian Wedding, Indian Royal Heritage, Indian Festive Marigold, Indian Fusion Modern, and Beach Destination). Customize the hero banner image, welcome text, couple's story, primary/secondary colors, background theme, top welcome banner label, and RSVP form. The live preview updates in real-time as you make changes. The 'View Public Page' link uses an internal preview code — a secure HMAC-based hash — so you can see the full showcase without needing a real guest invitation code.",
       },
       {
         title: "Sharing with Guests",
@@ -235,7 +235,7 @@ const sections = [
       {
         title: "Profile Management",
         content:
-          "The User Profile page lets you edit your name, address, country, and spoken languages. Your country selection affects currency formatting throughout the app.",
+          "The User Profile page lets you edit your name, address, country, and spoken languages. You can also select the application language using the full-name language dropdown selector in the navigation header/sidebar, which supports 15 languages: English, हिन्दी (Hindi), తెలుగు (Telugu), मराठी (Marathi), বাংলা (Bengali), தமிழ் (Tamil), ಕನ್ನಡ (Kannada), ગુજરાતી (Gujarati), ଓଡ଼ିଆ (Odia), മലയാളം (Malayalam), অসমীয়া (Assamese), ਪੰਜਾਬੀ (Punjabi), Español (Spanish), Deutsch (German), and Français (French). Your country selection affects currency formatting throughout the app.",
       },
       {
         title: "Change Password",

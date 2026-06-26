@@ -51,6 +51,8 @@ interface Wedding {
   showcaseGiftUrl?: string | null;
   showcaseGiftTitle?: string | null;
   showcaseGiftDescription?: string | null;
+  showcaseTemplate?: string;
+  showcaseTopLabel?: string | null;
 }
 
 interface Ritual {
@@ -129,6 +131,77 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
   const [showcasePrimary, setShowcasePrimary] = React.useState(wedding.showcasePrimary);
   const [showcaseSecondary, setShowcaseSecondary] = React.useState(wedding.showcaseSecondary);
   const [showcaseBackground, setShowcaseBackground] = React.useState(wedding.showcaseBackground);
+  const [showcaseTemplate, setShowcaseTemplate] = React.useState(wedding.showcaseTemplate || "classic");
+  const [showcaseTopLabel, setShowcaseTopLabel] = React.useState(wedding.showcaseTopLabel || "");
+
+  const handleTemplateChange = (template: string) => {
+    setShowcaseTemplate(template);
+    switch (template) {
+      case "classic":
+        setShowcaseTitleFont("Playfair Display");
+        setShowcaseFont("Geist");
+        setShowcasePrimary("#c484b0");
+        setShowcaseSecondary("#e6b7d2");
+        setShowcaseBackground("#fffafb");
+        break;
+      case "modern":
+        setShowcaseTitleFont("Montserrat");
+        setShowcaseFont("Outfit");
+        setShowcasePrimary("#1e293b");
+        setShowcaseSecondary("#64748b");
+        setShowcaseBackground("#f8fafc");
+        break;
+      case "royal":
+        setShowcaseTitleFont("Cinzel");
+        setShowcaseFont("Lora");
+        setShowcasePrimary("#854d0e");
+        setShowcaseSecondary("#b45309");
+        setShowcaseBackground("#fefdf6");
+        break;
+      case "floral":
+        setShowcaseTitleFont("Great Vibes");
+        setShowcaseFont("Cormorant Garamond");
+        setShowcasePrimary("#be185d");
+        setShowcaseSecondary("#db2777");
+        setShowcaseBackground("#fdf2f8");
+        break;
+      case "indian":
+        setShowcaseTitleFont("Cinzel");
+        setShowcaseFont("Cormorant Garamond");
+        setShowcasePrimary("#b91c1c");
+        setShowcaseSecondary("#d97706");
+        setShowcaseBackground("#fffbeb");
+        break;
+      case "indian_royal":
+        setShowcaseTitleFont("Cinzel");
+        setShowcaseFont("Lora");
+        setShowcasePrimary("#7f1d1d");
+        setShowcaseSecondary("#ca8a04");
+        setShowcaseBackground("#fef2f2");
+        break;
+      case "indian_marigold":
+        setShowcaseTitleFont("Great Vibes");
+        setShowcaseFont("Cormorant Garamond");
+        setShowcasePrimary("#ea580c");
+        setShowcaseSecondary("#eab308");
+        setShowcaseBackground("#fffdf5");
+        break;
+      case "indian_modern":
+        setShowcaseTitleFont("Outfit");
+        setShowcaseFont("Inter");
+        setShowcasePrimary("#db2777");
+        setShowcaseSecondary("#d97706");
+        setShowcaseBackground("#fff5f7");
+        break;
+      case "beach":
+        setShowcaseTitleFont("Outfit");
+        setShowcaseFont("Inter");
+        setShowcasePrimary("#0891b2");
+        setShowcaseSecondary("#0284c7");
+        setShowcaseBackground("#f0f9ff");
+        break;
+    }
+  };
 
   // Showcase layout state
   const [showcaseSubtitle, setShowcaseSubtitle] = React.useState(wedding.showcaseSubtitle || "");
@@ -197,6 +270,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
     setShowcaseGiftUrl(wedding.showcaseGiftUrl || "");
     setShowcaseGiftTitle(wedding.showcaseGiftTitle || "");
     setShowcaseGiftDescription(wedding.showcaseGiftDescription || "");
+    setShowcaseTemplate(wedding.showcaseTemplate || "classic");
+    setShowcaseTopLabel(wedding.showcaseTopLabel || "");
   }
 
   // Sync state on rituals prop change during rendering
@@ -261,6 +336,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
     setShowcaseGiftUrl(wedding.showcaseGiftUrl || "");
     setShowcaseGiftTitle(wedding.showcaseGiftTitle || "");
     setShowcaseGiftDescription(wedding.showcaseGiftDescription || "");
+    setShowcaseTemplate(wedding.showcaseTemplate || "classic");
+    setShowcaseTopLabel(wedding.showcaseTopLabel || "");
     setItineraryHeading("Wedding Itinerary");
     setItineraryDescription("The schedule of our celebration events.");
     setToast({ message: "Changes discarded successfully.", type: "success" });
@@ -288,6 +365,8 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
         showcaseGiftUrl: showcaseGiftUrl || null,
         showcaseGiftTitle: showcaseGiftTitle || null,
         showcaseGiftDescription: showcaseGiftDescription || null,
+        showcaseTemplate,
+        showcaseTopLabel: showcaseTopLabel || null,
       });
 
       if (res?.error) {
@@ -445,6 +524,30 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
           <p className="text-xs text-slate-500">Configure public page fonts and colors.</p>
         </div>
 
+        {/* Template Section */}
+        <div className="space-y-4 pt-4 border-t border-slate-100">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+              Design Template
+            </label>
+            <Select
+              id="showcase-template-select"
+              value={showcaseTemplate}
+              onChange={(e) => handleTemplateChange(e.target.value)}
+            >
+              <option value="classic">Classic Elegance</option>
+              <option value="modern">Modern Minimalist</option>
+              <option value="royal">Royal Heritage</option>
+              <option value="floral">Garden Blossom</option>
+              <option value="indian">Indian Wedding</option>
+              <option value="indian_royal">Indian Royal Heritage</option>
+              <option value="indian_marigold">Indian Festive Marigold</option>
+              <option value="indian_modern">Indian Fusion Modern</option>
+              <option value="beach">Beach Destination</option>
+            </Select>
+          </div>
+        </div>
+
         {/* Fonts Section */}
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <div className="space-y-1.5">
@@ -452,6 +555,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
               Body Font Family
             </label>
             <Select
+              id="showcase-body-font-select"
               value={showcaseFont}
               onChange={(e) => setShowcaseFont(e.target.value)}
             >
@@ -468,6 +572,7 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
               Title Font Family
             </label>
             <Select
+              id="showcase-title-font-select"
               value={showcaseTitleFont}
               onChange={(e) => setShowcaseTitleFont(e.target.value)}
             >
@@ -599,13 +704,87 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
           <span className="text-sm font-bold text-slate-500 tracking-wide">
             Showcase Page - Live Preview
           </span>
-        </div>
+        </div>        {/* Live Styled Preview Container */}
+        <div style={scopedStyleProps} className={`showcase-preview template-${showcaseTemplate} text-slate-800 flex flex-col items-center min-h-[80vh] transition-all duration-300 relative w-full`}>
+          {/* Template Specific Frame Decorations */}
+          {showcaseTemplate === "classic" && (
+            <div className="absolute inset-4 border-2 border-double pointer-events-none rounded-2xl z-10" style={{ borderColor: showcasePrimary }} />
+          )}
+          {showcaseTemplate === "modern" && (
+            <div className="absolute inset-4 border border-slate-200 pointer-events-none rounded-2xl z-10" />
+          )}
+          {showcaseTemplate === "royal" && (
+            <div className="absolute inset-4 border border-amber-600/30 pointer-events-none rounded-2xl z-10">
+              <div className="absolute top-2 left-2 text-amber-600 text-xs">⚜</div>
+              <div className="absolute top-2 right-2 text-amber-600 text-xs">⚜</div>
+              <div className="absolute bottom-2 left-2 text-amber-600 text-xs">⚜</div>
+              <div className="absolute bottom-2 right-2 text-amber-600 text-xs">⚜</div>
+            </div>
+          )}
+          {showcaseTemplate === "floral" && (
+            <div className="absolute inset-4 border border-pink-200 pointer-events-none rounded-2xl z-10">
+              <div className="absolute top-2 left-2 text-xs">🌸🌿</div>
+              <div className="absolute top-2 right-2 text-xs">🌸🌿</div>
+              <div className="absolute bottom-2 left-2 text-xs">🌸🌿</div>
+              <div className="absolute bottom-2 right-2 text-xs">🌸🌿</div>
+            </div>
+          )}
+          {showcaseTemplate === "beach" && (
+            <div className="absolute inset-4 border border-cyan-200 pointer-events-none rounded-2xl z-10">
+              <div className="absolute top-2 left-2 text-xs">🐚</div>
+              <div className="absolute top-2 right-2 text-xs">🐚</div>
+              <div className="absolute bottom-2 left-2 text-xs">🐚</div>
+              <div className="absolute bottom-2 right-2 text-xs">🐚</div>
+            </div>
+          )}
+          {showcaseTemplate === "indian" && (
+            <div className="absolute inset-4 border-2 border-orange-500/30 border-dashed pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+              <span className="text-xs bg-orange-50 text-orange-800 px-3 py-1 rounded-full font-serif border border-orange-200 shadow-sm relative -top-5">
+                {showcaseTopLabel || "शुभ विवाह"}
+              </span>
+              <div className="absolute top-2 left-2 text-xs">🪔</div>
+              <div className="absolute top-2 right-2 text-xs">🪔</div>
+              <div className="absolute bottom-2 left-2 text-xs">🪔</div>
+              <div className="absolute bottom-2 right-2 text-xs">🪔</div>
+            </div>
+          )}
+          {showcaseTemplate === "indian_royal" && (
+            <div className="absolute inset-4 border-2 border-red-800/40 pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+              <span className="text-xs bg-red-900 text-amber-200 px-3 py-1 rounded-full font-serif border border-amber-500 shadow-md relative -top-5">
+                {showcaseTopLabel || "शुभ विवाह"}
+              </span>
+              <div className="absolute top-2 left-2 text-amber-500 text-xs">⚜</div>
+              <div className="absolute top-2 right-2 text-amber-500 text-xs">⚜</div>
+              <div className="absolute bottom-2 left-2 text-amber-500 text-xs">⚜</div>
+              <div className="absolute bottom-2 right-2 text-amber-500 text-xs">⚜</div>
+            </div>
+          )}
+          {showcaseTemplate === "indian_marigold" && (
+            <div className="absolute inset-4 border-2 border-yellow-500/40 border-double pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+              <span className="text-xs bg-yellow-50 text-amber-800 px-3 py-1 rounded-full font-serif border border-yellow-300 shadow-sm relative -top-5">
+                {showcaseTopLabel || "शुभ विवाह"}
+              </span>
+              <div className="absolute top-2 left-2 text-xs">🌼</div>
+              <div className="absolute top-2 right-2 text-xs">🌼</div>
+              <div className="absolute bottom-2 left-2 text-xs">🌼</div>
+              <div className="absolute bottom-2 right-2 text-xs">🌼</div>
+            </div>
+          )}
+          {showcaseTemplate === "indian_modern" && (
+            <div className="absolute inset-4 border border-pink-500/30 pointer-events-none rounded-2xl z-10 flex justify-center items-start pt-2">
+              <span className="text-xs bg-pink-50 text-pink-700 px-3 py-1 rounded-full font-sans border border-pink-200 shadow-sm relative -top-5">
+                {showcaseTopLabel || "शुभ विवाह"}
+              </span>
+              <div className="absolute top-2 left-2 text-xs">🪔</div>
+              <div className="absolute top-2 right-2 text-xs">🪔</div>
+              <div className="absolute bottom-2 left-2 text-xs">🪔</div>
+              <div className="absolute bottom-2 right-2 text-xs">🪔</div>
+            </div>
+          )}
 
-        {/* Live Styled Preview Container */}
-        <div style={scopedStyleProps} className="showcase-preview text-slate-800 flex flex-col items-center min-h-[80vh] transition-all duration-300">
           {/* Decorative Top Border */}
           <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
-
+ 
           {/* A. Header Section (Subtitle, Title, Description, Countdown) */}
           <section className="relative w-full max-w-4xl mx-auto px-6 pt-12 pb-8 flex flex-col items-center text-center border border-transparent hover:border-dashed hover:border-slate-300 rounded-3xl m-2 transition-all">
             <button
@@ -617,23 +796,33 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
               </svg>
               Edit
             </button>
-
+ 
             <div className="inline-block px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider mb-6">
               {showcaseSubtitle || defaultSubtitle}
             </div>
-            
+             
             <h1 
               style={{ fontFamily: "var(--font-title)", WebkitTextFillColor: 'transparent', color: 'transparent' }}
               className="showcase-gradient-text text-4xl sm:text-6xl font-extrabold bg-clip-text bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500 py-3 leading-tight tracking-wide"
             >
               {showcaseTitle || defaultTitle}
             </h1>
-
+ 
             {/* Elegant Gold Divider */}
             <div className="flex items-center justify-center gap-4 py-4 w-full">
-              <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-r from-transparent to-amber-400" />
-              <span className="text-amber-500 text-lg">✨ 💍 ✨</span>
-              <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-l from-transparent to-amber-400" />
+              <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-r from-transparent to-[var(--color-primary)]" />
+              <span className="text-[var(--color-primary)] text-lg">
+                {showcaseTemplate === "classic" && "✨ 💍 ✨"}
+                {showcaseTemplate === "modern" && "✦ ✦ ✦"}
+                {showcaseTemplate === "royal" && "👑 ⚜️ 👑"}
+                {showcaseTemplate === "floral" && "🌸 🌺 🌸"}
+                {showcaseTemplate === "indian" && "🪔 🕉️ 🪔"}
+                {showcaseTemplate === "indian_royal" && "⚜️ 🪔 ⚜️"}
+                {showcaseTemplate === "indian_marigold" && "🌼 🪔 🌼"}
+                {showcaseTemplate === "indian_modern" && "✦ ✨ ✦"}
+                {showcaseTemplate === "beach" && "🌊 🐚 🌊"}
+              </span>
+              <div className="h-[1px] flex-1 max-w-[120px] bg-gradient-to-l from-transparent to-[var(--color-primary)]" />
             </div>
 
             <p className="text-base sm:text-lg text-[var(--color-primary)] font-medium tracking-wide">
@@ -893,6 +1082,18 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
         title="Edit Header Section"
       >
         <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+              Top Welcome Banner Label
+            </label>
+            <Input
+              type="text"
+              value={showcaseTopLabel}
+              onChange={(e) => setShowcaseTopLabel(e.target.value)}
+              placeholder="e.g. शुभ विवाह"
+            />
+          </div>
+
           <div className="space-y-1">
             <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
               Subtitle / Celebration Label

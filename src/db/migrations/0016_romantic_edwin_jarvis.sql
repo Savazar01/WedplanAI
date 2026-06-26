@@ -1,0 +1,1 @@
+ALTER TABLE "wedding" ADD COLUMN "showcase_top_label" text DEFAULT '' NOT NULL;

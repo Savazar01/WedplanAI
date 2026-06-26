@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { createRitualAction, updateRitualAction, deleteRitualAction } from "@/app/actions/calendar";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 const getLocalDateString = (d: Date) => {
   const date = new Date(d);
@@ -52,6 +53,7 @@ interface MonthCalendarOnlyProps {
 
 export default function MonthCalendarOnly({ initialRituals, initialTasks }: MonthCalendarOnlyProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [ritualsList, setRitualsList] = React.useState<Ritual[]>(initialRituals);
   const [tasksList, setTasksList] = React.useState<Task[]>(initialTasks);
 
@@ -394,7 +396,7 @@ export default function MonthCalendarOnly({ initialRituals, initialTasks }: Mont
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Wedding Calendar</h1>
+          <h1 className="text-2xl font-bold text-slate-800">{t("calendar")}</h1>
           <p className="text-xs text-slate-500">Visualize your scheduled ceremonies and task deadlines.</p>
         </div>
         <Button onClick={openCreateModal} variant="primary">

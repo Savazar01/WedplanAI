@@ -531,11 +531,21 @@ export async function updateWeddingShowcaseAction(
     showcaseGiftUrl?: string | null;
     showcaseGiftTitle?: string | null;
     showcaseGiftDescription?: string | null;
+    showcaseTemplate?: string;
+    showcaseTopLabel?: string | null;
   }
 ) {
   const session = await getServerSession();
-  if (!session || !session.user || session.user.role !== "admin") {
-    return { error: "Unauthorized. Admin role required." };
+  if (!session || !session.user) {
+    return { error: "Unauthorized." };
+  }
+
+  const isUserAdmin = session.user.role === "admin";
+  const isUserClient = session.user.role === "client";
+  const isAssignedToThisWedding = session.user.weddingId === weddingId;
+
+  if (!isUserAdmin && (!isUserClient || !isAssignedToThisWedding)) {
+    return { error: "Unauthorized. You do not have permission to update this wedding showcase." };
   }
 
   try {
@@ -581,6 +591,8 @@ export async function updateWeddingShowcaseAction(
       ...(data.showcaseGiftUrl !== undefined && { showcaseGiftUrl: data.showcaseGiftUrl }),
       ...(data.showcaseGiftTitle !== undefined && { showcaseGiftTitle: data.showcaseGiftTitle }),
       ...(data.showcaseGiftDescription !== undefined && { showcaseGiftDescription: data.showcaseGiftDescription }),
+      ...(data.showcaseTemplate !== undefined && { showcaseTemplate: data.showcaseTemplate }),
+      ...(data.showcaseTopLabel !== undefined && { showcaseTopLabel: data.showcaseTopLabel || "" }),
       updatedAt: new Date(),
     }).where(eq(weddings.id, weddingId));
 
@@ -687,6 +699,10 @@ export async function deleteWeddingAction(weddingId: string) {
       .where(and(eq(weddings.id, weddingId), eq(weddings.userId, session.user.id)))
       .limit(1);
     if (!wedding) return { error: "Wedding not found or access denied" };
+
+    if (wedding.isSample || (wedding.partnerA === "Rahul" && wedding.partnerB === "Priya")) {
+      return { error: "This wedding is for onboarding and cannot be deleted." };
+    }
 
     await db.delete(weddings).where(eq(weddings.id, weddingId));
 

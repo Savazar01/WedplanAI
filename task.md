@@ -1,0 +1,40 @@
+# Task Checklist - WedPlanAI Enhancements (Phase 2)
+
+- [x] Task 1: Database Migration
+  - [x] Add `showcaseTopLabel` column to `weddings` table in `src/db/schema.ts`
+  - [x] Run `npm run db:generate` to generate the migration file
+  - [x] Run `npm run db:migrate` to apply the database migrations
+- [x] Task 2: Full-Name Language Selector & 6 New Indian Languages
+  - [x] Add Kannada, Gujarati, Oriya, Malayalam, Assamese, and Punjabi to `languagesList` in `src/lib/translations.ts`
+  - [x] Update select dropdowns in `SidebarShell.tsx` and `LandingNavbar.tsx` to render the full language name
+- [x] Task 3: Translation Dictionary Updates (Landing Page & Dashboard)
+  - [x] Define comprehensive translation keys for the Landing Page and Dashboard Page in `src/lib/translations.ts`
+  - [x] Implement complete Hindi (`hi`) and Telugu (`te`) translations for all defined keys
+- [x] Task 4: Translate Public Landing Page
+  - [x] Resolve server locale using `getLocaleServer` in `src/app/page.tsx`
+  - [x] Replace hardcoded texts on the landing page (Hero, Features, Administration, Personas, How it Works) with dynamic translations
+  - [x] Update Features section to highlight new features (15 languages, email invitations, 9 templates, MCP server)
+- [x] Task 5: Translate Dashboard Page
+  - [x] Resolve server locale using `getLocaleServer` in `src/app/dashboard/page.tsx`
+  - [x] Replace hardcoded texts on the dashboard page (Welcome card, Task completion progress, Guest RSVPs, Budget tracker, Actions) with dynamic translations
+- [x] Task 6: Artistic borders for all Showcase Templates
+  - [x] Define decorative borders (ornate corners, geometric lines, fleur-de-lis, leaf garlands, seashells, clay diyas) in `src/app/wedding/[id]/page.tsx`
+  - [x] Mirror decorative borders styling in `src/app/dashboard/showcase/BuildShowcaseClient.tsx` live preview
+- [x] Task 7: 3 New Indian Wedding Template Variants & Editable Top Label
+  - [x] Add `showcaseTopLabel` input to the Edit Header modal in `BuildShowcaseClient.tsx`
+  - [x] Add Indian Royal (`indian_royal`), Indian Marigold (`indian_marigold`), and Indian Modern (`indian_modern`) templates to selection dropdown
+  - [x] Define preset fonts and colors for the new templates in the switcher handler in `BuildShowcaseClient.tsx`
+  - [x] Apply templates' unique grandiose layouts in `BuildShowcaseClient.tsx` preview and `src/app/wedding/[id]/page.tsx` public page
+- [x] Task 8: REST API and MCP Updates
+  - [x] Add `showcaseTemplate` and `showcaseTopLabel` to `allowedFields` in `src/app/api/v1/wedding/route.ts` PUT handler
+  - [x] Update the `update_wedding` tool definition in `mcp/server.js` to include the new fields
+- [x] Task 9: Documentation and Knowledge Graph
+  - [x] Update the dashboard docs page at `src/app/dashboard/docs/page.tsx`
+  - [x] Update `README.md` to document the new features and templates
+  - [x] Run `graphify update .` to update the codebase graph
+- [x] Task 10: E2E Verification & Docker Deployment
+  - [x] Add automated Playwright E2E tests for the new features in `e2e/features.spec.ts`
+  - [x] Run `npm run test:e2e` and confirm all 13+ tests pass successfully
+  - [x] Run Next.js production build (`npm run build`)
+  - [x] Run Docker build and compose up (`docker compose up -d --build`)
+  - [x] Verify localhost:3044 functionality

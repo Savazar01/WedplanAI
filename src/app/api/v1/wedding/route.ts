@@ -85,6 +85,8 @@ export async function PUT(request: NextRequest) {
       'showcaseGiftUrl',
       'showcaseGiftTitle',
       'showcaseGiftDescription',
+      'showcaseTemplate',
+      'showcaseTopLabel',
     ] as const;
 
     const updates: Record<string, unknown> = {};

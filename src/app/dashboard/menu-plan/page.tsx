@@ -5,8 +5,12 @@ import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import { eq, and } from "drizzle-orm";
 import MenuPlannerClient from "./MenuPlannerClient";
+import { getLocaleServer } from "@/lib/i18n-server";
+import { translations } from "@/lib/translations";
 
 export default async function MenuPlannerPage() {
+  const locale = await getLocaleServer();
+  const tDict = translations[locale] || translations["en"];
   const session = await getServerSession();
   if (!session || !session.user) {
     redirect("/login?unauthenticated=true");
@@ -38,7 +42,7 @@ export default async function MenuPlannerPage() {
   return (
     <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Catering Menu Planner</h1>
+        <h1 className="text-2xl font-bold text-slate-800">{tDict.cateringMenuPlanner}</h1>
         <p className="text-xs text-slate-500">Design and manage food & beverage menus for your wedding ceremonies.</p>
       </div>
 

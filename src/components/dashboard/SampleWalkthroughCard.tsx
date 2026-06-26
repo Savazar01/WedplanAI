@@ -39,10 +39,14 @@ export default function SampleWalkthroughCard({
   const router = useRouter();
 
   const [status, setStatus] = React.useState<'walking' | 'completed' | 'skipped' | null>(null);
-  const [currentStep, setCurrentStep] = React.useState(() => {
+  const [currentStep, setCurrentStep] = React.useState(0);
+
+  React.useEffect(() => {
     const stored = localStorage.getItem("sample_walkthrough_step");
-    return stored ? parseInt(stored, 10) : 0;
-  });
+    if (stored) {
+      setCurrentStep(parseInt(stored, 10));
+    }
+  }, []);
 
   React.useEffect(() => {
     localStorage.setItem("sample_walkthrough_step", String(currentStep));

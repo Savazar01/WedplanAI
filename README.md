@@ -30,6 +30,13 @@ The platform has built-in self-healing and auto-seeding logic registered in `src
 ### Wedding Traditions Supported
 Hindu · Muslim · Sikh · Christian · Secular (and custom traditions)
 
+### Languages Supported
+15 languages supported (with full-name select dropdown in navigation header/sidebar):
+English · हिन्दी (Hindi) · తెలుగు (Telugu) · मराठी (Marathi) · বাংলা (Bengali) · தமிழ் (Tamil) · ಕನ್ನಡ (Kannada) · ગુજરાતી (Gujarati) · ଓଡ଼ିଆ (Odia) · മലയാളം (Malayalam) · অসমীয়া (Assamese) · ਪੰਜਾਬੀ (Punjabi) · Español (Spanish) · Deutsch (German) · Français (French)
+
+### Premium Showcase Design Templates
+9 premium design templates (selectable via Build Showcase Page, featuring custom borders, ornaments, and divider icons):
+Classic Elegance · Modern Minimalist · Royal Heritage · Garden Blossom · Indian Wedding · Indian Royal Heritage · Indian Festive Marigold · Indian Fusion Modern · Beach Destination
 
 ---
 

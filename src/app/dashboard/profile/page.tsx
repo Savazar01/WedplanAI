@@ -4,8 +4,12 @@ import { getProfileAction } from "@/app/actions/profile";
 import ChangePasswordForm from "./ChangePasswordForm";
 import ProfileForm from "./ProfileForm";
 import ThemePreferences from "./ThemePreferences";
+import { getLocaleServer } from "@/lib/i18n-server";
+import { translations } from "@/lib/translations";
 
 export default async function ProfilePage() {
+  const locale = await getLocaleServer();
+  const tDict = translations[locale] || translations["en"];
   const session = await getServerSession();
   if (!session || !session.user) {
     redirect("/login?unauthenticated=true");
@@ -16,7 +20,7 @@ export default async function ProfilePage() {
   return (
     <main className="w-full max-w-3xl mr-auto p-6 md:px-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">User Profile</h1>
+        <h1 className="text-2xl font-bold text-slate-800">{tDict.profile}</h1>
         <p className="text-xs text-slate-500">Manage your account details, address, and preferences.</p>
       </div>
 

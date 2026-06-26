@@ -9,9 +9,10 @@ import { useRouter } from "next/navigation";
 interface WeddingActionsProps {
   weddingId: string;
   isArchived: boolean;
+  isSample?: boolean;
 }
 
-export default function WeddingActions({ weddingId, isArchived }: WeddingActionsProps) {
+export default function WeddingActions({ weddingId, isArchived, isSample }: WeddingActionsProps) {
   const router = useRouter();
   const [showArchiveConfirm, setShowArchiveConfirm] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
@@ -73,12 +74,17 @@ export default function WeddingActions({ weddingId, isArchived }: WeddingActions
           variant="error"
           size="sm"
           onClick={() => setShowDeleteConfirm(true)}
-          disabled={actioning}
+          disabled={actioning || isSample}
           className="text-xs"
         >
           Delete Wedding
         </Button>
       </div>
+      {isSample && (
+        <div className="mt-2 text-xs text-amber-700 dark:text-amber-300 bg-amber-500/[0.12] border border-amber-200/50 rounded-lg p-2 font-medium">
+          This wedding is for training and onboarding purpose only and cannot be deleted.
+        </div>
+      )}
 
       <ConfirmDialog
         isOpen={showArchiveConfirm}

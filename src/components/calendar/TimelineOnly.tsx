@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { createRitualAction, updateRitualAction, deleteRitualAction } from "@/app/actions/calendar";
+import { useTranslation } from "@/components/i18n/LanguageProvider";
 
 interface Ritual {
   id: string;
@@ -44,6 +45,7 @@ export default function EventItineraryOnly({
   defaultLocation = ""
 }: EventItineraryOnlyProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [ritualsList, setRitualsList] = React.useState<Ritual[]>(initialRituals);
 
   const allVenueOptions = React.useMemo(() => {
@@ -237,7 +239,7 @@ export default function EventItineraryOnly({
       {/* Header controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Wedding Ceremony Planner</h1>
+          <h1 className="text-2xl font-bold text-slate-800">{t("ceremonyPlanner")}</h1>
           <p className="text-xs text-slate-500 font-sans">Chronological order of your ceremonies and events.</p>
         </div>
         <Button onClick={openCreateModal} variant="primary">

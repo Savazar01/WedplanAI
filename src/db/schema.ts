@@ -120,6 +120,7 @@ export const weddings = pgTable("wedding", {
   showcaseGiftDescription: text("showcase_gift_description"),
   showcaseTemplate: text("showcase_template").default("classic").notNull(),
   showcaseTopLabel: text("showcase_top_label").default("").notNull(),
+  enableChat: boolean("enable_chat").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

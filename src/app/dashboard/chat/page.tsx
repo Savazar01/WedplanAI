@@ -11,7 +11,7 @@ export default async function ChatPage() {
   }
 
   const activeWedding = await getActiveWedding(session.user.id);
-  if (!activeWedding) {
+  if (!activeWedding || activeWedding.enableChat === false) {
     redirect("/dashboard");
   }
 

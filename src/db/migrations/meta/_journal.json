@@ -141,6 +141,13 @@
       "when": 1782819419076,
       "tag": "0019_shocking_colossus",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1782820366154,
+      "tag": "0020_dazzling_guardian",
+      "breakpoints": true
     }
   ]
 }

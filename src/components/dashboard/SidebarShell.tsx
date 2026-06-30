@@ -51,6 +51,7 @@ interface Wedding {
   themeBackground?: string | null;
   logoUrl?: string | null;
   logoData?: string | null;
+  enableChat?: boolean | null;
 }
 
 interface SidebarShellProps {
@@ -188,8 +189,10 @@ export default function SidebarShell({
     { href: "/dashboard/menu-plan", label: "Menu Plan", icon: UtensilsCrossed },
     { href: "/dashboard/guests", label: "Guests", icon: Users },
     { href: "/dashboard/vendors", label: "Vendors", icon: Store },
-    { href: "/dashboard/chat", label: "Chat & Call", icon: MessageSquare },
   ];
+  if (!activeWedding || activeWedding.enableChat !== false) {
+    navItems.push({ href: "/dashboard/chat", label: "Chat & Call", icon: MessageSquare });
+  }
   if (activeWedding) {
     navItems.push({
       href: "/dashboard/showcase",

@@ -1,0 +1,1 @@
+ALTER TABLE "wedding" ADD COLUMN "enable_chat" boolean DEFAULT true NOT NULL;

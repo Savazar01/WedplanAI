@@ -530,6 +530,7 @@ export async function updateWeddingAppearanceAction(
     themeDarkBackground: string;
     logoUrl?: string | null;
     logoData?: string | null;
+    enableChat?: boolean;
   }
 ) {
   const session = await getServerSession();
@@ -572,6 +573,7 @@ export async function updateWeddingAppearanceAction(
       themeDarkBackground: data.themeDarkBackground,
       logoUrl: data.logoUrl || null,
       logoData: data.logoData || null,
+      ...(data.enableChat !== undefined && { enableChat: data.enableChat }),
       updatedAt: new Date(),
     }).where(eq(weddings.id, weddingId));
 

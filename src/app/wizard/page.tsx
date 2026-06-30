@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { FieldHelp } from "@/components/ui/field-help";
 import { createWeddingAction } from "@/app/actions/wedding";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,7 +90,11 @@ export default function WizardPage() {
 
   // Form states
   const [partnerA, setPartnerA] = React.useState("");
+  const [brideFather, setBrideFather] = React.useState("");
+  const [brideMother, setBrideMother] = React.useState("");
   const [partnerB, setPartnerB] = React.useState("");
+  const [groomFather, setGroomFather] = React.useState("");
+  const [groomMother, setGroomMother] = React.useState("");
   const [weddingDate, setWeddingDate] = React.useState("");
   const [location, setLocation] = React.useState("");
   const locationRef = React.useRef(location);
@@ -123,6 +128,11 @@ export default function WizardPage() {
     return venueList;
   }, [location, locationOptions]);
   const [description, setDescription] = React.useState("");
+  const [teamMembers, setTeamMembers] = React.useState<{ name: string; email: string; password: string }[]>([]);
+  const [newTeamName, setNewTeamName] = React.useState("");
+  const [newTeamEmail, setNewTeamEmail] = React.useState("");
+  const [newTeamPassword, setNewTeamPassword] = React.useState("User@2027!");
+
   const [tradition, setTradition] = React.useState<string>("secular");
   const [budget, setBudget] = React.useState(1000000);
   const [guestCount, setGuestCount] = React.useState(150);
@@ -290,6 +300,18 @@ export default function WizardPage() {
     setCustomRituals(customRituals.filter((_, i) => i !== index));
   };
 
+  const handleAddTeamMember = () => {
+    if (!newTeamName.trim() || !newTeamEmail.trim() || !newTeamPassword.trim()) return;
+    setTeamMembers([...teamMembers, { name: newTeamName, email: newTeamEmail, password: newTeamPassword }]);
+    setNewTeamName("");
+    setNewTeamEmail("");
+    setNewTeamPassword("");
+  };
+
+  const deleteTeamMember = (index: number) => {
+    setTeamMembers(teamMembers.filter((_, i) => i !== index));
+  };
+
   const handleSaveNewTradition = async () => {
     if (!customTraditionName.trim()) return;
     setSavingTradition(true);
@@ -441,6 +463,14 @@ export default function WizardPage() {
         return false;
       }
     }
+    if (step === 4) {
+      for (const tm of teamMembers) {
+        if (!tm.name.trim() || !tm.email.trim() || !tm.password.trim()) {
+          setError("All team members must have a name, email, and password.");
+          return false;
+        }
+      }
+    }
     if (step === 2) {
       if (!weddingDate) {
         setError("Wedding date is required.");
@@ -459,7 +489,7 @@ export default function WizardPage() {
         return false;
       }
     }
-    if (step === 4) {
+    if (step === 8) {
       if (budget <= 0) {
         setError("Budget must be a positive number.");
         return false;
@@ -469,7 +499,7 @@ export default function WizardPage() {
         return false;
       }
     }
-    if (step === 5) {
+    if (step === 6) {
       for (const r of customRituals) {
         if (!r.name.trim()) {
           setError("All events must have a name.");
@@ -477,7 +507,7 @@ export default function WizardPage() {
         }
       }
     }
-    if (step === 6) {
+    if (step === 7) {
       for (const t of customTasks) {
         if (!t.title.trim()) {
           setError("All tasks must have a title.");
@@ -518,7 +548,12 @@ export default function WizardPage() {
 
       const res = await createWeddingAction({
         partnerA,
+        brideFather,
+        brideMother,
         partnerB,
+        groomFather,
+        groomMother,
+        teamMembers,
         tradition: tradition === "other" ? (customTraditionName.trim() || "other") : tradition,
         weddingDate,
         budget,
@@ -560,7 +595,7 @@ export default function WizardPage() {
 
         {/* Top Progress Indicator */}
         <div className="flex items-center justify-between mb-8 shrink-0 overflow-x-auto pb-1 gap-0">
-          {[1, 2, 3, 4, 5, 6, 7].map((s, i) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((s, i) => (
             <React.Fragment key={s}>
               <div className="flex items-center shrink-0">
                 <div
@@ -576,14 +611,15 @@ export default function WizardPage() {
                 <span className="hidden lg:inline text-[11px] ml-1.5 font-medium text-slate-500 whitespace-nowrap">
                   {s === 1 && "Partners"}
                   {s === 2 && "Date & Place"}
-                  {s === 3 && "Tradition"}
-                  {s === 4 && "Budget & Guests"}
-                  {s === 5 && "Ceremonies"}
-                  {s === 6 && "Tasks"}
-                  {s === 7 && "Review"}
+                  {s === 3 && "Team"}
+                  {s === 4 && "Tradition"}
+                  {s === 5 && "Budget & Guests"}
+                  {s === 6 && "Ceremonies"}
+                  {s === 7 && "Tasks"}
+                  {s === 8 && "Review"}
                 </span>
               </div>
-              {i < 6 && <div className={`h-[2px] min-w-[6px] flex-1 mx-1 rounded-full ${step > s ? "bg-[#6771ab]" : "bg-slate-100"}`} />}
+              {i < 7 && <div className={`h-[2px] min-w-[6px] flex-1 mx-1 rounded-full ${step > s ? "bg-[#6771ab]" : "bg-slate-100"}`} />}
             </React.Fragment>
           ))}
         </div>
@@ -598,7 +634,7 @@ export default function WizardPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Partner A Name</label>
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5"><span>Bride Name</span><FieldHelp message="Full name of the bride" /></label>
                   <Input
                     type="text"
                     placeholder="Enter partner A name"
@@ -607,13 +643,41 @@ export default function WizardPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Partner B Name</label>
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5"><span>Bridegroom Name</span><FieldHelp message="Full name of the bridegroom" /></label>
                   <Input
                     type="text"
                     placeholder="Enter partner B name"
                     value={partnerB}
                     onChange={(e) => setPartnerB(e.target.value)}
                   />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
+                    <span>Bride's Father Name</span>
+                    <FieldHelp message="Optional. Name of the bride's father" />
+                  </label>
+                  <Input type="text" placeholder="Enter bride's father name" value={brideFather} onChange={(e) => setBrideFather(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
+                    <span>Bride's Mother Name</span>
+                    <FieldHelp message="Optional. Name of the bride's mother" />
+                  </label>
+                  <Input type="text" placeholder="Enter bride's mother name" value={brideMother} onChange={(e) => setBrideMother(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
+                    <span>Bridegroom's Father Name</span>
+                    <FieldHelp message="Optional. Name of the bridegroom's father" />
+                  </label>
+                  <Input type="text" placeholder="Enter bridegroom's father name" value={groomFather} onChange={(e) => setGroomFather(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
+                    <span>Bridegroom's Mother Name</span>
+                    <FieldHelp message="Optional. Name of the bridegroom's mother" />
+                  </label>
+                  <Input type="text" placeholder="Enter bridegroom's mother name" value={groomMother} onChange={(e) => setGroomMother(e.target.value)} />
                 </div>
               </div>
             </div>
@@ -627,7 +691,7 @@ export default function WizardPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Wedding Date</label>
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5"><span>Wedding Date</span><FieldHelp message="The main day of the wedding" /></label>
                   <Input
                     type="date"
                     value={weddingDate}
@@ -635,7 +699,7 @@ export default function WizardPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Country</label>
+                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5"><span>Country</span><FieldHelp message="Select the country where the wedding will take place" /></label>
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
@@ -787,7 +851,37 @@ export default function WizardPage() {
             </div>
           )}
 
+          
           {step === 3 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-bold text-[#6771ab] mb-1">Add Team Members</h2>
+                <p className="text-sm text-slate-500">Invite your wedding planner, coordinator, or family members to help you plan.</p>
+              </div>
+              <div className="space-y-3">
+                {teamMembers.map((tm, idx) => (
+                  <Card key={idx} className="p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-[#2d336b]">{tm.name}</p>
+                      <p className="text-xs text-slate-500">{tm.email}</p>
+                    </div>
+                    <Button variant="ghost" className="text-red-500" onClick={() => deleteTeamMember(idx)}>✕</Button>
+                  </Card>
+                ))}
+              </div>
+              <div className="border-t border-slate-100 pt-4">
+                <h4 className="text-xs font-semibold text-[#6771ab] uppercase mb-2">Add New Member</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Input placeholder="Name" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} />
+                  <Input placeholder="Email" value={newTeamEmail} onChange={e => setNewTeamEmail(e.target.value)} />
+                  <Input placeholder="Temporary Password" value={newTeamPassword} onChange={e => setNewTeamPassword(e.target.value)} />
+                </div>
+                <Button className="mt-3" onClick={handleAddTeamMember}>Add Team Member</Button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Select Wedding Tradition</h2>
@@ -858,7 +952,7 @@ export default function WizardPage() {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Budget & Estimated Guests</h2>
@@ -889,7 +983,7 @@ export default function WizardPage() {
             </div>
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Ceremonies</h2>
@@ -1117,7 +1211,7 @@ export default function WizardPage() {
             </div>
           )}
 
-          {step === 6 && (
+          {step === 7 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Wedding Tasks Plan</h2>
@@ -1268,7 +1362,7 @@ export default function WizardPage() {
             </div>
           )}
 
-          {step === 7 && (
+          {step === 8 && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Review & Confirm</h2>
@@ -1428,7 +1522,7 @@ export default function WizardPage() {
             Back
           </Button>
 
-          {step < 7 ? (
+          {step < 8 ? (
             <Button type="button" onClick={handleNext} variant="primary">
               Continue
             </Button>

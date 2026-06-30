@@ -33,6 +33,7 @@ import {
   Sun,
   Moon,
   Mail,
+  MessageSquare,
 } from "lucide-react";
 
 const DEFAULT_LOGO = "https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png";
@@ -60,6 +61,7 @@ interface SidebarShellProps {
   userRole: string;
   previewCode: string;
   children: React.ReactNode;
+  shouldChangePassword?: boolean;
 }
 
 export default function SidebarShell({
@@ -70,10 +72,17 @@ export default function SidebarShell({
   userRole,
   previewCode,
   children,
+  shouldChangePassword,
 }: SidebarShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { t, locale, setLocale } = useTranslation();
+
+  React.useEffect(() => {
+    if (shouldChangePassword === true && pathname !== "/dashboard/profile") {
+      router.push("/dashboard/profile?change_password_required=true");
+    }
+  }, [shouldChangePassword, pathname, router]);
 
   const getTranslatedLabel = (label: string) => {
     switch (label) {
@@ -87,6 +96,7 @@ export default function SidebarShell({
       case "Calendar": return t("calendar");
       case "Menu Plan": return t("menuPlan");
       case "Vendors": return t("vendors");
+      case "Chat & Call": return "Chat & Call";
       default: return label;
     }
   };
@@ -170,40 +180,25 @@ export default function SidebarShell({
     target?: string;
   }
 
-  let navItems: NavItem[] = [];
-  if (userRole === "client") {
-    navItems = [
-      { href: "/dashboard/guests", label: "Guests", icon: Users },
-    ];
-    if (activeWedding) {
-      navItems.push({
-        href: "/dashboard/showcase",
-        label: "Build Showcase Page",
-        icon: Globe,
-      });
-    }
-    navItems.push({ href: "/dashboard/profile", label: "User Profile", icon: UserCog });
-    navItems.push({ href: "/dashboard/docs", label: "Documentation", icon: BookOpen });
-  } else {
-    navItems = [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/dashboard/wedding-ceremony-planner", label: "Wedding Ceremony Planner", icon: Clock },
-      { href: "/dashboard/wedding-task-planner", label: "Wedding Task Planner", icon: KanbanSquare },
-      { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
-      { href: "/dashboard/menu-plan", label: "Menu Plan", icon: UtensilsCrossed },
-      { href: "/dashboard/guests", label: "Guests", icon: Users },
-      { href: "/dashboard/vendors", label: "Vendors", icon: Store },
-    ];
-    if (activeWedding && userRole === "admin") {
-      navItems.push({
-        href: "/dashboard/showcase",
-        label: "Build Showcase Page",
-        icon: Globe,
-      });
-    }
-    navItems.push({ href: "/dashboard/profile", label: "User Profile", icon: UserCog });
-    navItems.push({ href: "/dashboard/docs", label: "Documentation", icon: BookOpen });
+  const navItems: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard/wedding-ceremony-planner", label: "Wedding Ceremony Planner", icon: Clock },
+    { href: "/dashboard/wedding-task-planner", label: "Wedding Task Planner", icon: KanbanSquare },
+    { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
+    { href: "/dashboard/menu-plan", label: "Menu Plan", icon: UtensilsCrossed },
+    { href: "/dashboard/guests", label: "Guests", icon: Users },
+    { href: "/dashboard/vendors", label: "Vendors", icon: Store },
+    { href: "/dashboard/chat", label: "Chat & Call", icon: MessageSquare },
+  ];
+  if (activeWedding) {
+    navItems.push({
+      href: "/dashboard/showcase",
+      label: "Build Showcase Page",
+      icon: Globe,
+    });
   }
+  navItems.push({ href: "/dashboard/profile", label: "User Profile", icon: UserCog });
+  navItems.push({ href: "/dashboard/docs", label: "Documentation", icon: BookOpen });
 
 
   const sidebarContent = (isMobile = false) => {

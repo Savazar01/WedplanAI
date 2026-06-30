@@ -1,474 +1,476 @@
 import Link from "next/link";
+import { getLocaleServer } from "@/lib/i18n-server";
+import { translations } from "@/lib/translations";
 
-const sections = [
+const getSections = (t: (key: string) => string) => [
   {
     id: "getting-started",
-    title: "Getting Started",
+    title: t("docs.sections.gettingStarted.title"),
     icon: "🚀",
     items: [
       {
-        title: "Creating Your Account",
+        title: t("docs.sections.gettingStarted.items.account.title"),
         content:
-          "Visit the Sign Up page to register as the first admin. The first user to sign up is automatically designated as the administrator. If other users already exist, public registration closes and new users must be created by an admin via Manage Your Team.",
+          t("docs.sections.gettingStarted.items.account.content"),
       },
       {
-        title: "Sample Wedding",
+        title: t("docs.sections.gettingStarted.items.sample.title"),
         content:
-          "When you sign up, a sample Hindu wedding (Rahul & Priya) is automatically created with pre-seeded tasks, ceremonies, guests, and vendors. This lets you explore the platform immediately. The sample wedding is marked with an isSample flag and displays an interactive walkthrough banner on the dashboard that guides you through all features. You can skip or complete the walkthrough at any time. The sample wedding can be archived or deleted like any other wedding.",
+          t("docs.sections.gettingStarted.items.sample.contentPublic"),
       },
       {
-        title: "Creating Your Wedding — Event Wizard",
+        title: t("docs.sections.gettingStarted.items.wizard.title"),
         content:
-          "Use the guided 7-step Event Creation Wizard (/wizard) to set up your wedding. The steps are: (1) Partner Names, (2) Date & Place — wedding date, location auto-format from venue, street, city, state, country, and pincode, with multi-location support for ceremonies at different venues, (3) Tradition — choose from Hindu, Muslim, Sikh, Christian, Secular, or any custom tradition added by your admin, (4) Budget & Guests — total budget and estimated guest count with country-based currency display, (5) Wedding Ceremonies — review and customize pre-seeded ceremonies or add your own, (6) Wedding Tasks Plan — review and customize pre-seeded tasks or add your own, (7) Review & Create — confirm all details before creation. All tasks and ceremonies are auto-generated from your chosen tradition.",
+          t("docs.sections.gettingStarted.items.wizard.contentPublic"),
       },
       {
-        title: "Auto-Seeding & Self-Healing Seeding",
+        title: t("docs.sections.gettingStarted.items.seeding.title"),
         content:
-          "When onboarding a couple or uploading their onboarding CSV, the platform automatically seeds default tasks and ceremonies based on their chosen wedding tradition. If tasks or ceremonies are ever completely deleted or missing, the platform self-heals by automatically re-seeding these defaults.",
+          t("docs.sections.gettingStarted.items.seeding.content"),
       },
       {
-        title: "Archive & Delete Weddings",
+        title: t("docs.sections.gettingStarted.items.archive.title"),
         content:
-          "Each wedding card on the dashboard includes Archive and Delete buttons. Archiving moves the wedding to a collapsed 'Archived Weddings' section — the wedding becomes view-only and is excluded from the sidebar wedding switcher. You can restore an archived wedding at any time. Deleting permanently removes the wedding and all related data (tasks, ceremonies, guests, vendors, menus) via cascade. Both actions require confirmation through a dialog.",
+          t("docs.sections.gettingStarted.items.archive.content"),
       },
       {
-        title: "Dashboard Overview",
+        title: t("docs.sections.gettingStarted.items.dashboard.title"),
         content:
-          "The main dashboard shows your active wedding at a glance: task completion percentage (with To-Do, In Progress, Done, and Overdue counts), guest RSVP breakdown (attending, declined, pending — broken down per ceremony), budget status with color-coded depletion bar and breach alerts, and a Build Showcase Page quick-navigation button. Each wedding card includes Archive and Delete buttons with confirmation dialogs. Archived weddings are moved to an 'Archived Weddings' collapsible section and can be restored or permanently deleted. The Guests section provides personal invitation links — each link has a 'Copy Link' button and a 'Share' button (using the Web Share API to launch WhatsApp, Email, SMS, etc.) plus a 'Save Ceremonies' button to persist which ceremonies the guest is invited to.",
+          t("docs.sections.gettingStarted.items.dashboard.contentPublic"),
       },
     ],
   },
   {
     id: "wedding-ceremony-planner",
-    title: "Wedding Ceremony Planner",
+    title: t("docs.sections.ceremonyPlanner.title"),
     icon: "⏱️",
     items: [
       {
-        title: "Day-of Timeline",
+        title: t("docs.sections.ceremonyPlanner.items.timeline.title"),
         content:
-          "The Wedding Ceremony Planner is your primary wedding day run sheet — it shows all ceremonies in chronological order with precise timings, locations, and assignees. This is the source of truth for ceremony scheduling used across the Calendar, Catering Menu Planner, and the public Showcase Page.",
+          t("docs.sections.ceremonyPlanner.items.timeline.content"),
       },
       {
-        title: "Adding Ceremonies",
+        title: t("docs.sections.ceremonyPlanner.items.add.title"),
         content:
-          "Click 'Add Ceremony' to create a new ceremony. Fill in the name, date, start time, end time, location, dress code, whether food is served, and an optional assignee. You can also add preparation checklist items to each ceremony.",
+          t("docs.sections.ceremonyPlanner.items.add.content"),
       },
       {
-        title: "Editing Ceremonies",
+        title: t("docs.sections.ceremonyPlanner.items.edit.title"),
         content:
-          "Click the edit icon on any ceremony to update its details — change the time, date, dress code, location, or assignee as your planning evolves. Changes are immediately reflected on the Calendar and Showcase page.",
+          t("docs.sections.ceremonyPlanner.items.edit.content"),
       },
       {
-        title: "Food Served & Menu Planning",
+        title: t("docs.sections.ceremonyPlanner.items.food.title"),
         content:
-          "When a ceremony is marked as 'Food Served', a 'Plan Menu' button appears directly on the ceremony card. Clicking it navigates to the Catering Menu Planner pre-filtered for that ceremony.",
+          t("docs.sections.ceremonyPlanner.items.food.content"),
       },
     ],
   },
   {
     id: "wedding-task-planner",
-    title: "Wedding Task Planner",
+    title: t("docs.sections.taskPlanner.title"),
     icon: "📋",
     items: [
       {
-        title: "What It Is",
+        title: t("docs.sections.taskPlanner.items.what.title"),
         content:
-          "The Wedding Task Planner is a drag-and-drop kanban board for managing all your wedding tasks across four columns: Backlog, To-Do, In Progress, and Done. Tasks are pre-seeded based on your wedding tradition so you never start from a blank slate.",
+          t("docs.sections.taskPlanner.items.what.content"),
       },
       {
-        title: "Creating Tasks",
+        title: t("docs.sections.taskPlanner.items.add.title"),
         content:
-          "Click the 'Add Task' button at the top of any column to create a new task. Give it a title, description, assign it to a team member, set a due date, and choose a category. Categories can have follow-up questions configured by your admin — these appear automatically in the task form.",
+          t("docs.sections.taskPlanner.items.add.content"),
       },
       {
-        title: "Drag & Drop",
+        title: t("docs.sections.taskPlanner.items.drag.title"),
         content:
-          "Simply click and drag any task card to another column to update its status. The board auto-saves the new position.",
+          t("docs.sections.taskPlanner.items.drag.content"),
       },
       {
-        title: "Editing & Deleting",
+        title: t("docs.sections.taskPlanner.items.edit.title"),
         content:
-          "Click on any task card to open a detail dialog where you can edit the title, description, assignee, due date, and category answers. Use the delete option to remove a task permanently.",
+          t("docs.sections.taskPlanner.items.edit.content"),
       },
       {
-        title: "Task Categories",
+        title: t("docs.sections.taskPlanner.items.categories.title"),
         content:
-          "Tasks are organized by category (venue, catering, attire, décor, photography, music, etc.). Categories can have custom follow-up questions defined by the admin. For catering tasks, you can link a task directly to a planned catering menu.",
+          t("docs.sections.taskPlanner.items.categories.content"),
       },
     ],
   },
   {
     id: "calendar",
-    title: "Calendar",
+    title: t("docs.sections.calendar.title"),
     icon: "📅",
     items: [
       {
-        title: "Monthly View",
+        title: t("docs.sections.calendar.items.monthly.title"),
         content:
-          "The Calendar page displays all ceremonies and tasks with due dates in a clean month-grid layout. Navigate between months using the prev/next arrows.",
+          t("docs.sections.calendar.items.monthly.content"),
       },
       {
-        title: "Events",
+        title: t("docs.sections.calendar.items.events.title"),
         content:
-          "Each ceremony from your Wedding Ceremony Planner appears as an event card on its scheduled date. Tasks with due dates are also shown. Use the filter bar to toggle between showing only tasks, only ceremonies, or all events. Click on any event to see details.",
+          t("docs.sections.calendar.items.events.content"),
       },
     ],
   },
   {
     id: "catering-menu-planner",
-    title: "Catering Menu Planner",
+    title: t("docs.sections.catering.title"),
     icon: "🍴",
     items: [
       {
-        title: "Overview",
+        title: t("docs.sections.catering.items.overview.title"),
         content:
-          "The Catering Menu Planner (sidebar label: 'Menu Plan') allows you to design and manage food & beverage menus for ceremonies that serve food. Each menu is linked to a specific ceremony and can include Appetizers, Main Courses, Desserts, and Drinks.",
+          t("docs.sections.catering.items.overview.content"),
       },
       {
-        title: "Planning a Menu",
+        title: t("docs.sections.catering.items.plan.title"),
         content:
-          "Click the 'Plan A Menu' button to create a catering menu. Choose a ceremony (ceremonies with food served are marked for convenience), and specify the cuisine type, expected guest count, and catering vendor. Fill in sections for Appetizers, Main Courses, Desserts, and Drinks.",
+          t("docs.sections.catering.items.plan.content"),
       },
       {
-        title: "Linking to Tasks",
+        title: t("docs.sections.catering.items.link.title"),
         content:
-          "For tasks of category 'Catering', you can link them directly to a specific planned catering menu from the task details dialog in the Wedding Task Planner. This lets you access the menu directly from your task list.",
+          t("docs.sections.catering.items.link.content"),
       },
       {
-        title: "Timeline Integration",
+        title: t("docs.sections.catering.items.timeline.title"),
         content:
-          "In the Wedding Ceremony Planner, any ceremony marked as serving food will display a 'Plan Menu' button, allowing you to jump straight into designing the menu for that ceremony with one click.",
+          t("docs.sections.catering.items.timeline.content"),
       },
     ],
   },
   {
     id: "guests",
-    title: "Guests & RSVPs",
+    title: t("docs.sections.guests.title"),
     icon: "👥",
     items: [
       {
-        title: "Guest List",
+        title: t("docs.sections.guests.items.list.title"),
         content:
-          "The Guests page shows a complete table of all invited guests. Each row displays the guest name, contact info, RSVP status, and a unique invitation code.",
+          t("docs.sections.guests.items.list.content"),
       },
       {
-        title: "Adding Guests",
+        title: t("docs.sections.guests.items.add.title"),
         content:
-          "Click 'Add Guest' to invite someone individually. Fill in their name, phone, email, and optional dietary notes or plus-one count.",
+          t("docs.sections.guests.items.add.content"),
       },
       {
-        title: "CSV Bulk Import",
+        title: t("docs.sections.guests.items.csv.title"),
         content:
-          "Use the CSV import feature to add hundreds of guests at once. Download the template, populate it with your guest data, and upload. Supported columns include `invited_ceremonies`: use \"All\" to invite the guest to every ceremony, or a comma-separated list of ceremony names like \"Mehendi,Wedding Ceremony\". The system will create guest entries and generate unique invitation codes for each.",
+          t("docs.sections.guests.items.csv.content"),
       },
       {
-        title: "Sending Personal Invitations",
+        title: t("docs.sections.guests.items.send.title"),
         content:
-          "Click the 'Send' button next to any guest to open the invitation dialog. Select the ceremonies this guest is invited to, then click 'Save Ceremonies' to persist their ceremony assignments. Use 'Copy Link' to copy their personal RSVP URL, or 'Share' to launch the native share sheet on your device (WhatsApp, Email, SMS, etc. on iOS and Android). When a guest opens their personal link, the Wedding Program on the public showcase page automatically filters to show only their invited ceremonies.",
+          t("docs.sections.guests.items.send.content"),
       },
       {
-        title: "RSVP Tracking",
+        title: t("docs.sections.guests.items.tracking.title"),
         content:
-          "The dashboard overview shows real-time RSVP stats: how many guests are attending, declined, or yet to respond. Click through to see individual responses.",
+          t("docs.sections.guests.items.tracking.content"),
       },
     ],
   },
   {
     id: "vendors",
-    title: "Vendors & Budget",
+    title: t("docs.sections.vendors.title"),
     icon: "🏪",
     items: [
       {
-        title: "Vendor Management",
+        title: t("docs.sections.vendors.items.manage.title"),
         content:
-          "Track all your wedding vendors — catering, décor, photography, music, transportation, and more. Each vendor entry includes their name, service category, contact information, and contract details.",
+          t("docs.sections.vendors.items.manage.content"),
       },
       {
-        title: "Budget Tracking",
+        title: t("docs.sections.vendors.items.budget.title"),
         content:
-          "For each vendor, record the contract amount, amount already paid, and currency. The system automatically calculates the outstanding balance. Currency is dynamically set based on your wedding's country and displayed throughout the wizard and dashboard.",
+          t("docs.sections.vendors.items.budget.contentPublic"),
       },
       {
-        title: "Budget Breach Alerts",
+        title: t("docs.sections.vendors.items.breach.title"),
         content:
-          "The dashboard overview shows a budget depletion bar. If your total spending exceeds 90% of your budget, a breach alert is displayed.",
+          t("docs.sections.vendors.items.breach.content"),
       },
     ],
   },
   {
     id: "showcase",
-    title: "Showcase Page",
+    title: t("docs.sections.showcase.title"),
     icon: "🌐",
     items: [
       {
-        title: "Public Wedding Website",
+        title: t("docs.sections.showcase.items.public.title"),
         content:
-          "Every wedding gets a beautiful public showcase page at /wedding/[id]. This page features a live countdown, Wedding Program (ceremonies timeline), welcome story, hero image, and an embedded RSVP form for guests.",
+          t("docs.sections.showcase.items.public.content"),
       },
       {
-        title: "Building Your Showcase",
+        title: t("docs.sections.showcase.items.build.title"),
         content:
-          "Navigate to Build Showcase Page from the sidebar (admin only). Select from 9 premium design templates (Classic Elegance, Modern Minimalist, Royal Heritage, Garden Blossom, Indian Wedding, Indian Royal Heritage, Indian Festive Marigold, Indian Fusion Modern, and Beach Destination). Customize the hero banner image, welcome text, couple's story, primary/secondary colors, background theme, top welcome banner label, and RSVP form. The live preview updates in real-time as you make changes. The 'View Public Page' link uses an internal preview code — a secure HMAC-based hash — so you can see the full showcase without needing a real guest invitation code.",
+          t("docs.sections.showcase.items.build.contentPublic"),
       },
       {
-        title: "Sharing with Guests",
+        title: t("docs.sections.showcase.items.share.title"),
         content:
-          "Copy your showcase page URL from the dashboard overview and share it with guests. They can view the wedding details and submit their RSVP directly on the public page.",
+          t("docs.sections.showcase.items.share.content"),
       },
       {
-        title: "Gift Registry",
+        title: t("docs.sections.showcase.items.gift.title"),
         content:
-          "Add a Gift Registry section to your showcase page with a URL, title, and description. When all three fields are filled in, the registry appears on your public wedding page for guests to view and access.",
+          t("docs.sections.showcase.items.gift.content"),
       },
       {
-        title: "Wedding Program (Filtered View)",
+        title: t("docs.sections.showcase.items.program.title"),
         content:
-          "When a guest opens their personal invitation link (/wedding/[id]?code=xxx), the Wedding Program automatically filters to show only their invited ceremonies — so each guest sees a personalized program tailored to them.",
+          t("docs.sections.showcase.items.program.content"),
       },
     ],
   },
   {
     id: "profile",
-    title: "User Profile & Settings",
+    title: t("docs.sections.profile.title"),
     icon: "⚙️",
     items: [
       {
-        title: "Profile Management",
+        title: t("docs.sections.profile.items.manage.title"),
         content:
-          "The User Profile page lets you edit your name, address, country, and spoken languages. You can also select the application language using the full-name language dropdown selector in the navigation header/sidebar, which supports 3 languages: English, हिन्दी (Hindi), and తెలుగు (Telugu). Your country selection affects currency formatting throughout the app.",
+          t("docs.sections.profile.items.manage.content"),
       },
       {
-        title: "Change Password",
+        title: t("docs.sections.profile.items.password.title"),
         content:
-          "Both the Profile page and Settings page include a Change Password form. Enter your current password and new password to update your credentials.",
+          t("docs.sections.profile.items.password.content"),
       },
       {
-        title: "Account Info",
+        title: t("docs.sections.profile.items.info.title"),
         content:
-          "The Settings page displays your account information including email address and account creation date.",
+          t("docs.sections.profile.items.info.content"),
       },
     ],
   },
   {
     id: "admin",
-    title: "App Administration",
+    title: t("docs.sections.admin.title"),
     icon: "🛡️",
     admin: true,
     items: [
       {
-        title: "Appearance & Theming",
+        title: t("docs.sections.admin.items.appearance.title"),
         content:
-          "Customize your wedding's visual theme from Admin > Appearance: choose title fonts (serif, handwriting, etc.), primary and secondary colors, background color, and upload a custom logo. Dark Mode can be enabled here — when enabled, all users see the dark UI. Changes apply to the dashboard, wizard, and showcase page.",
+          t("docs.sections.admin.items.appearance.content"),
       },
       {
-        title: "Traditions Admin",
+        title: t("docs.sections.admin.items.traditions.title"),
         content:
-          "Manage the wedding traditions available on the platform at Admin > Traditions. Add custom traditions (e.g., Telugu Wedding, Parsi Wedding) using the visual form builder — no JSON required. For each tradition, define Seed Tasks (tasks that auto-populate the Wedding Task Planner) and Seed Ceremonies (ceremonies that auto-populate the Wedding Ceremony Planner) using row-based editors. Each ceremony row lets you set the name, offset from wedding day (e.g., -2 = two days before), start/end time, and description.",
+          t("docs.sections.admin.items.traditions.content"),
       },
       {
-        title: "Categories Admin",
+        title: t("docs.sections.admin.items.categories.title"),
         content:
-          "Manage task categories and their follow-up questions at Admin > Categories. Use the visual checklist builder to define questions — choose a label and answer type (Text, Yes/No, Number) for each. Questions appear automatically when a planner creates or edits a task in that category.",
+          t("docs.sections.admin.items.categories.content"),
       },
       {
-        title: "API Keys",
+        title: t("docs.sections.admin.items.api.title"),
         content:
-          "Create and manage API keys for programmatic access to your wedding data via the REST API v1 endpoints. Each key is scoped to your wedding and can be labeled and revoked individually. Navigate to Admin > API Keys to manage keys.",
+          t("docs.sections.admin.items.api.contentPublic"),
       },
       {
-        title: "Manage Your Team",
+        title: t("docs.sections.admin.items.team.title"),
         content:
-          "View all registered users in the system. Create new user accounts when public registration is closed. Each user can be assigned a role: Admin (full access), User (all planning features), or Client (guests/showcase only). Manage users at Admin > Manage Your Team.",
+          t("docs.sections.admin.items.team.content"),
       },
     ],
   },
   {
     id: "traditions",
-    title: "Tradition Support",
+    title: t("docs.sections.traditions.title"),
     icon: "🌟",
     items: [
       {
-        title: "Built-in Traditions",
+        title: t("docs.sections.traditions.items.builtin.title"),
         content:
-          "WedPlanAI ships with 5 built-in wedding traditions: Hindu (Shubh Vivah), Muslim (Nikah), Sikh (Anand Karaj), Christian (Holy Matrimony), and Secular (Celebration of Love). Each tradition comes with pre-seeded planning tasks and ceremonies tailored to its customs.",
+          t("docs.sections.traditions.items.builtin.content"),
       },
       {
-        title: "Custom Traditions",
+        title: t("docs.sections.traditions.items.custom.title"),
         content:
-          "Admins can add unlimited custom traditions (e.g., Telugu Wedding, Parsi Wedding, Bengali Wedding) from the App Administration > Traditions page. Use the visual builder to define seed tasks and ceremonies — no JSON or technical knowledge required. Custom traditions appear alongside built-in ones in the Event Creation Wizard.",
+          t("docs.sections.traditions.items.custom.content"),
       },
       {
-        title: "Auto-Seeding",
+        title: t("docs.sections.traditions.items.autoseed.title"),
         content:
-          "When you create a wedding via the wizard and select a tradition, the system automatically generates relevant tasks for your Wedding Task Planner and populates the Wedding Ceremony Planner with tradition-specific ceremonies.",
+          t("docs.sections.traditions.items.autoseed.content"),
       },
     ],
   },
   {
     id: "team",
-    title: "Team Collaboration",
+    title: t("docs.sections.team.title"),
     icon: "🤝",
     items: [
       {
-        title: "Multi-User Access",
+        title: t("docs.sections.team.items.multiuser.title"),
         content:
-          "Invite wedding coordinators, family members, and planners to collaborate. Each team member gets secure access with role-based permissions. Admins can create user accounts via Admin > Manage Your Team.",
+          t("docs.sections.team.items.multiuser.content"),
       },
       {
-        title: "Role-Based Permissions",
+        title: t("docs.sections.team.items.roles.title"),
         content:
-          "Admin users have access to all features including the admin panel (Appearance, API Keys, Manage Your Team, Traditions, Categories). Regular users can access all planning features but cannot modify system settings. Client users can only access Guests and the Showcase page.",
+          t("docs.sections.team.items.roles.content"),
       },
       {
-        title: "Couple Onboarding",
+        title: t("docs.sections.team.items.onboard.title"),
         content:
-          "In Wedding Planner mode, share the onboarding link (/couple/onboarding/[weddingId]) with the couple. They complete a short onboarding form, and the system seeds their wedding with the appropriate tradition's tasks and ceremonies automatically.",
+          t("docs.sections.team.items.onboard.content"),
       },
     ],
   },
 ];
 
-const personasSection = {
+const getPersonasSection = (t: (key: string) => string) => ({
   id: "personas",
-  title: "User Personas & Roles",
+  title: t("docs.sections.personas.title"),
   icon: "👥",
   items: [
     {
-      title: "Wedding Planner Mode",
+      title: t("docs.sections.personas.items.planner.title"),
       content:
-        "When signing up, choose 'Wedding Planner' to manage weddings on behalf of couples. You can create Client accounts for the couple, share onboarding links at /couple/onboarding/[weddingId], and see all tasks, budget, and activities in one place.",
+        t("docs.sections.personas.items.planner.content"),
     },
     {
-      title: "Plan My Wedding (DIY)",
+      title: t("docs.sections.personas.items.diy.title"),
       content:
-        "Choose 'Plan My Wedding' to manage your own wedding. All features are available — Task Planner, Guests, Vendors, Ceremonies, and Calendar.",
+        t("docs.sections.personas.items.diy.content"),
     },
     {
-      title: "Client Role",
+      title: t("docs.sections.personas.items.client.title"),
       content:
-        "Users created with the 'Client' role have restricted access. They can view the Guests page and the Showcase page only. This is ideal for the couple (bride/groom) who need visibility without full admin access.",
+        t("docs.sections.personas.items.client.content"),
     },
     {
-      title: "Manage Your Team",
+      title: t("docs.sections.personas.items.manage.title"),
       content:
-        "Admins can invite team members and clients from the 'Manage Your Team' page under Admin Settings. Assign roles (Admin, User, Client) and personas to each person.",
+        t("docs.sections.personas.items.manage.content"),
     },
   ],
-};
+});
 
-const apiSection = {
+const getApiSection = (t: (key: string) => string) => ({
   id: "api",
-  title: "REST API v1",
+  title: t("docs.sections.api.title"),
   icon: "🔌",
   admin: true,
   items: [
     {
-      title: "Overview & Authentication",
+      title: t("docs.sections.api.items.overview.title"),
       content:
-        "WedPlanAI exposes a REST API at /api/v1/ for programmatic access to your wedding data. All endpoints require an API key passed in the x-api-key header: x-api-key: wpa_your_api_key_here. Generate API keys from Admin > API Keys. Keys support two scopes: Wedding-Scoped (restricted to one wedding) and Global Access (unrestricted, can create weddings and operate on any wedding via weddingId parameter). For global keys, pass ?weddingId=xxx query param on GET requests or weddingId in the request body on POST requests. All endpoints return JSON.",
+        t("docs.sections.api.items.overview.contentPublic"),
     },
     {
-      title: "Wedding — GET /api/v1/wedding",
+      title: t("docs.sections.api.items.getWedding.title"),
       content:
-        "Retrieve your active wedding details. Returns: id, partnerA, partnerB, weddingDate, location, country, venue, budget, guestCount, tradition, showcaseTitle, logoUrl, and theme settings. Method: GET. No request body required.",
+        t("docs.sections.api.items.getWedding.content"),
     },
     {
-      title: "Wedding — PUT /api/v1/wedding",
+      title: t("docs.sections.api.items.putWedding.title"),
       content:
-        "Update wedding fields. Method: PUT. Body (JSON, all optional): { partnerA, partnerB, weddingDate, location, country, venue, budget, guestCount }. Returns the updated wedding object.",
+        t("docs.sections.api.items.putWedding.content"),
     },
     {
-      title: "Ceremonies — GET/POST /api/v1/ceremonies",
+      title: t("docs.sections.api.items.postCeremony.title"),
       content:
-        "GET: List all ceremonies for the active wedding. Returns array of ceremony objects. POST: Create a ceremony. Body (JSON): { name (required), startTime (ISO 8601, required), endTime (ISO 8601, required), location (required), description (optional) }. Additional ceremony fields (dress code, food served, assignee) are managed via the UI only.",
+        t("docs.sections.api.items.postCeremony.content"),
     },
     {
-      title: "Ceremonies — PUT/DELETE /api/v1/ceremonies/:id",
+      title: t("docs.sections.api.items.putCeremony.title"),
       content:
-        "PUT: Update a ceremony by ID. Body: any subset of ceremony fields. DELETE: Permanently delete a ceremony by ID. Returns 200 OK on success.",
+        t("docs.sections.api.items.putCeremony.content"),
     },
     {
-      title: "Tasks — GET/POST /api/v1/tasks",
+      title: t("docs.sections.api.items.postTask.title"),
       content:
-        "GET: List all tasks. Returns: { id, title, description, status, dueDate, category, columnId, position }. POST: Create a task. Body (JSON): { title (required), description, columnId (required), category, dueDate (ISO 8601), position }.",
+        t("docs.sections.api.items.postTask.content"),
     },
     {
-      title: "Tasks — PUT/DELETE /api/v1/tasks/:id",
+      title: t("docs.sections.api.items.putTask.title"),
       content:
-        "PUT: Update a task by ID. Body: { title, description, dueDate, category, columnId, status, position }. DELETE: Permanently delete a task by ID.",
+        t("docs.sections.api.items.putTask.content"),
     },
     {
-      title: "Guests — GET/POST /api/v1/guests",
+      title: t("docs.sections.api.items.postGuest.title"),
       content:
-        "GET: List all guests. Returns: { id, name, email, phone, rsvpStatus, plusOneCount, dietaryRestrictions, loginCode, invitedCeremonies }. POST: Create a guest. Body: { name (required), email, phone, rsvpStatus, plusOneCount, dietaryRestrictions }.",
+        t("docs.sections.api.items.postGuest.content"),
     },
     {
-      title: "Guests — PUT/DELETE /api/v1/guests/:id",
+      title: t("docs.sections.api.items.putGuest.title"),
       content:
-        "PUT: Update a guest by ID. Body: any guest fields. DELETE: Permanently delete a guest by ID.",
+        t("docs.sections.api.items.putGuest.content"),
     },
     {
-      title: "Vendors — GET/POST /api/v1/vendors",
+      title: t("docs.sections.api.items.postVendor.title"),
       content:
-        "GET: List all vendors. Returns: { id, name, category, contactName, email, phone, contractAmount, paidAmount, currency, notes }. POST: Create a vendor. Body: { name (required), category, contactName, email, phone, contractAmount, paidAmount, currency, notes }.",
+        t("docs.sections.api.items.postVendor.content"),
     },
     {
-      title: "Vendors — PUT/DELETE /api/v1/vendors/:id",
+      title: t("docs.sections.api.items.putVendor.title"),
       content:
-        "PUT: Update a vendor by ID. DELETE: Permanently delete a vendor by ID.",
+        t("docs.sections.api.items.putVendor.content"),
     },
     {
-      title: "Kanban Columns — GET/POST /api/v1/columns",
+      title: t("docs.sections.api.items.postColumn.title"),
       content:
-        "GET: List all Kanban board columns. Returns: { id, title, position }. POST: Create a new column. Body: { title (required), position }.",
+        t("docs.sections.api.items.postColumn.content"),
     },
     {
-      title: "Kanban Columns — PUT/DELETE /api/v1/columns/:id",
+      title: t("docs.sections.api.items.putColumn.title"),
       content:
-        "PUT: Update a column by ID (title, position). DELETE: Delete a column by ID (returns 400 error if tasks still exist in the column — move or delete tasks first).",
+        t("docs.sections.api.items.putColumn.content"),
     },
     {
-      title: "Example: List Ceremonies",
+      title: t("docs.sections.api.items.exCeremony.title"),
       content:
-        "curl -X GET https://your-domain.com/api/v1/ceremonies -H 'x-api-key: wpa_your_api_key_here' | Lists all ceremonies for the active wedding.",
+        t("docs.sections.api.items.exCeremony.content"),
     },
     {
-      title: "Example: Create a Task",
+      title: t("docs.sections.api.items.exTask.title"),
       content:
-        "curl -X POST https://your-domain.com/api/v1/tasks -H 'x-api-key: wpa_your_key' -H 'Content-Type: application/json' -d '{\"title\":\"Book the florist\",\"category\":\"flowers\",\"columnId\":\"your-column-id\",\"dueDate\":\"2025-11-01T00:00:00Z\"}'",
+        t("docs.sections.api.items.exTask.content"),
     },
     {
-      title: "Traditions — GET/POST /api/v1/traditions",
+      title: t("docs.sections.api.items.postTradition.title"),
       content:
-        "GET: List all wedding traditions (global config — returns all traditions on the platform). POST: Create a tradition. Body (JSON): { key (required, slug), name (required), description, seedTasks (JSON string), seedCeremonies (JSON string) }. Duplicate keys return 409 Conflict.",
+        t("docs.sections.api.items.postTradition.content"),
     },
     {
-      title: "Traditions — PUT/DELETE /api/v1/traditions/:id",
+      title: t("docs.sections.api.items.putTradition.title"),
       content:
-        "PUT: Update a tradition by ID. Body: any subset of tradition fields. DELETE: Permanently delete a tradition by ID.",
+        t("docs.sections.api.items.putTradition.content"),
     },
     {
-      title: "Categories — GET/POST /api/v1/categories",
+      title: t("docs.sections.api.items.postCategory.title"),
       content:
-        "GET: List all task categories (global config). POST: Create a category. Body (JSON): { key (required, slug), name (required), followUpQuestions (JSON string) }. Duplicate keys return 409 Conflict.",
+        t("docs.sections.api.items.postCategory.content"),
     },
     {
-      title: "Categories — PUT/DELETE /api/v1/categories/:id",
+      title: t("docs.sections.api.items.putCategory.title"),
       content:
-        "PUT: Update a category by ID. Body: any subset of category fields. DELETE: Permanently delete a category by ID.",
+        t("docs.sections.api.items.putCategory.content"),
     },
     {
-      title: "Example: List Traditions",
+      title: t("docs.sections.api.items.exTradition.title"),
       content:
-        "curl -X GET https://your-domain.com/api/v1/traditions -H 'x-api-key: wpa_your_key' | Lists all wedding traditions configured on the platform.",
+        t("docs.sections.api.items.exTradition.content"),
     },
     {
-      title: "Example: List Categories",
+      title: t("docs.sections.api.items.exCategory.title"),
       content:
-        "curl -X GET https://your-domain.com/api/v1/categories -H 'x-api-key: wpa_your_key' | Lists all task categories configured on the platform.",
+        t("docs.sections.api.items.exCategory.content"),
     },
   ],
-};
+});
 
 interface DocSection {
   id: string;
@@ -481,21 +483,21 @@ interface DocSection {
   }[];
 }
 
-const allSections: DocSection[] = [
-  sections[0], // getting-started
-  personasSection,
-  sections[1], // wedding-ceremony-planner
-  sections[2], // wedding-task-planner
-  sections[3], // calendar
-  sections[4], // catering-menu-planner
-  sections[5], // guests
-  sections[6], // vendors
-  sections[7], // showcase
-  sections[8], // profile
-  sections[9], // admin
-  sections[10], // traditions
-  sections[11], // team
-  apiSection,
+const getAllSections = (t: (key: string) => string): DocSection[] => [
+  getSections(t)[0], // getting-started
+  getPersonasSection(t),
+  getSections(t)[1], // wedding-ceremony-planner
+  getSections(t)[2], // wedding-task-planner
+  getSections(t)[3], // calendar
+  getSections(t)[4], // catering-menu-planner
+  getSections(t)[5], // guests
+  getSections(t)[6], // vendors
+  getSections(t)[7], // showcase
+  getSections(t)[8], // profile
+  getSections(t)[9], // admin
+  getSections(t)[10], // traditions
+  getSections(t)[11], // team
+  getApiSection(t),
 ];
 
 function SectionCard({
@@ -533,7 +535,10 @@ function SectionCard({
   );
 }
 
-export default function DocsPage() {
+export default async function DocsPage() {
+  const locale = await getLocaleServer();
+  const t = (key: string) => (translations[locale as keyof typeof translations] as Record<string, string>)?.[key] || (translations["en"] as Record<string, string>)[key];
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
@@ -542,19 +547,18 @@ export default function DocsPage() {
           Documentation
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold text-[#2d336b] dark:text-slate-100 mb-3">
-          WedPlanAI User Guide
+          {t("docs.title")}
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed max-w-2xl">
-          Everything you need to know about planning your perfect wedding with
-          WedPlanAI — from the Event Creation Wizard to the REST API.
+          {t("docs.subtitle")}
         </p>
       </div>
 
       {/* Table of Contents */}
       <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-5 mb-10 shadow-sm">
-        <h2 className="font-bold text-[#2d336b] dark:text-slate-100 text-base mb-3">On this page</h2>
+        <h2 className="font-bold text-[#2d336b] dark:text-slate-100 text-base mb-3">{t("docs.onThisPage")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
-          {allSections.map((section) => (
+          {getAllSections(t).map((section) => (
             <Link
               key={section.id}
               href={`#${section.id}`}
@@ -573,21 +577,21 @@ export default function DocsPage() {
       </div>
 
       {/* Sections */}
-      {allSections.map((section) => (
+      {getAllSections(t).map((section) => (
         <SectionCard key={section.id} section={section} />
       ))}
 
       {/* Footer note */}
       <div className="border-t border-slate-200 dark:border-slate-700 pt-8 mt-8 text-center">
         <p className="text-slate-400 dark:text-slate-500 text-sm">
-          Need help? Contact your wedding administrator or visit the{" "}
+          {t("docs.needHelp")}{" "}
           <Link
             href="/dashboard/settings"
             className="text-[#6771ab] dark:text-violet-300 hover:underline font-medium"
           >
             Settings
           </Link>{" "}
-          page for account support.
+          {t("docs.pageForSupport")}
         </p>
       </div>
     </div>

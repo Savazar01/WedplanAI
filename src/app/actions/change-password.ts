@@ -3,6 +3,9 @@
 import { auth } from "@/lib/auth";
 import { getServerSession } from "@/lib/auth-server";
 import { headers } from "next/headers";
+import { db } from "@/db/client";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function changePasswordAction(prevState: { success?: boolean; error?: string } | null, formData: FormData) {
   const session = await getServerSession();
@@ -35,6 +38,11 @@ export async function changePasswordAction(prevState: { success?: boolean; error
       },
       headers: headerStore,
     });
+
+    await db.update(users)
+      .set({ shouldChangePassword: false })
+      .where(eq(users.id, session.user.id));
+
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to change password.";

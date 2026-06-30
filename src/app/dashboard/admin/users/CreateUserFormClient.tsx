@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { FieldHelp } from "@/components/ui/field-help";
 import * as React from "react";
 
 interface CreateUserFormClientProps {
@@ -36,8 +37,8 @@ export default function CreateUserFormClient({
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
       <div>
-        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-          Full Name
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+          Full Name <FieldHelp message="The full name of the team member you are adding." />
         </label>
         <Input 
           type="text" 
@@ -49,8 +50,8 @@ export default function CreateUserFormClient({
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-          Email Address
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+          Email Address <FieldHelp message="The email address they will use to log in." />
         </label>
         <Input 
           type="email" 
@@ -62,8 +63,8 @@ export default function CreateUserFormClient({
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-          Password
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+          Password <FieldHelp message="The temporary password they will use to log in. They will be forced to change this upon first login." />
         </label>
         <Input 
           type="password" 
@@ -75,8 +76,8 @@ export default function CreateUserFormClient({
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-          User Persona
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+          User Persona <FieldHelp message="Defines the user's primary persona and experience." />
         </label>
         <Select name="persona" defaultValue="diy" required disabled={isPending}>
           <option value="diy">Plan My Wedding (DIY)</option>
@@ -85,8 +86,8 @@ export default function CreateUserFormClient({
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-          Assign Role
+        <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+          Assign Role <FieldHelp message="Users have limited access, Clients have full planning access, Admins have app administration access." />
         </label>
         <Select 
           name="role" 
@@ -96,15 +97,19 @@ export default function CreateUserFormClient({
           disabled={isPending}
         >
           <option value="user">User</option>
-          {adminPersona !== "diy" && <option value="client">Client</option>}
-          <option value="admin">Admin</option>
+          {adminPersona === "wedding_planner" && (
+            <>
+              <option value="client">Client</option>
+              <option value="admin">Admin</option>
+            </>
+          )}
         </Select>
       </div>
 
       {role !== "admin" && (
         <div>
-          <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-            Assigned Wedding(s)
+          <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+            Assigned Wedding(s) <FieldHelp message="Select which wedding this member can access." />
           </label>
           {role === "client" ? (
             <Select name="weddingAccess" required disabled={isPending}>

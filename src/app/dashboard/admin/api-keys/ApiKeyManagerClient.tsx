@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
+import { FieldHelp } from "@/components/ui/field-help";
 import { createApiKeyAction, revokeApiKeyAction } from "@/app/actions/api-keys";
 import { Key, Copy, Trash2, Check } from "lucide-react";
 
@@ -133,8 +134,8 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
 
             <form onSubmit={handleGenerate} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest block mb-1">
-                  Key Name
+                <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+                  Key Name <FieldHelp message="Give this key a descriptive name so you remember what it's used for." />
                 </label>
                 <Input
                   placeholder="e.g. Integration Sync"
@@ -145,8 +146,8 @@ export default function ApiKeyManagerClient({ initialKeys }: ApiKeyManagerClient
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest block mb-1">
-                  Scope
+                <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+                  Scope <FieldHelp message="Choose 'Wedding-Scoped' for keys that only access specific weddings, and 'Global Access' for system-wide read/write permissions." />
                 </label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">

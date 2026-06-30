@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import Countdown from "@/components/wedding/countdown";
 import PublicRsvpForm from "@/components/wedding/public-rsvp-form";
 import { formatDateTime, formatDate } from "@/lib/format";
-import SampleWalkthroughCard from "@/components/dashboard/SampleWalkthroughCard";
 import DynamicTheme from "@/components/theme/DynamicTheme";
 import Link from "next/link";
 import { getPreviewCode } from "@/lib/preview";
@@ -224,10 +223,6 @@ export default async function WeddingShowcasePage({ params, searchParams }: Page
 
       <DynamicTheme wedding={wedding} mode="showcase" />
       <div className="w-full h-2 bg-gradient-to-r from-[var(--color-primary)] via-[var(--color-secondary)] to-amber-500" />
-
-      {isSampleWedding && (
-        <SampleWalkthroughCard isSampleWedding={true} weddingId={wedding.id} userRole="admin" previewCode={previewCode} />
-      )}
 
       <section className="w-full max-w-4xl mx-auto px-6 pt-12 pb-8 flex flex-col items-center text-center">
         <div className="inline-block px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider mb-6">

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Toast } from "@/components/ui/toast";
+import { FieldHelp } from "@/components/ui/field-help";
 import { updateWeddingAppearanceAction } from "@/app/actions/wedding";
 
 interface Wedding {
@@ -138,8 +139,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
               <div className="space-y-4 pt-4 border-t border-slate-100">
                 <h4 className="text-sm font-bold text-slate-700">Typography</h4>
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                    Font Family
+                  <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                    Font Family <FieldHelp message="The primary font used for headings and text across the app." />
                   </label>
                   <Select
                     value={themeFont}
@@ -162,8 +163,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Primary Color */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Primary Color (Light)
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                      Primary Color (Light) <FieldHelp message="Used for primary buttons, active states, and brand highlights." />
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -188,8 +189,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
 
                   {/* Secondary Color */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Secondary Color (Light)
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                      Secondary Color (Light) <FieldHelp message="Used for secondary accents and subtle borders." />
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -214,8 +215,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
 
                   {/* Background Color */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Background Color (Light)
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                      Background Color (Light) <FieldHelp message="The main background color of the application." />
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -247,8 +248,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Primary Color (Dark) */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Primary Color (Dark)
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                      Primary Color (Dark) <FieldHelp message="Primary brand color when viewed in dark mode." />
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -273,8 +274,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
 
                   {/* Secondary Color (Dark) */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Secondary Color (Dark)
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                      Secondary Color (Dark) <FieldHelp message="Secondary accent color when viewed in dark mode." />
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -299,8 +300,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
 
                   {/* Background Color (Dark) */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                      Background Color (Dark)
+                    <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                      Background Color (Dark) <FieldHelp message="The main background color of the application in dark mode." />
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -331,8 +332,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                 
                 {/* URL field */}
                 <div className="space-y-1">
-                  <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">
-                    Logo Image URL
+                  <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center">
+                    Logo Image URL <FieldHelp message="Provide a URL to an externally hosted logo image." />
                   </label>
                   <Input
                     type="url"
@@ -345,8 +346,8 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
 
                 {/* Upload field */}
                 <div className="space-y-1 pt-2">
-                  <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
-                    Upload Logo File
+                  <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1 flex items-center">
+                    Upload Logo File <FieldHelp message="Upload a logo directly from your computer (max 2MB)." />
                   </label>
                   <div className="flex items-center gap-4">
                     <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-xl border border-slate-200 transition-all active:scale-[0.97]">

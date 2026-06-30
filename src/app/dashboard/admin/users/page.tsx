@@ -5,8 +5,9 @@ import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
-import { createSubsequentUserAction } from "./actions";
+import { createSubsequentUserAction, editUserAction, deleteUserAction } from "./actions";
 import CreateUserFormClient from "./CreateUserFormClient";
+import UserTableClient from "./UserTableClient";
 
 export default async function UsersManagementPage() {
   const session = await getServerSession();
@@ -38,39 +39,14 @@ export default async function UsersManagementPage() {
       <div className="lg:col-span-2 space-y-4">
         <h2 className="text-lg font-bold text-slate-800">Team Directory ({allUsers.length})</h2>
         
-        <Card variant="default" className="overflow-hidden bg-white shadow-sm border border-slate-200">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100">
-              <thead className="bg-slate-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Role</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Created At</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {allUsers.map((u) => (
-                  <tr key={u.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800">{u.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{u.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`inline-flex px-2 py-0.5 rounded-sm text-xs font-semibold ${
-                        u.role === "admin" 
-                          ? "bg-violet-100 text-[#2d336b]" 
-                          : "bg-slate-100 text-slate-600"
-                      }`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <Card variant="default" className="overflow-hidden bg-white shadow-sm border border-slate-200 p-4">
+          <UserTableClient
+            users={allUsers}
+            weddings={adminWeddings}
+            adminPersona={session.user.persona || "diy"}
+            editAction={editUserAction}
+            deleteAction={deleteUserAction}
+          />
         </Card>
       </div>
     </main>

@@ -32,6 +32,10 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "all",
       },
+      shouldChangePassword: {
+        type: "boolean",
+        defaultValue: false,
+      },
     },
   },
   advanced: {

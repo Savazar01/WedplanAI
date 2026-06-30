@@ -1,8 +1,10 @@
 "use server";
 
 import { db } from "@/db/client";
-import { weddings, tasks, rituals, kanbanColumns, weddingTraditions, taskCategories, cateringMenus } from "@/db/schema";
+import { weddings, tasks, rituals, kanbanColumns, weddingTraditions, taskCategories, cateringMenus, users, emailConfigurations } from "@/db/schema";
 import { getServerSession } from "@/lib/auth-server";
+import { auth } from "@/lib/auth";
+import { sendEmail } from "@/lib/mailer";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -33,7 +35,12 @@ export async function createWizardTraditionAction(data: {
 
 const createWeddingSchema = z.object({
   partnerA: z.string().min(1, "Partner A name is required"),
+  brideFather: z.string().optional(),
+  brideMother: z.string().optional(),
   partnerB: z.string().min(1, "Partner B name is required"),
+  groomFather: z.string().optional(),
+  groomMother: z.string().optional(),
+  teamMembers: z.array(z.object({ name: z.string(), email: z.string(), password: z.string() })).optional(),
   tradition: z.string().min(1, "Tradition is required"),
   weddingDate: z.string().refine((val) => new Date(val) > new Date(), {
     message: "Wedding date must be in the future",
@@ -72,7 +79,12 @@ const createWeddingSchema = z.object({
 
 export async function createWeddingAction(data: {
   partnerA: string;
+  brideFather?: string;
+  brideMother?: string;
   partnerB: string;
+  groomFather?: string;
+  groomMother?: string;
+  teamMembers?: { name: string; email: string; password: string }[];
   tradition: string;
   weddingDate: string;
   budget: number;
@@ -111,7 +123,7 @@ export async function createWeddingAction(data: {
     return { error: parsed.error.issues[0]?.message || "Validation failed" };
   }
 
-  const { partnerA, partnerB, tradition, weddingDate, budget, guestCount, location, locationOptions, locationName, street, city, state, country, pincode, description, customTasks, customRituals } = parsed.data;
+  const { partnerA, brideFather, brideMother, partnerB, groomFather, groomMother, teamMembers, tradition, weddingDate, budget, guestCount, location, locationOptions, locationName, street, city, state, country, pincode, description, customTasks, customRituals } = parsed.data;
   const weddingDateObj = new Date(weddingDate);
 
   let newlyCreatedWeddingId: string | null = null;
@@ -120,7 +132,11 @@ export async function createWeddingAction(data: {
       const [insertedWedding] = await tx.insert(weddings).values({
         userId: session.user.id,
         partnerA,
+        brideFather: brideFather || null,
+          brideMother: brideMother || null,
         partnerB,
+        groomFather: groomFather || null,
+          groomMother: groomMother || null,
         tradition,
         weddingDate: weddingDateObj,
         budget,
@@ -380,6 +396,59 @@ export async function createWeddingAction(data: {
       }
     });
 
+    
+    if (newlyCreatedWeddingId && teamMembers && teamMembers.length > 0) {
+      for (const tm of teamMembers) {
+        try {
+          const existingUser = await db.select().from(users).where(eq(users.email, tm.email)).limit(1);
+          if (existingUser.length === 0) {
+            const result = await auth.api.signUpEmail({
+              body: {
+                name: tm.name,
+                email: tm.email,
+                password: tm.password,
+                persona: "diy",
+              },
+            });
+            if (result && result.user) {
+              await db.update(users).set({ 
+                role: "user",
+                weddingAccess: "all",
+                shouldChangePassword: true,
+                weddingId: newlyCreatedWeddingId
+              }).where(eq(users.id, result.user.id));
+              
+              const confs = await db.select().from(emailConfigurations).where(eq(emailConfigurations.isActive, true)).limit(1);
+              if (confs.length > 0) {
+                const conf = confs[0];
+                const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/login`;
+                const emailHtml = `
+                  <div style="font-family: sans-serif; padding: 20px;">
+                    <h2>Welcome to WedPlanAI!</h2>
+                    <p>You have been invited as a team member to collaborate on a wedding.</p>
+                    <p><strong>Your login credentials:</strong></p>
+                    <ul>
+                      <li>Email: ${tm.email}</li>
+                      <li>Temporary Password: ${tm.password}</li>
+                    </ul>
+                    <p>Please log in and change your password immediately.</p>
+                    <a href="${loginUrl}" style="display: inline-block; padding: 10px 20px; background-color: #6771ab; color: white; text-decoration: none; border-radius: 4px;">Log In Now</a>
+                  </div>
+                `;
+                await sendEmail({
+                  to: tm.email,
+                  subject: "You're invited to collaborate on WedPlanAI",
+                  html: emailHtml
+                });
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to create team member:", e);
+        }
+      }
+    }
+
     if (newlyCreatedWeddingId) {
       const cookieStore = await cookies();
       cookieStore.set("active_wedding_id", newlyCreatedWeddingId);
@@ -395,7 +464,12 @@ export async function createWeddingAction(data: {
 
 export async function updateWeddingAction(weddingId: string, data: {
   partnerA: string;
+  brideFather?: string;
+  brideMother?: string;
   partnerB: string;
+  groomFather?: string;
+  groomMother?: string;
+  teamMembers?: { name: string; email: string; password: string }[];
   location: string;
   weddingDate: string;
   budget: number;

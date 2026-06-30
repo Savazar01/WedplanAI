@@ -185,6 +185,14 @@ export default function LandingContent({ isLoggedIn }: { isLoggedIn: boolean }) 
               <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.features.emailDesc")}</p>
             </div>
 
+            <div className={`${featureCardBase} from-green-500/10 to-green-50 dark:from-slate-900/40 dark:to-slate-900/60 border-green-100 dark:border-slate-800`}>
+              <FeatureIcon bg="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+              </FeatureIcon>
+              <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-lg mb-2">{t("landing.features.chatTitle")}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.features.chatDesc")}</p>
+            </div>
+
             <div className={`${featureCardBase} from-red-500/10 to-red-50 dark:from-slate-900/40 dark:to-slate-900/60 border-red-100 dark:border-slate-800`}>
               <FeatureIcon bg="bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-1.305 1.797l-.272 1.357a.75.75 0 00.916.85l1.393-.348a3 3 0 001.782-1.307l5.517-5.517a1.42 1.42 0 00-2.008-2.008L9.53 16.122z" /><path strokeLinecap="round" strokeLinejoin="round" d="M10.43 12.985l2.229 2.228m-1.414-4.43a6 6 0 118.485-8.486 6 6 0 01-8.485 8.486z" /></svg>

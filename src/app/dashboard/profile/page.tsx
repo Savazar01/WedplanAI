@@ -6,6 +6,9 @@ import ProfileForm from "./ProfileForm";
 import ThemePreferences from "./ThemePreferences";
 import { getLocaleServer } from "@/lib/i18n-server";
 import { translations } from "@/lib/translations";
+import { db } from "@/db/client";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export default async function ProfilePage() {
   const locale = await getLocaleServer();
@@ -15,10 +18,28 @@ export default async function ProfilePage() {
     redirect("/login?unauthenticated=true");
   }
 
+  const [dbUser] = await db
+    .select({ shouldChangePassword: users.shouldChangePassword })
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1);
+
+  const shouldWarn = dbUser?.shouldChangePassword === true;
+
   const profile = await getProfileAction();
 
   return (
     <main className="w-full max-w-3xl mr-auto p-6 md:px-8 space-y-6">
+      {shouldWarn && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-900 p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
+          <span className="text-xl">⚠️</span>
+          <div>
+            <h3 className="font-bold text-amber-800">Password Change Required</h3>
+            <p className="text-xs text-amber-700 mt-1">For your security, you must update your password to secure your account. Please use the Change Password form below to set a new password.</p>
+          </div>
+        </div>
+      )}
+
       <div>
         <h1 className="text-2xl font-bold text-slate-800">{tDict.profile}</h1>
         <p className="text-xs text-slate-500">Manage your account details, address, and preferences.</p>

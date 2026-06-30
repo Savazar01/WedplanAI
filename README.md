@@ -18,8 +18,10 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 | 🍴 **Catering Menu Planner** | Design food & beverage menus for ceremonies. Link them directly to catering tasks and view them right from your day-of timeline planner |
 | 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, Wedding Program (filtered by guest's invited ceremonies via personal link), Gift Registry, RSVP form, and internal preview mode using a secure hash-based preview code |
 | 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
+| 💬 **Chat & Call** | Real-time chat messaging and embedded Jitsi video conferencing for the couple, team, and invited guests directly in the dashboard and showcase page |
+| 📧 **Email Integration** | Built-in email delivery support for team invitations via SMTP/SendGrid or Gmail API, with in-app setup documentation |
 | 🗄️ **Archive & Delete Weddings** | Archive weddings to a collapsed section (view-only, excluded from sidebar switcher), restore or permanently delete with cascade confirmation |
-| 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding (detected via isSample flag) and 7-step wizard to set up your first event — includes multi-location venue support with auto-formatted address fields and country-based currency display |
+| 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding (detected via isSample flag) and 8-step wizard to set up your first event — includes parents details, team member invites, multi-location venue support with auto-formatted address fields and country-based currency display |
 | 👤 **Personas** | Wedding Planner mode (manage multiple couples with client role + onboarding links) and DIY (Plan My Wedding) |
 | ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — pre-seeded with standard categories, fully editable. Full REST API at `/api/v1/categories` |
 | 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` — pre-seeded with standard traditions (Hindu, Muslim, Sikh, Christian, Secular), fully editable. Full REST API at `/api/v1/traditions` |
@@ -31,8 +33,8 @@ The platform has built-in self-healing and auto-seeding logic registered in `src
 Hindu · Muslim · Sikh · Christian · Secular (and custom traditions)
 
 ### Languages Supported
-3 languages supported (with full-name select dropdown in navigation header/sidebar):
-English · हिन्दी (Hindi) · తెలుగు (Telugu)
+7 languages supported (with full-name select dropdown in navigation header/sidebar):
+English · हिन्दी (Hindi) · తెలుగు (Telugu) · ગુજરાતી (Gujarati) · मराठी (Marathi) · தமிழ் (Tamil) · ಕನ್ನಡ (Kannada)
 
 ### Premium Showcase Design Templates
 9 premium design templates (selectable via Build Showcase Page, featuring custom borders, ornaments, and divider icons):

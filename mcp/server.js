@@ -59,6 +59,10 @@ function getToolsList() {
         properties: {
           partnerA: { type: "string", description: "Name of partner A (required)" },
           partnerB: { type: "string", description: "Name of partner B (required)" },
+          brideFather: { type: "string" },
+              brideMother: { type: "string" },
+          groomFather: { type: "string" },
+              groomMother: { type: "string" },
           tradition: { type: "string", description: "Wedding tradition: hindu, muslim, sikh, christian, secular (required)" },
           weddingDate: { type: "string", description: "Wedding date (future ISO date string, required)" },
           location: { type: "string", description: "Wedding location/venue (required)" },
@@ -85,6 +89,10 @@ function getToolsList() {
           weddingId: { type: "string", description: "Wedding ID (required for global API keys)" },
           partnerA: { type: "string", description: "Name of partner A" },
           partnerB: { type: "string", description: "Name of partner B" },
+          brideFather: { type: "string" },
+              brideMother: { type: "string" },
+          groomFather: { type: "string" },
+              groomMother: { type: "string" },
           weddingDate: { type: "string", description: "Wedding date (future ISO date string)" },
           tradition: { type: "string", description: "Wedding tradition" },
           location: { type: "string", description: "Wedding location/city" },
@@ -331,6 +339,31 @@ function getToolsList() {
         },
         required: ["id"]
       }
+    },
+    {
+      name: "list_chat_messages",
+      description: "List all chat messages. For global API keys, provide weddingId.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" }
+        }
+      }
+    },
+    {
+      name: "create_chat_message",
+      description: "Create a new chat message. For global API keys, provide weddingId in body.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          weddingId: { type: "string", description: "Wedding ID (required for global API keys)" },
+          senderName: { type: "string", description: "Name of the sender" },
+          senderEmail: { type: "string", description: "Email of the sender" },
+          senderRole: { type: "string", description: "Role of the sender (admin, user, client, guest)" },
+          message: { type: "string", description: "Chat message content" }
+        },
+        required: ["senderName", "senderRole", "message"]
+      }
     }
   ];
 }
@@ -403,6 +436,12 @@ async function callTool(name, args) {
       break;
     case 'delete_vendor':
       result = await apiRequest(`/api/v1/vendors/${args.id}`, 'DELETE');
+      break;
+    case 'list_chat_messages':
+      result = await apiRequest(`/api/v1/chat-messages${qs}`, 'GET');
+      break;
+    case 'create_chat_message':
+      result = await apiRequest('/api/v1/chat-messages', 'POST', bodyArgs(args));
       break;
     default:
       throw new Error(`Tool not found: ${name}`);

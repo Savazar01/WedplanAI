@@ -17,6 +17,7 @@ export const users = pgTable("user", {
   languages: text("languages"),
   persona: text("persona").default("diy").notNull(),
   weddingAccess: text("wedding_access").default("all").notNull(),
+  shouldChangePassword: boolean("should_change_password").default(false).notNull(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   weddingId: uuid("wedding_id").references((): any => weddings.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -70,6 +71,10 @@ export const weddings = pgTable("wedding", {
   userId: text("user_id").notNull().references((): any => users.id, { onDelete: "cascade" }),
   partnerA: text("partner_a").notNull(),
   partnerB: text("partner_b").notNull(),
+  brideFather: text("bride_father"),
+  brideMother: text("bride_mother"),
+  groomFather: text("groom_father"),
+  groomMother: text("groom_mother"),
   tradition: text("tradition").notNull(),
   weddingDate: timestamp("wedding_date").notNull(),
   budget: integer("budget").default(0).notNull(),
@@ -270,6 +275,16 @@ export const emailConfigurations = pgTable("email_configuration", {
   isActive: boolean("is_active").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const chatMessages = pgTable("chat_message", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
+  senderName: text("sender_name").notNull(),
+  senderEmail: text("sender_email"),
+  senderRole: text("sender_role").notNull(), // 'admin', 'user', 'client', 'guest'
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const rituals = ceremonies;

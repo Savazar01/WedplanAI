@@ -9,6 +9,8 @@ import { Select } from "@/components/ui/select";
 import { Toast } from "@/components/ui/toast";
 import { saveEmailConfigAction, sendTestEmailAction } from "@/app/actions/email";
 import { Mail, Settings, Key, Shield, Send, Check } from "lucide-react";
+import { FieldHelp } from "@/components/ui/field-help";
+import Link from "next/link";
 
 interface EmailConfig {
   id: string;
@@ -115,8 +117,8 @@ export default function EmailSettingsClient({ initialConfig }: EmailSettingsClie
           <form onSubmit={handleSave} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                  Delivery Provider
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 flex items-center">
+                  Delivery Provider <FieldHelp message="Select the service you want to use to send emails from your application." />
                 </label>
                 <Select
                   id="email-provider-select"
@@ -131,8 +133,8 @@ export default function EmailSettingsClient({ initialConfig }: EmailSettingsClie
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                  Sender Email Address
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 flex items-center">
+                  Sender Email Address <FieldHelp message="The email address your emails will appear to come from." />
                 </label>
                 <Input
                   type="email"
@@ -149,13 +151,18 @@ export default function EmailSettingsClient({ initialConfig }: EmailSettingsClie
             {/* Provider Specific Configuration fields */}
             {provider === "sendgrid" && (
               <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm border-b border-slate-200 pb-2 mb-3">
-                  <Key className="h-4 w-4 text-[#6771ab]" />
-                  <span>SendGrid Settings</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                  <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm">
+                    <Key className="h-4 w-4 text-[#6771ab]" />
+                    <span>SendGrid Settings</span>
+                  </div>
+                  <Link href="/dashboard/docs#email-integration" className="text-xs text-[#6771ab] hover:underline font-semibold">
+                    View Setup Instructions
+                  </Link>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                    SendGrid API Key
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 flex items-center">
+                    SendGrid API Key <FieldHelp message="Your SendGrid API Key with Mail Send access." />
                   </label>
                   <Input
                     name="apiKey"
@@ -172,15 +179,20 @@ export default function EmailSettingsClient({ initialConfig }: EmailSettingsClie
 
             {provider === "gmail" && (
               <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm border-b border-slate-200 pb-2 mb-3">
-                  <Shield className="h-4 w-4 text-[#6771ab]" />
-                  <span>Gmail OAuth2 Credentials</span>
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                  <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm">
+                    <Shield className="h-4 w-4 text-[#6771ab]" />
+                    <span>Gmail OAuth2 Credentials</span>
+                  </div>
+                  <Link href="/dashboard/docs#email-integration" className="text-xs text-[#6771ab] hover:underline font-semibold">
+                    View Setup Instructions
+                  </Link>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                      Client ID
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 flex items-center">
+                      Client ID <FieldHelp message="Google OAuth Client ID from Google Cloud Console." />
                     </label>
                     <Input
                       name="clientId"
@@ -192,8 +204,8 @@ export default function EmailSettingsClient({ initialConfig }: EmailSettingsClie
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                      Client Secret
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 flex items-center">
+                      Client Secret <FieldHelp message="Google OAuth Client Secret from Google Cloud Console." />
                     </label>
                     <Input
                       name="clientSecret"
@@ -207,8 +219,8 @@ export default function EmailSettingsClient({ initialConfig }: EmailSettingsClie
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                    Refresh Token
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 flex items-center">
+                    Refresh Token <FieldHelp message="The refresh token obtained via Google OAuth Playground." />
                   </label>
                   <Input
                     name="refreshToken"

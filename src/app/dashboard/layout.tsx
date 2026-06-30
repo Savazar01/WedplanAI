@@ -22,7 +22,7 @@ export default async function DashboardLayout({ children }: LayoutProps) {
 
   const activeWedding = await getActiveWedding(session.user.id);
 
-  const user = session.user as { role?: string; weddingAccess?: string; id: string; email: string; name: string };
+  const user = session.user as { role?: string; weddingAccess?: string; id: string; email: string; name: string; shouldChangePassword?: boolean };
   const userRole = user.role || "user";
   const userWeddingAccess = user.weddingAccess || "all";
 
@@ -58,6 +58,7 @@ export default async function DashboardLayout({ children }: LayoutProps) {
         userName={session.user.name}
         userEmail={session.user.email}
         userRole={(session.user as { role?: string }).role || "user"}
+        shouldChangePassword={user.shouldChangePassword}
         previewCode={activeWedding ? getPreviewCode(activeWedding.id) : ""}
       >
         {children}

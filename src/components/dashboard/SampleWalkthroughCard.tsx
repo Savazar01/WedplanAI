@@ -92,7 +92,7 @@ export default function SampleWalkthroughCard({
       {
         id: "calendar",
         title: "Calendar",
-        description: "Schedule and view all wedding-related events, rituals, and appointments in a consolidated calendar view.",
+        description: "Schedule and view all wedding-related events, ceremonies, and appointments in a consolidated calendar view.",
         icon: Calendar,
         color: "text-rose-500 bg-rose-50 border-rose-100",
         path: "/dashboard/calendar",
@@ -127,15 +127,7 @@ export default function SampleWalkthroughCard({
         description: "Preview the beautiful public wedding showcase website where guests can view event details, stories, and RSVP.",
         icon: Globe,
         color: "text-sky-500 bg-sky-50 border-sky-100",
-        path: weddingId && previewCode ? `/wedding/${weddingId}?code=${previewCode}` : "/dashboard",
-      },
-      {
-        id: "profile",
-        title: "User Profile",
-        description: "Configure user details, profile information, and account security preferences.",
-        icon: UserCog,
-        color: "text-amber-600 bg-amber-50 border-amber-100",
-        path: "/dashboard/profile",
+        path: "/dashboard/showcase",
       },
       ...(userRole === "admin" ? [{
         id: "users",
@@ -165,16 +157,17 @@ export default function SampleWalkthroughCard({
       // Disambiguation for Welcome (0) and All Set (last) which both share "/dashboard"
       if (step.path === "/dashboard") {
         if (pathname === "/dashboard") {
-          if (currentStep === 0 && index === 0) return true;
-          if (currentStep === steps.length - 1 && index === steps.length - 1) return true;
+          if (currentStep >= steps.length - 2) {
+            return index === steps.length - 1;
+          }
           return index === 0;
         }
         return false;
       }
       
-      // Match showcase path starting with /wedding/
+      // Match showcase path starting with /wedding/ or exactly /dashboard/showcase
       if (step.id === "showcase") {
-        return pathname.startsWith("/wedding/");
+        return pathname.startsWith("/wedding/") || pathname === step.path;
       }
       
       return step.path === pathname;

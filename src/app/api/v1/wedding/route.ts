@@ -53,6 +53,8 @@ export async function PUT(request: NextRequest) {
     const allowedFields = [
       'partnerA',
       'partnerB',
+      'brideFather', 'brideMother',
+      'groomFather', 'groomMother',
       'weddingDate',
       'tradition',
       'location',
@@ -165,6 +167,8 @@ export async function POST(request: NextRequest) {
     const {
       partnerA,
       partnerB,
+      brideFather, brideMother,
+      groomFather, groomMother,
       tradition,
       weddingDate,
       budget,
@@ -199,6 +203,8 @@ export async function POST(request: NextRequest) {
         userId,
         partnerA,
         partnerB,
+        brideFather, brideMother,
+        groomFather, groomMother,
         tradition,
         weddingDate: parsedDate,
         budget: budget ?? 1000000,

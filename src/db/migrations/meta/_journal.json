@@ -134,6 +134,13 @@
       "when": 1782794353352,
       "tag": "0018_dapper_morgan_stark",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1782819419076,
+      "tag": "0019_shocking_colossus",
+      "breakpoints": true
     }
   ]
 }

@@ -71,6 +71,8 @@ export const weddings = pgTable("wedding", {
   userId: text("user_id").notNull().references((): any => users.id, { onDelete: "cascade" }),
   partnerA: text("partner_a").notNull(),
   partnerB: text("partner_b").notNull(),
+  partnerAParents: text("partner_a_parents"),
+  partnerBParents: text("partner_b_parents"),
   brideFather: text("bride_father"),
   brideMother: text("bride_mother"),
   groomFather: text("groom_father"),

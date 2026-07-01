@@ -54,30 +54,57 @@ export async function getActiveWedding(userId: string) {
 
   // Helper function to check if a wedding is allowed for this user
   async function isWeddingAllowed(weddingId: string): Promise<boolean> {
+    const [w] = await db
+      .select({ id: weddings.id, isSample: weddings.isSample, userId: weddings.userId })
+      .from(weddings)
+      .where(eq(weddings.id, weddingId))
+      .limit(1);
+    if (!w) return false;
+    if (w.isSample) return true;
+
     if (role === "admin") {
-      const [w] = await db
-        .select({ id: weddings.id })
-        .from(weddings)
-        .where(and(eq(weddings.id, weddingId), eq(weddings.userId, userId)))
-        .limit(1);
-      return !!w;
+      return w.userId === userId;
     } else {
       if (weddingAccess !== "all") {
         return weddingId === weddingAccess;
       } else {
         if (!allowedAdminUserId) return false;
-        const [w] = await db
-          .select({ id: weddings.id })
-          .from(weddings)
-          .where(and(eq(weddings.id, weddingId), eq(weddings.userId, allowedAdminUserId)))
-          .limit(1);
-        return !!w;
+        return w.userId === allowedAdminUserId;
       }
     }
   }
 
   const cookieStore = await cookies();
+  const sampleWalkthroughStatus = cookieStore.get("sample_walkthrough_status")?.value;
   const activeWeddingId = cookieStore.get("active_wedding_id")?.value;
+
+  // If walkthrough is active (not completed/skipped), default to the sample wedding first
+  if (sampleWalkthroughStatus !== "completed" && sampleWalkthroughStatus !== "skipped") {
+    const creatorAdminId = role === "admin" ? userId : allowedAdminUserId;
+    let sampleWedding: typeof weddings.$inferSelect | null = null;
+    
+    if (creatorAdminId) {
+      const [w] = await db
+        .select()
+        .from(weddings)
+        .where(and(eq(weddings.isSample, true), eq(weddings.userId, creatorAdminId)))
+        .limit(1);
+      if (w) sampleWedding = w;
+    }
+    
+    if (!sampleWedding) {
+      const [w] = await db
+        .select()
+        .from(weddings)
+        .where(eq(weddings.isSample, true))
+        .limit(1);
+      if (w) sampleWedding = w;
+    }
+    
+    if (sampleWedding) {
+      return await checkAndSelfHealSampleWedding(sampleWedding);
+    }
+  }
 
   // 1. If cookie wedding is set and allowed, use it
   if (activeWeddingId && await isWeddingAllowed(activeWeddingId)) {
@@ -137,6 +164,18 @@ export async function getActiveWedding(userId: string) {
 
 export async function switchWeddingAction(weddingId: string) {
   const cookieStore = await cookies();
+  
+  // Check if the selected wedding is a sample wedding
+  const [w] = await db
+    .select({ isSample: weddings.isSample })
+    .from(weddings)
+    .where(eq(weddings.id, weddingId))
+    .limit(1);
+  
+  if (w && !w.isSample) {
+    cookieStore.set("sample_walkthrough_status", "skipped");
+  }
+  
   cookieStore.set("active_wedding_id", weddingId);
   redirect("/dashboard");
 }

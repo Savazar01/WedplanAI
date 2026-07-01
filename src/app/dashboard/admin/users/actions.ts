@@ -98,6 +98,9 @@ export async function createSubsequentUserAction(prevState: { success?: boolean;
                   <td style="padding: 8px; border: 1px solid #ddd;">${password}</td>
                 </tr>
               </table>
+              <div style="margin: 25px 0 15px 0;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3044"}/login" style="display: inline-block; padding: 12px 24px; background-color: #6771ab; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Log In Now</a>
+              </div>
               <p style="font-weight: bold; color: #ef4444;">For security reasons, you will be required to change your password upon your first login.</p>
               <p>Best regards,<br/>The Wedding Task Planner Team</p>
             </div>

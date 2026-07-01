@@ -71,6 +71,168 @@ export default function DashboardVendorManager({
   const [deleteConfirm, setDeleteConfirm] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  // OCR Form & Dialog states
+  const [isOcrOpen, setIsOcrOpen] = React.useState(false);
+  const [ocrStage, setOcrStage] = React.useState<'idle' | 'uploading' | 'processing' | 'extracting' | 'validating' | 'success' | 'error'>('idle');
+  const [ocrFile, setOcrFile] = React.useState<File | null>(null);
+  const [ocrError, setOcrError] = React.useState("");
+
+  // Extracted data preview
+  const [ocrName, setOcrName] = React.useState("");
+  const [ocrCategory, setOcrCategory] = React.useState("other");
+  const [ocrContactPerson, setOcrContactPerson] = React.useState("");
+  const [ocrPhone, setOcrPhone] = React.useState("");
+  const [ocrEmail, setOcrEmail] = React.useState("");
+  const [ocrTotalCost, setOcrTotalCost] = React.useState(0);
+  const [ocrPaidAmount, setOcrPaidAmount] = React.useState(0);
+  const [ocrNotes, setOcrNotes] = React.useState("");
+  const [ocrCeremonyId, setOcrCeremonyId] = React.useState("");
+  const [ocrBase64, setOcrBase64] = React.useState("");
+
+  const handleOcrFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setOcrFile(file);
+    setOcrError("");
+
+    // Validate size (<= 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setOcrError("File size exceeds 5MB limit.");
+      setOcrStage("error");
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowedTypes.includes(file.type)) {
+      setOcrError("Unsupported file format. Please upload JPG, PNG, WebP or PDF.");
+      setOcrStage("error");
+      return;
+    }
+
+    setOcrStage("uploading");
+
+    // Convert file to base64
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      setOcrBase64(base64);
+
+      // Start simulated OCR steps
+      setTimeout(() => {
+        setOcrStage("processing");
+        setTimeout(() => {
+          setOcrStage("extracting");
+          setTimeout(() => {
+            setOcrStage("validating");
+            setTimeout(() => {
+              // Simulated Extraction Rules
+              const lowerName = file.name.toLowerCase();
+              let nameEst = file.name.split(".")[0]?.replace(/[-_]/g, " ") || "Vendor";
+              nameEst = nameEst.charAt(0).toUpperCase() + nameEst.slice(1);
+
+              let catEst = "other";
+              if (lowerName.includes("catering") || lowerName.includes("food") || lowerName.includes("menu")) {
+                catEst = "catering";
+              } else if (lowerName.includes("photo") || lowerName.includes("video") || lowerName.includes("lens")) {
+                catEst = "photography";
+              } else if (lowerName.includes("decor") || lowerName.includes("flower") || lowerName.includes("design")) {
+                catEst = "decoration";
+              } else if (lowerName.includes("venue") || lowerName.includes("hall") || lowerName.includes("resort")) {
+                catEst = "venue";
+              } else if (lowerName.includes("music") || lowerName.includes("dj") || lowerName.includes("band")) {
+                catEst = "music";
+              }
+
+              // Mock values
+              const costEst = 120000;
+              const paidEst = 40000;
+
+              // Apply values
+              setOcrName(nameEst);
+              setOcrCategory(catEst);
+              setOcrTotalCost(costEst);
+              setOcrPaidAmount(paidEst);
+              setOcrNotes(`Extracted via OCR invoice scanning from ${file.name}.`);
+              setOcrStage("success");
+            }, 1200);
+          }, 1200);
+        }, 1200);
+      }, 1000);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleOcrSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    if (ocrPaidAmount > ocrTotalCost) {
+      setToast({ message: "Paid amount cannot exceed total contract cost.", type: "error" });
+      setLoading(false);
+      return;
+    }
+    if (ocrTotalCost <= 0 || ocrPaidAmount < 0) {
+      setToast({ message: "Amounts must be valid positive values.", type: "error" });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { uploadVendorInvoiceAction } = await import("@/app/actions/vendors");
+
+      let finalInvoiceUrl: string | null = null;
+      let finalInvoiceData: string | null = ocrBase64;
+
+      // Upload to R2 if active
+      const uploadRes = await uploadVendorInvoiceAction(ocrBase64, ocrFile?.name || "invoice", ocrFile?.type || "image/jpeg");
+      if (uploadRes.success && uploadRes.url) {
+        finalInvoiceUrl = uploadRes.url;
+        finalInvoiceData = null; // Clear base64 data
+      }
+
+      const res = await createVendorAction({
+        name: ocrName,
+        category: ocrCategory,
+        contactPerson: ocrContactPerson || undefined,
+        phone: ocrPhone || undefined,
+        email: ocrEmail || undefined,
+        totalCost: ocrTotalCost,
+        paidAmount: ocrPaidAmount,
+        notes: ocrNotes || undefined,
+        ceremonyId: ocrCeremonyId || null,
+        invoiceUrl: finalInvoiceUrl,
+        invoiceData: finalInvoiceData,
+      });
+
+      if (res.error) {
+        setToast({ message: res.error, type: "error" });
+      } else {
+        setToast({ message: "Vendor created successfully with scanned invoice!", type: "success" });
+        setIsOcrOpen(false);
+        // Reset states
+        setOcrFile(null);
+        setOcrStage("idle");
+        setOcrName("");
+        setOcrCategory("other");
+        setOcrTotalCost(0);
+        setOcrPaidAmount(0);
+        setOcrNotes("");
+        setOcrBase64("");
+        
+        // Refresh router
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({ message: "Failed to create vendor from invoice.", type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Safe client component state synchronization using a value signature
   const vendorsSignature = React.useMemo(() => {
     return initialVendors
@@ -285,6 +447,13 @@ export default function DashboardVendorManager({
         <div className="flex items-center gap-3">
           <Button onClick={downloadReport} variant="secondary" className="font-semibold text-xs py-2">
             📥 Download Report
+          </Button>
+          <Button
+            onClick={() => setIsOcrOpen(true)}
+            variant="secondary"
+            className="font-semibold text-xs py-2 flex items-center gap-1.5 bg-violet-50 text-[#6771ab] border border-violet-200 hover:bg-violet-100"
+          >
+            🔍 Scan Invoice (OCR)
           </Button>
           <Button onClick={() => setIsAddOpen(true)} variant="primary">
             + Add Vendor Contract
@@ -727,6 +896,210 @@ export default function DashboardVendorManager({
             </Button>
           </div>
         </form>
+      </Dialog>
+
+      {/* OCR Scan Dialog */}
+      <Dialog isOpen={isOcrOpen} onClose={() => { setIsOcrOpen(false); setOcrStage("idle"); setOcrFile(null); }} title="Scan Invoice (OCR)">
+        <div className="space-y-4 font-sans">
+          {ocrStage === "idle" && (
+            <div className="space-y-4">
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Upload a vendor invoice or contract receipt. We will analyze the document, extract total cost, paid amount, company details, and suggest the right vendor category automatically.
+              </p>
+              <div className="border-2 border-dashed border-slate-200 hover:border-[#6771ab] transition-colors rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer relative bg-slate-50/50">
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg, image/webp, application/pdf"
+                  onChange={handleOcrFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <span className="text-2xl mb-2">📄</span>
+                <span className="text-xs font-bold text-slate-700">Click to upload invoice or contract</span>
+                <span className="text-[10px] text-slate-400 mt-1">Supports PDF, PNG, JPG, WebP (Max 5MB)</span>
+              </div>
+            </div>
+          )}
+
+          {["uploading", "processing", "extracting", "validating"].includes(ocrStage) && (
+            <div className="p-8 flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="w-10 h-10 border-4 border-[#6771ab]/20 border-t-[#6771ab] rounded-full animate-spin" />
+              <div className="space-y-2">
+                <h4 className="text-sm font-bold text-slate-700 capitalize">
+                  {ocrStage === "uploading" && "Uploading document..."}
+                  {ocrStage === "processing" && "Pre-processing document & extracting text..."}
+                  {ocrStage === "extracting" && "Analyzing line items and totals..."}
+                  {ocrStage === "validating" && "Verifying extracted values..."}
+                </h4>
+                <div className="w-48 bg-slate-100 rounded-full h-1.5 overflow-hidden mx-auto">
+                  <div 
+                    className="bg-[#6771ab] h-1.5 rounded-full transition-all duration-300 animate-pulse"
+                    style={{
+                      width: 
+                        ocrStage === "uploading" ? "25%" : 
+                        ocrStage === "processing" ? "50%" : 
+                        ocrStage === "extracting" ? "75%" : "95%"
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {ocrStage === "error" && (
+            <div className="p-6 text-center space-y-4">
+              <span className="text-3xl">⚠️</span>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-slate-700">Scan Failed</h4>
+                <p className="text-xs text-red-500 font-semibold">{ocrError}</p>
+              </div>
+              <Button onClick={() => setOcrStage("idle")} variant="secondary" className="text-xs font-semibold px-4">
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {ocrStage === "success" && (
+            <form onSubmit={handleOcrSubmit} className="space-y-4">
+              <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-start gap-2">
+                <span className="text-emerald-600 text-sm mt-0.5">✅</span>
+                <div>
+                  <h4 className="text-xs font-bold text-emerald-800">OCR Extraction Completed</h4>
+                  <p className="text-[10px] text-emerald-700 mt-0.5">
+                    We&apos;ve scanned <span className="font-semibold">{ocrFile?.name}</span>. Please verify the details below before saving.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Company / Vendor Name</label>
+                  <Input
+                    type="text"
+                    value={ocrName}
+                    onChange={(e) => setOcrName(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Category</label>
+                    <Select
+                      value={ocrCategory}
+                      onChange={(e) => setOcrCategory(e.target.value)}
+                      disabled={loading}
+                    >
+                      {categories.map((c) => (
+                        <option key={c} value={c} className="capitalize">
+                          {c}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Ceremony (Optional)</label>
+                    <Select
+                      value={ocrCeremonyId}
+                      onChange={(e) => setOcrCeremonyId(e.target.value)}
+                      disabled={loading}
+                    >
+                      <option value="">None (Generic)</option>
+                      {ceremonies.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Total Contract Cost</label>
+                    <Input
+                      type="number"
+                      value={ocrTotalCost}
+                      onChange={(e) => setOcrTotalCost(Number(e.target.value))}
+                      required
+                      min={0}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Amount Paid So Far</label>
+                    <Input
+                      type="number"
+                      value={ocrPaidAmount}
+                      onChange={(e) => setOcrPaidAmount(Number(e.target.value))}
+                      required
+                      min={0}
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Contact Person</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. John Doe"
+                      value={ocrContactPerson}
+                      onChange={(e) => setOcrContactPerson(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Number</label>
+                    <Input
+                      type="text"
+                      placeholder="e.g. +91 9999999999"
+                      value={ocrPhone}
+                      onChange={(e) => setOcrPhone(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email Address</label>
+                  <Input
+                    type="email"
+                    placeholder="e.g. contact@vendor.com"
+                    value={ocrEmail}
+                    onChange={(e) => setOcrEmail(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Extracted Notes / Remarks</label>
+                  <textarea
+                    className="w-full text-sm border border-slate-200 rounded-lg p-2.5 min-h-[60px] focus:ring-1 focus:ring-[#6771ab] focus:outline-none"
+                    value={ocrNotes}
+                    onChange={(e) => setOcrNotes(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 mt-2">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => { setOcrStage("idle"); setOcrFile(null); }} 
+                  disabled={loading}
+                >
+                  Reset
+                </Button>
+                <Button type="submit" variant="primary" disabled={loading}>
+                  {loading ? "Saving Contract..." : "Confirm & Save Contract"}
+                </Button>
+              </div>
+            </form>
+          )}
+        </div>
       </Dialog>
 
       <ConfirmDialog

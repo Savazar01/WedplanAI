@@ -18,13 +18,15 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 | 🍴 **Catering Menu Planner** | Design food & beverage menus for ceremonies. Link them directly to catering tasks and view them right from your day-of timeline planner |
 | 🌐 **Build Showcase Page** | Auto-generated public wedding page with live builder, countdown, Wedding Program (filtered by guest's invited ceremonies via personal link), Gift Registry, RSVP form, and internal preview mode using a secure hash-based preview code |
 | 👥 **Manage Your Team** | Admin controls for user roles, permissions, and inviting planners to collaborate |
-| 💬 **Chat & Call** | Real-time chat messaging and embedded Jitsi video conferencing for the couple, team, and invited guests directly in the dashboard and showcase page |
 | 📧 **Email Integration** | Built-in email delivery support for team invitations via SMTP/SendGrid or Gmail API, with in-app setup documentation |
 | 🗄️ **Archive & Delete Weddings** | Archive weddings to a collapsed section (view-only, excluded from sidebar switcher), restore or permanently delete with cascade confirmation |
 | 🎉 **Guided Onboarding** | Interactive walkthrough tour of sample wedding (detected via isSample flag) and 8-step wizard to set up your first event — includes parents details, team member invites, multi-location venue support with auto-formatted address fields and country-based currency display |
 | 👤 **Personas** | Wedding Planner mode (manage multiple couples with client role + onboarding links) and DIY (Plan My Wedding) |
 | ⚙️ **Categories Admin** | Visual checklist question builder for task follow-up questions — pre-seeded with standard categories, fully editable. Full REST API at `/api/v1/categories` |
 | 🌟 **Traditions Admin** | Manage wedding traditions at `/dashboard/admin/traditions` — pre-seeded with standard traditions (Hindu, Muslim, Sikh, Christian, Secular), fully editable. Full REST API at `/api/v1/traditions` |
+| 🗄️ **Cloudflare R2 Storage** | Admin settings to configure S3-compatible Cloudflare R2 bucket for secure storage of receipts, contract documents, guest CSV imports, and image uploads |
+| 📱 **WhatsApp Integration** | Admin settings to integrate Meta's WhatsApp Business Cloud API to send guest invitations, RSVP status updates, and wedding programs |
+| 🔍 **OCR Invoice Scanner** | Extract data (cost, paid amount, company name, contact info, category) from vendor invoice files (PDF, PNG, JPG, JPEG, WebP <= 5MB) with automatic budget logging |
 
 ### Database Auto-Seeding at Startup
 The platform has built-in self-healing and auto-seeding logic registered in `src/instrumentation.ts` that runs on container startup. If default traditions or categories are missing from the database, it automatically seeds them so that the admin can view, modify, or enhance them immediately.

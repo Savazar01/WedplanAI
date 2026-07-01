@@ -23,7 +23,6 @@ interface Wedding {
   themeDarkBackground: string;
   logoUrl?: string | null;
   logoData?: string | null;
-  enableChat?: boolean | null;
 }
 
 interface AppearanceFormClientProps {
@@ -50,7 +49,6 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
   const [logoUrl, setLogoUrl] = React.useState(wedding.logoUrl || "");
   const [logoData, setLogoData] = React.useState(wedding.logoData || "");
   const [logoName, setLogoName] = React.useState("");
-  const [enableChat, setEnableChat] = React.useState(wedding.enableChat !== false);
 
   const [isPending, setIsPending] = React.useState(false);
   const [previewMode, setPreviewMode] = React.useState<"light" | "dark">("light");
@@ -68,7 +66,6 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
     setThemeDarkBackground(wedding.themeDarkBackground || "#0b0f19");
     setLogoUrl(wedding.logoUrl || "");
     setLogoData(wedding.logoData || "");
-    setEnableChat(wedding.enableChat !== false);
   }
 
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +94,6 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
         themeDarkBackground,
         logoUrl: logoUrl || null,
         logoData: logoData || null,
-        enableChat,
       });
 
       if (res?.error) {
@@ -389,24 +385,6 @@ export default function AppearanceFormClient({ wedding }: AppearanceFormClientPr
                       </Button>
                     )}
                   </div>
-                </div>
-              </div>
-
-              {/* Feature Settings Section */}
-              <div className="space-y-4 pt-4 border-t border-slate-100">
-                <h4 className="text-sm font-bold text-slate-700">Feature Modules</h4>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="enableChat"
-                    checked={enableChat}
-                    onChange={(e) => setEnableChat(e.target.checked)}
-                    disabled={isPending}
-                    className="w-4 h-4 rounded text-[#6771ab] focus:ring-[#6771ab] border-slate-300 cursor-pointer"
-                  />
-                  <label htmlFor="enableChat" className="text-xs font-semibold text-[#6771ab] cursor-pointer flex items-center gap-1.5 select-none">
-                    Enable Chat & Call Module <FieldHelp message="Toggles whether the Chat & Call feature (including text messaging and video calls) is visible and accessible in the sidebar." />
-                  </label>
                 </div>
               </div>
 

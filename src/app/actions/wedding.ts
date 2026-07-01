@@ -118,6 +118,21 @@ export async function createWeddingAction(data: {
     return { error: "Unauthorized. Please sign in." };
   }
 
+  const [userRecord] = await db
+    .select({ role: users.role, persona: users.persona, weddingId: users.weddingId })
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1);
+
+  if (!userRecord) {
+    return { error: "User not found." };
+  }
+
+  const isAllowed = userRecord.role !== "user" && (userRecord.role === "admin" || (userRecord.persona === "diy" && !userRecord.weddingId));
+  if (!isAllowed) {
+    return { error: "Unauthorized. You do not have permission to create weddings." };
+  }
+
   const parsed = createWeddingSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message || "Validation failed" };
@@ -413,7 +428,7 @@ export async function createWeddingAction(data: {
             if (result && result.user) {
               await db.update(users).set({ 
                 role: "user",
-                weddingAccess: "all",
+                weddingAccess: newlyCreatedWeddingId,
                 shouldChangePassword: true,
                 weddingId: newlyCreatedWeddingId
               }).where(eq(users.id, result.user.id));
@@ -421,7 +436,7 @@ export async function createWeddingAction(data: {
               const confs = await db.select().from(emailConfigurations).where(eq(emailConfigurations.isActive, true)).limit(1);
               if (confs.length > 0) {
                 const conf = confs[0];
-                const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/login`;
+                const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3044"}/login`;
                 const emailHtml = `
                   <div style="font-family: sans-serif; padding: 20px;">
                     <h2>Welcome to WedPlanAI!</h2>
@@ -530,7 +545,6 @@ export async function updateWeddingAppearanceAction(
     themeDarkBackground: string;
     logoUrl?: string | null;
     logoData?: string | null;
-    enableChat?: boolean;
   }
 ) {
   const session = await getServerSession();
@@ -573,7 +587,6 @@ export async function updateWeddingAppearanceAction(
       themeDarkBackground: data.themeDarkBackground,
       logoUrl: data.logoUrl || null,
       logoData: data.logoData || null,
-      ...(data.enableChat !== undefined && { enableChat: data.enableChat }),
       updatedAt: new Date(),
     }).where(eq(weddings.id, weddingId));
 

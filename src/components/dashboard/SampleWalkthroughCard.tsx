@@ -3,6 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { switchWeddingAction } from "@/lib/wedding-helper";
 import { 
   Sparkles, 
   ClipboardList, 
@@ -44,7 +46,9 @@ export default function SampleWalkthroughCard({
   React.useEffect(() => {
     const stored = localStorage.getItem("sample_walkthrough_step");
     if (stored) {
-      setCurrentStep(parseInt(stored, 10));
+      setTimeout(() => {
+        setCurrentStep(parseInt(stored, 10));
+      }, 0);
     }
   }, []);
 
@@ -199,17 +203,40 @@ export default function SampleWalkthroughCard({
     );
   }
 
-  const handleSkip = () => {
-    setStatus("skipped");
-    localStorage.setItem("sample_walkthrough_status", "skipped");
+  const handleFinished = async (finishedStatus: 'completed' | 'skipped') => {
+    setStatus(finishedStatus);
+    localStorage.setItem("sample_walkthrough_status", finishedStatus);
     localStorage.removeItem("sample_walkthrough_step");
+    document.cookie = `sample_walkthrough_status=${finishedStatus}; path=/; max-age=31536000`;
+
+    if (userRole === "user") {
+      try {
+        const session = await authClient.getSession();
+        const assignedWeddingId = (session?.data?.user as { weddingId?: string | null })?.weddingId;
+        if (assignedWeddingId) {
+          await switchWeddingAction(assignedWeddingId);
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to get session or switch wedding:", err);
+      }
+      router.push("/dashboard");
+      router.refresh();
+    } else if (userRole === "admin") {
+      router.push("/wizard");
+      router.refresh();
+    } else {
+      router.push("/dashboard");
+      router.refresh();
+    }
+  };
+
+  const handleSkip = () => {
+    handleFinished("skipped");
   };
 
   const handleComplete = () => {
-    setStatus("completed");
-    localStorage.setItem("sample_walkthrough_status", "completed");
-    localStorage.removeItem("sample_walkthrough_step");
-    router.push("/dashboard");
+    handleFinished("completed");
   };
 
   const handleRestart = () => {
@@ -307,6 +334,9 @@ export default function SampleWalkthroughCard({
 
   // Completed or skipped banner
   if (status === "completed" || status === "skipped") {
+    if (userRole === "user") {
+      return null;
+    }
     return (
       <div className="max-w-6xl w-full mx-auto px-6 pt-6">
         <style>{`

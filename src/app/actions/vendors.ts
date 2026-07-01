@@ -17,6 +17,8 @@ export async function createVendorAction(data: {
   paidAmount: number;
   notes?: string;
   ceremonyId?: string | null;
+  invoiceUrl?: string | null;
+  invoiceData?: string | null;
 }) {
   const session = await getServerSession();
   if (!session || !session.user) {
@@ -60,6 +62,8 @@ export async function createVendorAction(data: {
       paymentStatus,
       notes: data.notes || null,
       ceremonyId: data.ceremonyId || null,
+      invoiceUrl: data.invoiceUrl || null,
+      invoiceData: data.invoiceData || null,
     });
 
     revalidatePath("/vendors");
@@ -103,6 +107,8 @@ export async function updateVendorAction(
     paidAmount: number;
     notes?: string;
     ceremonyId?: string | null;
+    invoiceUrl?: string | null;
+    invoiceData?: string | null;
   }
 ) {
   const session = await getServerSession();
@@ -142,6 +148,8 @@ export async function updateVendorAction(
         paymentStatus,
         notes: data.notes || null,
         ceremonyId: data.ceremonyId || null,
+        invoiceUrl: data.invoiceUrl || null,
+        invoiceData: data.invoiceData || null,
         updatedAt: new Date(),
       })
       .where(eq(vendors.id, vendorId));
@@ -154,6 +162,56 @@ export async function updateVendorAction(
     console.error("Update vendor error:", error);
     const errorMessage = error instanceof Error ? error.message : "Failed to update vendor";
     return { error: errorMessage };
+  }
+}
+
+export async function uploadVendorInvoiceAction(base64Data: string, fileName: string, fileType: string) {
+  const session = await getServerSession();
+  if (!session || !session.user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { r2Configurations } = await import("@/db/schema");
+  const { S3Client, PutObjectCommand } = await import("@aws-sdk/client-s3");
+
+  try {
+    const activeR2s = await db.select().from(r2Configurations).where(eq(r2Configurations.isActive, true)).limit(1);
+    if (activeR2s.length === 0) {
+      return { success: false, fallbackToBase64: true };
+    }
+
+    const r2Config = activeR2s[0];
+    
+    // Initialize S3 client for R2
+    const s3 = new S3Client({
+      region: "auto",
+      endpoint: `https://${r2Config.accountId}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: r2Config.accessKeyId,
+        secretAccessKey: r2Config.secretAccessKey,
+      },
+    });
+
+    const buffer = Buffer.from(base64Data.split(",")[1] || base64Data, "base64");
+    const uniqueKey = `invoices/${Date.now()}-${fileName}`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: r2Config.bucketName,
+        Key: uniqueKey,
+        Body: buffer,
+        ContentType: fileType,
+      })
+    );
+
+    const publicUrl = r2Config.publicDomain
+      ? `${r2Config.publicDomain}/${uniqueKey}`
+      : `https://${r2Config.accountId}.r2.cloudflarestorage.com/${r2Config.bucketName}/${uniqueKey}`;
+
+    return { success: true, url: publicUrl };
+  } catch (error) {
+    console.error("uploadVendorInvoiceAction error:", error);
+    return { success: false, fallbackToBase64: true, error: error instanceof Error ? error.message : "R2 upload failed" };
   }
 }
 

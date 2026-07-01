@@ -4,6 +4,8 @@ import * as React from "react";
 import EditWeddingModal from "./EditWeddingModal";
 import Countdown from "./countdown";
 
+import WeddingActions from "./WeddingActions";
+
 interface Wedding {
   id: string;
   partnerA: string;
@@ -13,6 +15,8 @@ interface Wedding {
   budget: number;
   guestCount: number;
   tradition: string;
+  isArchived?: boolean | null;
+  isSample?: boolean | null;
 }
 
 export default function DashboardWeddingCard({ wedding }: { wedding: Wedding }) {
@@ -20,13 +24,20 @@ export default function DashboardWeddingCard({ wedding }: { wedding: Wedding }) 
 
   return (
     <div className="relative">
-      {/* Edit button — top-right */}
-      <button
-        onClick={() => setEditOpen(true)}
-        className="absolute top-0 right-0 flex items-center gap-1 px-3 py-1 text-xs font-semibold text-[#6771ab] border border-[#6771ab]/30 rounded-xl hover:bg-[#6771ab]/10 transition-all"
-      >
-        ✏️ Edit Details
-      </button>
+      {/* Edit button & Wedding Actions — top-right */}
+      <div className="absolute top-0 right-0 flex items-center gap-2">
+        <button
+          onClick={() => setEditOpen(true)}
+          className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#6771ab] border border-[#6771ab]/30 rounded-xl hover:bg-[#6771ab]/10 transition-all cursor-pointer"
+        >
+          ✏️ Edit Details
+        </button>
+        <WeddingActions
+          weddingId={wedding.id}
+          isArchived={wedding.isArchived || false}
+          isSample={wedding.isSample || (wedding.partnerA === "Rahul" && wedding.partnerB === "Priya")}
+        />
+      </div>
 
       {/* Wedding info */}
       <span className="inline-flex px-2 py-0.5 rounded-sm bg-violet-100 text-[#2d336b] text-[10px] font-semibold uppercase tracking-wider">

@@ -120,7 +120,6 @@ export const weddings = pgTable("wedding", {
   showcaseGiftDescription: text("showcase_gift_description"),
   showcaseTemplate: text("showcase_template").default("classic").notNull(),
   showcaseTopLabel: text("showcase_top_label").default("").notNull(),
-  enableChat: boolean("enable_chat").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -222,12 +221,15 @@ export const vendors = pgTable("vendor", {
   paymentStatus: text("payment_status").default("unpaid").notNull(), // unpaid, partially_paid, paid
   notes: text("notes"),
   ceremonyId: uuid("ceremony_id").references(() => ceremonies.id, { onDelete: "set null" }),
+  invoiceUrl: text("invoice_url"),
+  invoiceData: text("invoice_data"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const apiKeys = pgTable("api_key", {
   id: uuid("id").defaultRandom().primaryKey(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   weddingId: uuid("wedding_id").references((): any => weddings.id, { onDelete: "cascade" }),
   scope: text("scope").default("wedding").notNull(),
   userId: text("user_id"),
@@ -280,14 +282,27 @@ export const emailConfigurations = pgTable("email_configuration", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const chatMessages = pgTable("chat_message", {
+export const whatsappConfigurations = pgTable("whatsapp_configuration", {
   id: uuid("id").defaultRandom().primaryKey(),
-  weddingId: uuid("wedding_id").notNull().references(() => weddings.id, { onDelete: "cascade" }),
-  senderName: text("sender_name").notNull(),
-  senderEmail: text("sender_email"),
-  senderRole: text("sender_role").notNull(), // 'admin', 'user', 'client', 'guest'
-  message: text("message").notNull(),
+  phoneNumberId: text("phone_number_id").notNull(),
+  businessAccountId: text("business_account_id").notNull(),
+  accessToken: text("access_token").notNull(),
+  apiVersion: text("api_version").default("v20.0").notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const r2Configurations = pgTable("r2_configuration", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  accountId: text("account_id").notNull(),
+  accessKeyId: text("access_key_id").notNull(),
+  secretAccessKey: text("secret_access_key").notNull(),
+  bucketName: text("bucket_name").notNull(),
+  publicDomain: text("public_domain"),
+  isActive: boolean("is_active").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const rituals = ceremonies;

@@ -103,6 +103,7 @@ export function getRequestedWeddingId(auth: AuthResult, request: NextRequest): s
   return auth.weddingId;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getBodyWeddingId(auth: AuthResult, body: any): string | null {
   if (auth.scope === 'global') {
     return body?.weddingId || null;

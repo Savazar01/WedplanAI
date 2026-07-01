@@ -6,6 +6,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { archiveWeddingAction, unarchiveWeddingAction, deleteWeddingAction } from "@/app/actions/wedding";
 import { useRouter } from "next/navigation";
 
+import { MoreVertical } from "lucide-react";
+
 interface WeddingActionsProps {
   weddingId: string;
   isArchived: boolean;
@@ -17,6 +19,20 @@ export default function WeddingActions({ weddingId, isArchived, isSample }: Wedd
   const [showArchiveConfirm, setShowArchiveConfirm] = React.useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [actioning, setActioning] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleArchive = async () => {
     setActioning(true);
@@ -44,45 +60,59 @@ export default function WeddingActions({ weddingId, isArchived, isSample }: Wedd
   };
 
   return (
-    <>
-      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
-        {isArchived ? (
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={handleUnarchive}
-            disabled={actioning}
-            className="text-xs"
+    <div className="relative inline-block text-left" ref={menuRef}>
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        className="flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#6771ab] cursor-pointer"
+        aria-label="Wedding Actions Menu"
+      >
+        <MoreVertical className="h-5 w-5" />
+      </button>
+
+      {menuOpen && (
+        <div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-white border border-slate-200 shadow-lg p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-100">
+          {isArchived ? (
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                handleUnarchive();
+              }}
+              disabled={actioning}
+              className="w-full text-left px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors font-medium cursor-pointer"
+            >
+              Restore Wedding
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                setShowArchiveConfirm(true);
+              }}
+              disabled={actioning}
+              className="w-full text-left px-3 py-2 rounded-lg text-sm text-amber-600 hover:bg-amber-50 hover:text-amber-700 transition-colors font-medium cursor-pointer"
+            >
+              Archive Wedding
+            </button>
+          )}
+          <button
+            onClick={() => {
+              setMenuOpen(false);
+              setShowDeleteConfirm(true);
+            }}
+            disabled={actioning || isSample}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors font-medium cursor-pointer ${
+              isSample
+                ? "text-slate-300 cursor-not-allowed"
+                : "text-red-600 hover:bg-red-50 hover:text-red-700"
+            }`}
           >
-            Restore Wedding
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowArchiveConfirm(true)}
-            disabled={actioning}
-            className="text-xs text-amber-600 border border-amber-200 hover:bg-amber-50"
-          >
-            Archive Wedding
-          </Button>
-        )}
-        <Button
-          type="button"
-          variant="error"
-          size="sm"
-          onClick={() => setShowDeleteConfirm(true)}
-          disabled={actioning || isSample}
-          className="text-xs"
-        >
-          Delete Wedding
-        </Button>
-      </div>
-      {isSample && (
-        <div className="mt-2 text-xs text-amber-700 dark:text-amber-300 bg-amber-500/[0.12] border border-amber-200/50 rounded-lg p-2 font-medium">
-          This wedding is for training and onboarding purpose only and cannot be deleted.
+            Delete Wedding
+          </button>
+          {isSample && (
+            <div className="px-3 py-2 text-[10px] text-amber-700 dark:text-amber-300 bg-amber-500/[0.12] border border-amber-200/50 rounded-lg m-1 font-medium leading-normal">
+              This wedding is for training and onboarding purpose only and cannot be deleted.
+            </div>
+          )}
         </div>
       )}
 
@@ -107,6 +137,6 @@ export default function WeddingActions({ weddingId, isArchived, isSample }: Wedd
         cancelLabel="Cancel"
         variant="danger"
       />
-    </>
+    </div>
   );
 }

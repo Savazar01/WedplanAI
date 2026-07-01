@@ -88,6 +88,22 @@ export default function WizardPage() {
   const router = useRouter();
   const [step, setStep] = React.useState(1);
 
+  const { data: sessionData, isPending } = authClient.useSession();
+
+  React.useEffect(() => {
+    if (!isPending) {
+      if (!sessionData || !sessionData.user) {
+        router.push("/login");
+        return;
+      }
+      const user = sessionData.user as { role?: string; persona?: string; weddingId?: string | null };
+      const isAllowed = user.role !== "user" && (user.role === "admin" || (user.persona === "diy" && !user.weddingId));
+      if (!isAllowed) {
+        router.push("/dashboard");
+      }
+    }
+  }, [sessionData, isPending, router]);
+
   // Form states
   const [partnerA, setPartnerA] = React.useState("");
   const [brideFather, setBrideFather] = React.useState("");
@@ -450,6 +466,16 @@ export default function WizardPage() {
       const session = await authClient.getSession();
       if (!session || !session.data) {
         router.push("/login");
+        return;
+      }
+      const user = session.data.user as { role?: string; persona?: string; weddingId?: string | null };
+      const role = user.role || "user";
+      const persona = user.persona || "diy";
+      const weddingId = user.weddingId;
+
+      const isAllowed = role !== "user" && (role === "admin" || (persona === "diy" && !weddingId));
+      if (!isAllowed) {
+        router.push("/dashboard");
       }
     };
     checkUser();
@@ -653,28 +679,28 @@ export default function WizardPage() {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bride's Father Name</span>
+                    <span>Bride&apos;s Father Name</span>
                     <FieldHelp message="Optional. Name of the bride's father" />
                   </label>
                   <Input type="text" placeholder="Enter bride's father name" value={brideFather} onChange={(e) => setBrideFather(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bride's Mother Name</span>
+                    <span>Bride&apos;s Mother Name</span>
                     <FieldHelp message="Optional. Name of the bride's mother" />
                   </label>
                   <Input type="text" placeholder="Enter bride's mother name" value={brideMother} onChange={(e) => setBrideMother(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bridegroom's Father Name</span>
+                    <span>Bridegroom&apos;s Father Name</span>
                     <FieldHelp message="Optional. Name of the bridegroom's father" />
                   </label>
                   <Input type="text" placeholder="Enter bridegroom's father name" value={groomFather} onChange={(e) => setGroomFather(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bridegroom's Mother Name</span>
+                    <span>Bridegroom&apos;s Mother Name</span>
                     <FieldHelp message="Optional. Name of the bridegroom's mother" />
                   </label>
                   <Input type="text" placeholder="Enter bridegroom's mother name" value={groomMother} onChange={(e) => setGroomMother(e.target.value)} />

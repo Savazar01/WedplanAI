@@ -19,7 +19,20 @@ export default async function DashboardVendorsPage() {
   }
 
   const dbVendors = await db
-    .select()
+    .select({
+      id: vendors.id,
+      name: vendors.name,
+      category: vendors.category,
+      contactPerson: vendors.contactPerson,
+      phone: vendors.phone,
+      email: vendors.email,
+      totalCost: vendors.totalCost,
+      paidAmount: vendors.paidAmount,
+      paymentStatus: vendors.paymentStatus,
+      notes: vendors.notes,
+      ceremonyId: vendors.ceremonyId,
+      invoiceUrl: vendors.invoiceUrl,
+    })
     .from(vendors)
     .where(eq(vendors.weddingId, wedding.id));
 

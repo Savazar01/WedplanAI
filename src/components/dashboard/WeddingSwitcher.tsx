@@ -15,12 +15,14 @@ interface WeddingSwitcherProps {
   activeWedding: Wedding | null;
   allWeddings: Wedding[];
   isCollapsed?: boolean;
+  userRole?: string;
 }
 
 export default function WeddingSwitcher({
   activeWedding,
   allWeddings,
   isCollapsed = false,
+  userRole,
 }: WeddingSwitcherProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
@@ -112,15 +114,17 @@ export default function WeddingSwitcher({
               ))
             )}
           </div>
-          <div className="border-t border-slate-200/60 mt-1 pt-1">
-            <button
-              onClick={handleCreateNew}
-              className="w-full flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-[#6771ab] hover:bg-[#6771ab] hover:text-white transition-all font-semibold"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Create New</span>
-            </button>
-          </div>
+          {userRole !== "user" && (
+            <div className="border-t border-slate-200/60 mt-1 pt-1">
+              <button
+                onClick={handleCreateNew}
+                className="w-full flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-[#6771ab] hover:bg-[#6771ab] hover:text-white transition-all font-semibold"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create New</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

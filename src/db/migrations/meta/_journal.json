@@ -148,6 +148,20 @@
       "when": 1782820366154,
       "tag": "0020_dazzling_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1782885371380,
+      "tag": "0021_naive_masked_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1782904880244,
+      "tag": "0022_lethal_white_queen",
+      "breakpoints": true
     }
   ]
 }

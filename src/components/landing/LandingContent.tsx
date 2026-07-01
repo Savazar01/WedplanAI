@@ -185,13 +185,6 @@ export default function LandingContent({ isLoggedIn }: { isLoggedIn: boolean }) 
               <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.features.emailDesc")}</p>
             </div>
 
-            <div className={`${featureCardBase} from-green-500/10 to-green-50 dark:from-slate-900/40 dark:to-slate-900/60 border-green-100 dark:border-slate-800`}>
-              <FeatureIcon bg="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
-                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
-              </FeatureIcon>
-              <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-lg mb-2">{t("landing.features.chatTitle")}</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.features.chatDesc")}</p>
-            </div>
 
             <div className={`${featureCardBase} from-red-500/10 to-red-50 dark:from-slate-900/40 dark:to-slate-900/60 border-red-100 dark:border-slate-800`}>
               <FeatureIcon bg="bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
@@ -223,7 +216,7 @@ export default function LandingContent({ isLoggedIn }: { isLoggedIn: boolean }) 
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div className={`${featureCardBase} from-indigo-500/5 to-indigo-50/50 dark:from-slate-900/40 dark:to-slate-900/60 border-indigo-100 dark:border-slate-800`}>
                 <FeatureIcon bg="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 013.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072" /></svg>
@@ -254,6 +247,30 @@ export default function LandingContent({ isLoggedIn }: { isLoggedIn: boolean }) 
                 </FeatureIcon>
                 <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-base mb-2">{t("landing.admin.apiTitle")}</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.admin.apiDesc")}</p>
+              </div>
+
+              <div className={`${featureCardBase} from-amber-500/5 to-amber-50/50 dark:from-slate-900/40 dark:to-slate-900/60 border-amber-100 dark:border-slate-800`}>
+                <FeatureIcon bg="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V10.125m16.5 0v3.75m-16.5-3.75v3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" /></svg>
+                </FeatureIcon>
+                <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-base mb-2">{t("landing.admin.r2Title")}</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.admin.r2Desc")}</p>
+              </div>
+
+              <div className={`${featureCardBase} from-emerald-500/5 to-emerald-50/50 dark:from-slate-900/40 dark:to-slate-900/60 border-emerald-100 dark:border-slate-800`}>
+                <FeatureIcon bg="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.446.54 1.08.311 1.637l-.894 2.156c-.149.358.125.753.51.713l2.846-.297a1.124 1.124 0 01.834.27 8.19 8.19 0 003.12.637z" /></svg>
+                </FeatureIcon>
+                <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-base mb-2">{t("landing.admin.whatsappTitle")}</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.admin.whatsappDesc")}</p>
+              </div>
+
+              <div className={`${featureCardBase} from-rose-500/5 to-rose-50/50 dark:from-slate-900/40 dark:to-slate-900/60 border-rose-100 dark:border-slate-800`}>
+                <FeatureIcon bg="bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                </FeatureIcon>
+                <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-base mb-2">{t("landing.admin.ocrTitle")}</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.admin.ocrDesc")}</p>
               </div>
             </div>
           </div>

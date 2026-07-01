@@ -26,20 +26,58 @@ export default async function DashboardPage() {
   const wedding = await getActiveWedding(session.user.id);
 
   if (!wedding) {
+    const archivedWeddings = await db
+      .select()
+      .from(weddings)
+      .where(and(eq(weddings.userId, session.user.id), eq(weddings.isArchived, true)));
+
     return (
-      <main className="w-full max-w-7xl mr-auto p-6 md:px-8 flex items-center justify-center min-h-[80vh]">
-        <Card variant="cream" className="w-full max-w-lg p-10 text-center shadow-lg border-slate-200">
-          <div className="text-5xl mb-4">💒</div>
-          <h2 className="text-2xl font-bold text-[#2d336b] mb-2">{t("dashboard.welcome.noWeddingsTitle")}</h2>
-          <p className="text-slate-500 text-sm mb-8">
-            {t("dashboard.welcome.noWeddingsDesc")}
-          </p>
-          <Link href="/wizard">
-            <Button variant="primary" className="px-8 py-3 text-base">
-              {t("dashboard.welcome.createCta")}
-            </Button>
-          </Link>
-        </Card>
+      <main className="w-full max-w-7xl mr-auto p-6 md:px-8 space-y-8">
+        <div className="flex items-center justify-center min-h-[50vh] py-10">
+          <Card variant="cream" className="w-full max-w-lg p-10 text-center shadow-lg border-slate-200">
+            <div className="text-5xl mb-4">💒</div>
+            <h2 className="text-2xl font-bold text-[#2d336b] mb-2">{t("dashboard.welcome.noWeddingsTitle")}</h2>
+            <p className="text-slate-500 text-sm mb-8">
+              {t("dashboard.welcome.noWeddingsDesc")}
+            </p>
+            {session.user.role !== "user" && (
+              <Link href="/wizard">
+                <Button variant="primary" className="px-8 py-3 text-base">
+                  {t("dashboard.welcome.createCta")}
+                </Button>
+              </Link>
+            )}
+          </Card>
+        </div>
+
+        {archivedWeddings.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-slate-800">
+              Archived Weddings ({archivedWeddings.length})
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {archivedWeddings.map((aw) => (
+                <Card key={aw.id} className="p-6 border border-slate-200 bg-white relative">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-[#2d336b]">{aw.partnerA} &amp; {aw.partnerB}</h4>
+                      <p className="text-xs text-slate-400 mt-1">
+                        📅 {new Date(aw.weddingDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="absolute top-4 right-4">
+                      <WeddingActions 
+                        weddingId={aw.id} 
+                        isArchived={true} 
+                        isSample={aw.isSample || (aw.partnerA === "Rahul" && aw.partnerB === "Priya")} 
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     );
   }
@@ -126,7 +164,6 @@ export default async function DashboardPage() {
         {/* ─── ROW 1: Wedding Card + Showcase Quick Nav ─── */}
         <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
           <DashboardWeddingCard wedding={wedding} />
-          <WeddingActions weddingId={wedding.id} isArchived={wedding.isArchived || false} isSample={wedding.isSample || (wedding.partnerA === "Rahul" && wedding.partnerB === "Priya")} />
           <div className="mt-6 pt-6 border-t border-slate-200/60">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-2">
@@ -240,7 +277,6 @@ export default async function DashboardPage() {
       {/* ─── ROW 1: Wedding Card + Showcase Quick Nav ─── */}
       <Card variant="cream" className="p-6 border-slate-200 shadow-sm relative overflow-hidden">
         <DashboardWeddingCard wedding={wedding} />
-        <WeddingActions weddingId={wedding.id} isArchived={wedding.isArchived || false} isSample={wedding.isSample || (wedding.partnerA === "Rahul" && wedding.partnerB === "Priya")} />
         <div className="mt-6 pt-6 border-t border-slate-200/60">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-2">

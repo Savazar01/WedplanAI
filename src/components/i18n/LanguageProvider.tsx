@@ -68,7 +68,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [locale]);
 
   const t = React.useCallback((key: keyof typeof translations["en"]) => {
-    const langDict = (translations[locale] || translations["en"]) as any;
+    const langDict = (translations[locale] || translations["en"]) as Record<string, string>;
     return langDict[key] || translations["en"][key] || String(key);
   }, [locale]);
 

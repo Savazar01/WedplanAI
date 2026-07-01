@@ -277,6 +277,22 @@ const getSections = (t: (key: string) => string) => [
         content:
           t("docs.sections.admin.items.team.content"),
       },
+      {
+        title: "GMail / SendGrid OAuth2 Setup",
+        content: "Configure email credentials for system-generated credentials and invitation emails. For GMail OAuth2 setup: Create a project in Google Cloud Console, enable Gmail API, configure OAuth Consent Screen, generate Web credentials, and copy client ID/Secret. Use the OAuth Playground or the app auth URL to retrieve your Refresh Token. For SendGrid: Create an API key in SendGrid dashboard with 'Mail Send' permissions, and paste the API Key here. Enter your verified Sender Email address. Navigating to Admin > Email Settings will allow you to save and test this setup."
+      },
+      {
+        title: "WhatsApp Business Cloud API Setup",
+        content: "Integrate WhatsApp notifications to automate guest invitations and RSVP confirmation updates. Setup steps: Register a Meta Developer account, create a new Developer App, select the WhatsApp product, setup your test/live phone number, and copy the Phone Number ID and WhatsApp Business Account ID. Generate a permanent System User access token in your Meta Business Suite, configure permissions, and paste the token into Admin > WhatsApp Settings. Make sure to toggle it active."
+      },
+      {
+        title: "Cloudflare R2 Bucket Configuration",
+        content: "Configure S3-compatible Cloudflare R2 bucket to securely store invoices, contract PDFs, guest list CSV imports, and dashboard images. Go to Cloudflare Dashboard > R2, create an object storage bucket, configure R2 API tokens, and get your Account ID, Access Key ID, and Secret Access Key. In Admin > Cloudflare R2, save these credentials and test connection. Once activated, files will upload directly to Cloudflare R2."
+      },
+      {
+        title: "OCR Invoice Scanning & Validation",
+        content: "The system provides an automated optical character recognition (OCR) engine in the Vendors & Budget dashboard to extract details from vendor contract invoices. Allowed file formats are PDF, PNG, JPG, JPEG, and WebP, with a size limit of 5MB. Once uploaded, the scanning engine processes line items to extract company name, total cost, paid amount, contact details, and suggested category. Costs must be non-negative, and paid amounts must be less than or equal to total cost. Scanned files upload to Cloudflare R2 if active, or fall back to base64 database strings."
+      },
     ],
   },
   {
@@ -535,7 +551,7 @@ export default async function DocsPage() {
   const t = (key: string) => (translations[locale as keyof typeof translations] as Record<string, string>)?.[key] || (translations["en"] as Record<string, string>)[key];
   
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       {/* Header */}
       <div className="mb-10">
         <div className="inline-block px-3 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-[#6771ab] dark:text-violet-300 text-xs font-bold uppercase tracking-widest mb-3">
@@ -549,32 +565,38 @@ export default async function DocsPage() {
         </p>
       </div>
 
-      {/* Table of Contents */}
-      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-5 mb-10 shadow-sm">
-        <h2 className="font-bold text-[#2d336b] dark:text-slate-100 text-base mb-3">{t("docs.onThisPage")}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Left Sticky Sidebar */}
+        <aside className="w-full md:w-64 shrink-0 md:sticky md:top-24 h-fit max-h-[calc(100vh-120px)] overflow-y-auto bg-slate-50/50 dark:bg-slate-800/20 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl p-4 shadow-sm">
+          <h2 className="font-bold text-[#2d336b] dark:text-slate-100 text-xs uppercase tracking-wider mb-4 px-2">
+            On this page
+          </h2>
+          <nav className="space-y-1">
+            {getAllSections(t).map((section) => (
+              <Link
+                key={section.id}
+                href={`#${section.id}`}
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-[#6771ab] dark:hover:text-violet-300 transition-colors"
+              >
+                <span className="text-sm shrink-0">{section.icon}</span>
+                <span className="truncate">{section.title}</span>
+                {section.admin && (
+                  <span className="text-[8px] bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 px-1 rounded font-bold shrink-0">
+                    AD
+                  </span>
+                )}
+              </Link>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Right Content Area */}
+        <div className="flex-1 space-y-6">
           {getAllSections(t).map((section) => (
-            <Link
-              key={section.id}
-              href={`#${section.id}`}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-[#6771ab] dark:hover:text-violet-300 transition-colors"
-            >
-              <span className="text-base">{section.icon}</span>
-              <span>{section.title}</span>
-              {section.admin && (
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
-                  ADMIN
-                </span>
-              )}
-            </Link>
+            <SectionCard key={section.id} section={section} />
           ))}
         </div>
       </div>
-
-      {/* Sections */}
-      {getAllSections(t).map((section) => (
-        <SectionCard key={section.id} section={section} />
-      ))}
 
       {/* Footer note */}
       <div className="border-t border-slate-200 dark:border-slate-700 pt-8 mt-8 text-center">

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Toast } from "@/components/ui/toast";
 import { Dialog } from "@/components/ui/dialog";
+import { AIAssistantButton } from "@/components/ui/ai-assistant-button";
 import { updateWeddingShowcaseAction } from "@/app/actions/wedding";
 import { updateRitualAction } from "@/app/actions/calendar";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -1147,9 +1148,18 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
-              Introductory Quote / Description Block
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+                Introductory Quote / Description Block
+              </label>
+              <AIAssistantButton
+                value={showcaseDescription}
+                title="Introductory Quote"
+                onApply={(newText, mode) => {
+                  setShowcaseDescription(mode === "replace" ? newText : showcaseDescription + (showcaseDescription ? "\n" : "") + newText);
+                }}
+              />
+            </div>
             <textarea
               value={showcaseDescription}
               onChange={(e) => setShowcaseDescription(e.target.value)}
@@ -1254,9 +1264,18 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
-              Story Details / Love Story description
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+                Story Details / Love Story description
+              </label>
+              <AIAssistantButton
+                value={showcaseDetails}
+                title="Story Details"
+                onApply={(newText, mode) => {
+                  setShowcaseDetails(mode === "replace" ? newText : showcaseDetails + (showcaseDetails ? "\n" : "") + newText);
+                }}
+              />
+            </div>
             <textarea
               value={showcaseDetails}
               onChange={(e) => setShowcaseDetails(e.target.value)}
@@ -1303,9 +1322,18 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
-              Story Details
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+                Story Details
+              </label>
+              <AIAssistantButton
+                value={showcaseDetails}
+                title="Story Details"
+                onApply={(newText, mode) => {
+                  setShowcaseDetails(mode === "replace" ? newText : showcaseDetails + (showcaseDetails ? "\n" : "") + newText);
+                }}
+              />
+            </div>
             <textarea
               value={showcaseDetails}
               onChange={(e) => setShowcaseDetails(e.target.value)}
@@ -1475,7 +1503,21 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
 
                       {/* Description */}
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">Description</label>
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase">Description</label>
+                          <AIAssistantButton
+                            value={state.description}
+                            title="Ceremony Description"
+                            disabled={state.saving}
+                            onApply={(newText, mode) => {
+                              handleRitualFieldChange(
+                                ritual.id,
+                                "description",
+                                mode === "replace" ? newText : state.description + (state.description ? "\n" : "") + newText
+                              );
+                            }}
+                          />
+                        </div>
                         <textarea
                           value={state.description}
                           onChange={(e) => handleRitualFieldChange(ritual.id, "description", e.target.value)}
@@ -1541,9 +1583,18 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
-              RSVP Subtitle Description
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+                RSVP Subtitle Description
+              </label>
+              <AIAssistantButton
+                value={showcaseRsvpDescription}
+                title="RSVP Description"
+                onApply={(newText, mode) => {
+                  setShowcaseRsvpDescription(mode === "replace" ? newText : showcaseRsvpDescription + (showcaseRsvpDescription ? "\n" : "") + newText);
+                }}
+              />
+            </div>
             <textarea
               value={showcaseRsvpDescription}
               onChange={(e) => setShowcaseRsvpDescription(e.target.value)}
@@ -1603,9 +1654,18 @@ export default function BuildShowcaseClient({ wedding, rituals: initialRituals, 
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
-              Description <span className="text-slate-400 normal-case">(optional)</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-wider">
+                Description <span className="text-slate-400 normal-case">(optional)</span>
+              </label>
+              <AIAssistantButton
+                value={showcaseGiftDescription}
+                title="Gift Registry Description"
+                onApply={(newText, mode) => {
+                  setShowcaseGiftDescription(mode === "replace" ? newText : showcaseGiftDescription + (showcaseGiftDescription ? "\n" : "") + newText);
+                }}
+              />
+            </div>
             <textarea
               value={showcaseGiftDescription}
               onChange={(e) => setShowcaseGiftDescription(e.target.value)}

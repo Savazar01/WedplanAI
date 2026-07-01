@@ -293,6 +293,10 @@ const getSections = (t: (key: string) => string) => [
         title: "OCR Invoice Scanning & Validation",
         content: "The system provides an automated optical character recognition (OCR) engine in the Vendors & Budget dashboard to extract details from vendor contract invoices. Allowed file formats are PDF, PNG, JPG, JPEG, and WebP, with a size limit of 5MB. Once uploaded, the scanning engine processes line items to extract company name, total cost, paid amount, contact details, and suggested category. Costs must be non-negative, and paid amounts must be less than or equal to total cost. Scanned files upload to Cloudflare R2 if active, or fall back to base64 database strings."
       },
+      {
+        title: "AI Models & LLM Configuration Setup",
+        content: "Activate the AI Assistant features by configuring a system-wide LLM provider. Navigate to Admin > AI Assistant & LLMs. You can configure: (1) Frontier API models like OpenAI (requires API Key; default model e.g. gpt-4o), Anthropic (requires API Key; default model e.g. claude-3-5-sonnet-latest), Gemini (requires API Key; default model e.g. gemini-1.5-pro), OpenRouter (requires API Key and custom Base URL; default model e.g. meta-llama/llama-3-8b-instruct), Zen API (requires API Key and custom Base URL). (2) Local models like Ollama (requires custom Base URL e.g. http://localhost:11434, no API Key; default model e.g. llama3) or LMStudio (requires custom Base URL, no API Key; default model e.g. custom-model). Select your preferred provider, click Save, click Test Connection to preview a generated response, and toggle Activate to enable the sparkling AI buttons on description inputs throughout the application."
+      },
     ],
   },
   {

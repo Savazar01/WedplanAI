@@ -162,6 +162,13 @@
       "when": 1782904880244,
       "tag": "0022_lethal_white_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1782926447250,
+      "tag": "0023_fancy_bucky",
+      "breakpoints": true
     }
   ]
 }

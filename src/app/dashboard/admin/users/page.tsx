@@ -5,7 +5,7 @@ import { getServerSession } from "@/lib/auth-server";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
-import { createSubsequentUserAction, editUserAction, deleteUserAction } from "./actions";
+import { createSubsequentUserAction, editUserAction, deleteUserAction, resetUserPasswordAction } from "./actions";
 import CreateUserFormClient from "./CreateUserFormClient";
 import UserTableClient from "./UserTableClient";
 
@@ -46,6 +46,7 @@ export default async function UsersManagementPage() {
             adminPersona={session.user.persona || "diy"}
             editAction={editUserAction}
             deleteAction={deleteUserAction}
+            resetAction={resetUserPasswordAction}
           />
         </Card>
       </div>

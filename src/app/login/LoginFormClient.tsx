@@ -17,6 +17,7 @@ export default function LoginFormClient() {
   const [loading, setLoading] = React.useState(false);
 
   const signupSuccess = searchParams.get("signup_success") === "true";
+  const passwordChanged = searchParams.get("message") === "password_changed";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +48,12 @@ export default function LoginFormClient() {
       {signupSuccess && (
         <div className="p-3 bg-green-50 border border-green-200 text-green-600 rounded-xl text-xs text-center font-sans">
           Registration successful! Please sign in.
+        </div>
+      )}
+
+      {passwordChanged && (
+        <div className="p-3 bg-blue-50 border border-blue-200 text-blue-600 rounded-xl text-xs text-center font-sans">
+          Password changed successfully. Please sign in with your new password.
         </div>
       )}
 

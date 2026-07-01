@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { AIAssistantButton } from "@/components/ui/ai-assistant-button";
 import { createVendorAction, deleteVendorAction, updateVendorAction } from "@/app/actions/vendors";
 import { formatCurrency } from "@/lib/format";
 
@@ -740,7 +741,16 @@ export default function DashboardVendorManager({
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Notes (optional)</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Notes (optional)</label>
+              <AIAssistantButton
+                value={notes}
+                title="Vendor Notes"
+                onApply={(newText, mode) => {
+                  setNotes(mode === "replace" ? newText : notes + (notes ? " " : "") + newText);
+                }}
+              />
+            </div>
             <Input
               type="text"
               placeholder="e.g. Stage dimensions, inclusion details"
@@ -871,7 +881,16 @@ export default function DashboardVendorManager({
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Notes (optional)</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Notes (optional)</label>
+              <AIAssistantButton
+                value={editNotes}
+                title="Vendor Notes"
+                onApply={(newText, mode) => {
+                  setEditNotes(mode === "replace" ? newText : editNotes + (editNotes ? " " : "") + newText);
+                }}
+              />
+            </div>
             <Input
               type="text"
               placeholder="e.g. Stage dimensions, inclusion details"

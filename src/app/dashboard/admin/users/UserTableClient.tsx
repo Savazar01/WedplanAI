@@ -7,7 +7,7 @@ import { Select } from "@/components/ui/select";
 import { Dialog } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, KeyRound } from "lucide-react";
 
 interface User {
   id: string;
@@ -37,7 +37,31 @@ interface UserTableClientProps {
     weddingAccess: string
   ) => Promise<{ success?: boolean; error?: string }>;
   deleteAction: (userId: string) => Promise<{ success?: boolean; error?: string }>;
+  resetAction: (
+    userId: string,
+    newPassword: string
+  ) => Promise<{ success?: boolean; error?: string; emailSent?: boolean; emailError?: string }>;
 }
+
+const generateSecurePassword = () => {
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+  const allChars = lowercase + uppercase + numbers + symbols;
+  
+  let password = "";
+  password += lowercase[Math.floor(Math.random() * lowercase.length)];
+  password += uppercase[Math.floor(Math.random() * uppercase.length)];
+  password += numbers[Math.floor(Math.random() * numbers.length)];
+  password += symbols[Math.floor(Math.random() * symbols.length)];
+  
+  for (let i = 0; i < 10; i++) {
+    password += allChars[Math.floor(Math.random() * allChars.length)];
+  }
+  
+  return password.split("").sort(() => 0.5 - Math.random()).join("");
+};
 
 export default function UserTableClient({
   users,
@@ -45,12 +69,15 @@ export default function UserTableClient({
   adminPersona,
   editAction,
   deleteAction,
+  resetAction,
 }: UserTableClientProps) {
   const [editingUser, setEditingUser] = React.useState<User | null>(null);
   const [deletingUser, setDeletingUser] = React.useState<User | null>(null);
+  const [resettingUser, setResettingUser] = React.useState<User | null>(null);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [isResetDialogOpen, setIsResetDialogOpen] = React.useState(false);
 
   // Edit form states
   const [editName, setEditName] = React.useState("");
@@ -60,8 +87,47 @@ export default function UserTableClient({
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [isResetting, setIsResetting] = React.useState(false);
+  const [generatedPassword, setGeneratedPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const handleResetClick = (user: User) => {
+    setResettingUser(user);
+    setGeneratedPassword(generateSecurePassword());
+    setError(null);
+    setIsResetDialogOpen(true);
+  };
+
+  const handleResetConfirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resettingUser) return;
+    setIsResetting(true);
+    setError(null);
+    try {
+      const res = await resetAction(resettingUser.id, generatedPassword);
+      if (res.error) {
+        setError(res.error);
+        setToast({ message: res.error, type: "error" });
+      } else {
+        let msg = "Password reset successfully!";
+        if (res.emailSent) {
+          msg += " Credentials email sent.";
+        } else if (res.emailError) {
+          msg += ` Credentials email failed to send: ${res.emailError}`;
+        }
+        setToast({ message: msg, type: res.emailError ? "error" : "success" });
+        setIsResetDialogOpen(false);
+        setResettingUser(null);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to reset password.";
+      setError(msg);
+      setToast({ message: msg, type: "error" });
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const handleEditClick = (user: User) => {
     setEditingUser(user);
@@ -165,6 +231,14 @@ export default function UserTableClient({
                   {new Date(u.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Reset Password"
+                    onClick={() => handleResetClick(u)}
+                  >
+                    <KeyRound className="h-4 w-4 text-slate-500 hover:text-amber-600" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -333,6 +407,74 @@ export default function UserTableClient({
         variant="danger"
         loading={isDeleting}
       />
+
+      {/* Reset Password Dialog */}
+      <Dialog
+        isOpen={isResetDialogOpen}
+        onClose={() => {
+          if (!isResetting) {
+            setIsResetDialogOpen(false);
+            setResettingUser(null);
+          }
+        }}
+        title="Reset Password"
+      >
+        <form onSubmit={handleResetConfirm} className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Are you sure you want to reset the password for <strong className="text-slate-800">{resettingUser?.name}</strong>?
+          </p>
+          
+          <div>
+            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">
+              Generated Secure Password
+            </label>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={generatedPassword}
+                readOnly
+                className="font-mono bg-slate-50 select-all"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedPassword);
+                  setToast({ message: "Password copied to clipboard!", type: "success" });
+                }}
+              >
+                Copy
+              </Button>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1">
+              The user will be required to change this password on their next login.
+            </p>
+          </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">
+              {error}
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setIsResetDialogOpen(false);
+                setResettingUser(null);
+              }}
+              disabled={isResetting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={isResetting}>
+              {isResetting ? "Resetting..." : "Confirm Reset"}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
 
       {toast && (
         <Toast

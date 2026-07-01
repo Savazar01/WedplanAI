@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Toast } from "@/components/ui/toast";
+import { AIAssistantButton } from "@/components/ui/ai-assistant-button";
 import { 
   UtensilsCrossed, 
   Plus, 
@@ -292,9 +293,18 @@ export default function MenuPlannerClient({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                  Appetizers / Starters
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Appetizers / Starters
+                  </label>
+                  <AIAssistantButton
+                    value={appetizers}
+                    title="Appetizers"
+                    onApply={(newText, mode) => {
+                      setAppetizers(mode === "replace" ? newText : appetizers + (appetizers ? "\n" : "") + newText);
+                    }}
+                  />
+                </div>
                 <textarea
                   value={appetizers}
                   onChange={(e) => setAppetizers(e.target.value)}
@@ -305,9 +315,18 @@ export default function MenuPlannerClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                  Main Courses
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Main Courses
+                  </label>
+                  <AIAssistantButton
+                    value={mainCourses}
+                    title="Main Courses"
+                    onApply={(newText, mode) => {
+                      setMainCourses(mode === "replace" ? newText : mainCourses + (mainCourses ? "\n" : "") + newText);
+                    }}
+                  />
+                </div>
                 <textarea
                   value={mainCourses}
                   onChange={(e) => setMainCourses(e.target.value)}
@@ -318,9 +337,18 @@ export default function MenuPlannerClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                  Desserts / Sweets
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Desserts / Sweets
+                  </label>
+                  <AIAssistantButton
+                    value={desserts}
+                    title="Desserts"
+                    onApply={(newText, mode) => {
+                      setDesserts(mode === "replace" ? newText : desserts + (desserts ? "\n" : "") + newText);
+                    }}
+                  />
+                </div>
                 <textarea
                   value={desserts}
                   onChange={(e) => setDesserts(e.target.value)}
@@ -331,9 +359,18 @@ export default function MenuPlannerClient({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                  Drinks & Beverages
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Drinks & Beverages
+                  </label>
+                  <AIAssistantButton
+                    value={drinks}
+                    title="Drinks & Beverages"
+                    onApply={(newText, mode) => {
+                      setDrinks(mode === "replace" ? newText : drinks + (drinks ? "\n" : "") + newText);
+                    }}
+                  />
+                </div>
                 <textarea
                   value={drinks}
                   onChange={(e) => setDrinks(e.target.value)}
@@ -345,9 +382,18 @@ export default function MenuPlannerClient({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">
-                Special Instructions / Notes
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Special Instructions / Notes
+                </label>
+                <AIAssistantButton
+                  value={notes}
+                  title="Special Instructions & Notes"
+                  onApply={(newText, mode) => {
+                    setNotes(mode === "replace" ? newText : notes + (notes ? "\n" : "") + newText);
+                  }}
+                />
+              </div>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

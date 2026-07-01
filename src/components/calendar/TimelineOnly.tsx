@@ -8,6 +8,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
+import { AIAssistantButton } from "@/components/ui/ai-assistant-button";
 import { createRitualAction, updateRitualAction, deleteRitualAction } from "@/app/actions/calendar";
 import { useTranslation } from "@/components/i18n/LanguageProvider";
 
@@ -374,7 +375,16 @@ export default function EventItineraryOnly({
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Description</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Description</label>
+              <AIAssistantButton
+                value={description}
+                title="Ceremony Description"
+                onApply={(newText, mode) => {
+                  setDescription(mode === "replace" ? newText : description + (description ? " " : "") + newText);
+                }}
+              />
+            </div>
             <Input
               type="text"
               placeholder="Ceremony flow, rules, etc. (optional)"

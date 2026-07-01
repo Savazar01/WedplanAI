@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { users, emailConfigurations } from "@/db/schema";
+import { users, emailConfigurations, accounts } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getServerSession } from "@/lib/auth-server";
 import { eq } from "drizzle-orm";
@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { seedSampleWedding } from "@/lib/seed-sample-wedding";
 import { getActiveWedding } from "@/lib/wedding-helper";
 import { sendEmail } from "@/lib/mailer";
+import { hashPassword } from "better-auth/crypto";
 
 export async function createSubsequentUserAction(prevState: { success?: boolean; error?: string; emailSent?: boolean; emailError?: string } | null, formData: FormData) {
   const session = await getServerSession();
@@ -189,3 +190,88 @@ export async function deleteUserAction(userId: string) {
     return { error: error instanceof Error ? error.message : "Failed to delete user." };
   }
 }
+
+export async function resetUserPasswordAction(userId: string, newPassword: string) {
+  const session = await getServerSession();
+  if (!session || !session.user || session.user.role !== "admin") {
+    return { error: "Unauthorized. Admin role required." };
+  }
+
+  if (!userId || !newPassword) {
+    return { error: "User ID and new password are required." };
+  }
+
+  try {
+    const [existingUser] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!existingUser) {
+      return { error: "User not found." };
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    // Update account table
+    await db.update(accounts)
+      .set({ password: hashedPassword, updatedAt: new Date() })
+      .where(eq(accounts.userId, userId));
+
+    // Update user table
+    await db.update(users)
+      .set({ shouldChangePassword: true, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+
+    // Check if email integration is active
+    let emailSent = false;
+    let emailError: string | undefined = undefined;
+
+    const [emailConfig] = await db
+      .select()
+      .from(emailConfigurations)
+      .where(eq(emailConfigurations.isActive, true))
+      .limit(1);
+
+    if (emailConfig && emailConfig.provider !== "disabled") {
+      try {
+        const emailResult = await sendEmail({
+          to: existingUser.email,
+          subject: "Your WedplanAI Password Reset",
+          html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+              <h2 style="color: #6771ab;">Your Password Has Been Reset</h2>
+              <p>Hello ${existingUser.name},</p>
+              <p>An administrator has reset your password. Here are your temporary login credentials:</p>
+              <table style="border-collapse: collapse; width: 100%; max-width: 400px; margin: 20px 0;">
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #f9f9f9;">Email</td>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${existingUser.email}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; background: #f9f9f9;">Temporary Password</td>
+                  <td style="padding: 8px; border: 1px solid #ddd;">${newPassword}</td>
+                </tr>
+              </table>
+              <div style="margin: 25px 0 15px 0;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3044"}/login" style="display: inline-block; padding: 12px 24px; background-color: #6771ab; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Log In Now</a>
+              </div>
+              <p style="font-weight: bold; color: #ef4444;">For security reasons, you will be required to change your password upon logging in.</p>
+              <p>Best regards,<br/>The Wedding Task Planner Team</p>
+            </div>
+          `,
+        });
+        if (emailResult.success) {
+          emailSent = true;
+        } else {
+          emailError = emailResult.error;
+        }
+      } catch (err) {
+        emailError = err instanceof Error ? err.message : "Failed to send credentials email.";
+      }
+    }
+
+    revalidatePath("/dashboard/admin/users");
+    return { success: true, emailSent, emailError };
+  } catch (error) {
+    console.error("Error resetting user password:", error);
+    return { error: error instanceof Error ? error.message : "Failed to reset user password." };
+  }
+}
+

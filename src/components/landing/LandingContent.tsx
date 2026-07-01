@@ -272,6 +272,18 @@ export default function LandingContent({ isLoggedIn }: { isLoggedIn: boolean }) 
                 <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-base mb-2">{t("landing.admin.ocrTitle")}</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.admin.ocrDesc")}</p>
               </div>
+
+              <div className={`${featureCardBase} from-purple-500/5 to-purple-50/50 dark:from-slate-900/40 dark:to-slate-900/60 border-purple-100 dark:border-slate-800`}>
+                <FeatureIcon bg="bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <rect x="4" y="4" width="16" height="16" rx="2" />
+                    <rect x="9" y="9" width="6" height="6" />
+                    <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3" />
+                  </svg>
+                </FeatureIcon>
+                <h3 className="font-bold text-[#2d336b] dark:text-slate-200 text-base mb-2">{t("landing.admin.aiTitle")}</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t("landing.admin.aiDesc")}</p>
+              </div>
             </div>
           </div>
         </div>

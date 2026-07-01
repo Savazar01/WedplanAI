@@ -35,6 +35,7 @@ import {
   Mail,
   MessageSquare,
   Database,
+  Bot,
 } from "lucide-react";
 
 const DEFAULT_LOGO = "https://savazar.com/wp-content/uploads/2023/10/cropped-Transparent_Image_2-300x100.png";
@@ -139,7 +140,7 @@ export default function SidebarShell({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isAdminMenuOpen, setIsAdminMenuOpen] = React.useState(() =>
-    ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email", "/dashboard/admin/whatsapp", "/dashboard/admin/r2"].includes(pathname)
+    ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email", "/dashboard/admin/whatsapp", "/dashboard/admin/r2", "/dashboard/admin/llm"].includes(pathname)
   );
 
   React.useEffect(() => {
@@ -154,7 +155,7 @@ export default function SidebarShell({
   const [prevPathname, setPrevPathname] = React.useState(pathname);
   if (pathname !== prevPathname) {
     setPrevPathname(pathname);
-    if (["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email", "/dashboard/admin/whatsapp", "/dashboard/admin/r2"].includes(pathname)) {
+    if (["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email", "/dashboard/admin/whatsapp", "/dashboard/admin/r2", "/dashboard/admin/llm"].includes(pathname)) {
       setIsAdminMenuOpen(true);
     }
   }
@@ -202,7 +203,7 @@ export default function SidebarShell({
 
   const sidebarContent = (isMobile = false) => {
     const showCollapsed = isCollapsed && !isMobile;
-    const isSubpageActive = ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email", "/dashboard/admin/whatsapp", "/dashboard/admin/r2"].includes(pathname);
+    const isSubpageActive = ["/dashboard/admin/appearance", "/dashboard/admin/api-keys", "/dashboard/admin/users", "/dashboard/admin/traditions", "/dashboard/admin/categories", "/dashboard/admin/email", "/dashboard/admin/whatsapp", "/dashboard/admin/r2", "/dashboard/admin/llm"].includes(pathname);
     const logoSource = activeWedding?.logoData || activeWedding?.logoUrl || DEFAULT_LOGO;
 
     return (
@@ -363,6 +364,16 @@ export default function SidebarShell({
                     <Database className="h-3.5 w-3.5 text-slate-400" />
                     Cloudflare R2
                   </Link>
+                  <Link
+                    href="/dashboard/admin/llm"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#f0f1fa] hover:text-[#3d4580] transition-colors ${
+                      pathname === "/dashboard/admin/llm" ? "bg-[#eef0f7] text-[#2d336b]" : "text-[#475569]"
+                    }`}
+                  >
+                    <Bot className="h-3.5 w-3.5 text-slate-400" />
+                    AI Assistant & LLMs
+                  </Link>
                 </div>
               </div>
             ) : (
@@ -479,6 +490,18 @@ export default function SidebarShell({
                     >
                       <Database className="h-4 w-4 text-slate-400" />
                       <span>Cloudflare R2 Storage</span>
+                    </Link>
+                    <Link
+                      href="/dashboard/admin/llm"
+                      onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-100 ${
+                        pathname === "/dashboard/admin/llm"
+                          ? "bg-[#eef0f7] text-[#2d336b]"
+                          : "text-[#475569] hover:bg-[#f0f1fa] hover:text-[#3d4580]"
+                      }`}
+                    >
+                      <Bot className="h-4 w-4 text-slate-400" />
+                      <span>AI Assistant & LLMs</span>
                     </Link>
                   </div>
                 )}

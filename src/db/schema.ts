@@ -305,4 +305,16 @@ export const r2Configurations = pgTable("r2_configuration", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const llmConfigurations = pgTable("llm_configuration", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  provider: text("provider").notNull().unique(), // e.g. 'openai', 'anthropic', 'gemini'
+  apiKey: text("api_key"),
+  baseUrl: text("base_url"),
+  defaultModel: text("default_model").notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const rituals = ceremonies;
+

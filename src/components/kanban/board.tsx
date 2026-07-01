@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Toast } from "@/components/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { AIAssistantButton } from "@/components/ui/ai-assistant-button";
 import { useTranslation } from "@/components/i18n/LanguageProvider";
 import { 
   createTaskAction, 
@@ -887,7 +888,16 @@ export default function PlanningBoard({
             <Input type="text" placeholder="e.g. Call wedding cake designer" value={title} onChange={(e) => setTitle(e.target.value)} required disabled={loading} />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Description</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Description</label>
+              <AIAssistantButton
+                value={description}
+                title="Task Description"
+                onApply={(newText, mode) => {
+                  setDescription(mode === "replace" ? newText : description + (description ? " " : "") + newText);
+                }}
+              />
+            </div>
             <Input type="text" placeholder="Provide more context (optional)" value={description} onChange={(e) => setDescription(e.target.value)} disabled={loading} />
           </div>
           
@@ -1051,7 +1061,16 @@ export default function PlanningBoard({
             <Input type="text" placeholder="Task title" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} required disabled={loading} />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest mb-1">Description</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-[#6771ab] uppercase tracking-widest">Description</label>
+              <AIAssistantButton
+                value={editDescription}
+                title="Task Description"
+                onApply={(newText, mode) => {
+                  setEditDescription(mode === "replace" ? newText : editDescription + (editDescription ? " " : "") + newText);
+                }}
+              />
+            </div>
             <Input type="text" placeholder="Provide more context (optional)" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} disabled={loading} />
           </div>
           

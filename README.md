@@ -27,6 +27,7 @@ Built with **Next.js 16**, **PostgreSQL**, **Drizzle ORM**, and **Better Auth**.
 | 🗄️ **Cloudflare R2 Storage** | Admin settings to configure S3-compatible Cloudflare R2 bucket for secure storage of receipts, contract documents, guest CSV imports, and image uploads |
 | 📱 **WhatsApp Integration** | Admin settings to integrate Meta's WhatsApp Business Cloud API to send guest invitations, RSVP status updates, and wedding programs |
 | 🔍 **OCR Invoice Scanner** | Extract data (cost, paid amount, company name, contact info, category) from vendor invoice files (PDF, PNG, JPG, JPEG, WebP <= 5MB) with automatic budget logging |
+| 🤖 **AI Assistant & LLM Config** | Admin settings to configure frontier APIs (OpenAI, Claude, Gemini, OpenRouter, Zen) or local models (Ollama, LMStudio), activating inline AI content generation buttons on description fields across Showcase, Kanban, Timelines, Catering, and Vendors |
 
 ### Database Auto-Seeding at Startup
 The platform has built-in self-healing and auto-seeding logic registered in `src/instrumentation.ts` that runs on container startup. If default traditions or categories are missing from the database, it automatically seeds them so that the admin can view, modify, or enhance them immediately.

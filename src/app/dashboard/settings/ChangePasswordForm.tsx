@@ -5,14 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { changePasswordAction } from "@/app/actions/change-password";
 import * as React from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function ChangePasswordForm() {
   const formRef = React.useRef<HTMLFormElement>(null);
+  const router = useRouter();
 
   async function handleSubmit(prev: { success?: boolean; error?: string } | null, formData: FormData) {
     const res = await changePasswordAction(prev, formData);
-    if (res?.success && formRef.current) {
-      formRef.current.reset();
+    if (res?.success) {
+      if (formRef.current) {
+        formRef.current.reset();
+      }
+      await authClient.signOut();
+      router.push("/login?message=password_changed");
+      router.refresh();
     }
     return res;
   }

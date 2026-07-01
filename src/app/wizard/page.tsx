@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { authClient } from "@/lib/auth-client";
 import { formatCurrency, getCurrencyForCountry } from "@/lib/format";
+import { Venus, Mars } from "lucide-react";
 
 const traditions = [
   { id: "hindu", label: "Hindu", desc: "Mehndi, Haldi & Sangeet, Saat Phere, Reception" },
@@ -658,52 +659,87 @@ export default function WizardPage() {
                 <h2 className="text-xl font-bold text-[#6771ab] mb-1">Partner Details</h2>
                 <p className="text-sm text-slate-500">Let&apos;s start with the happy couple&apos;s names.</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5"><span>Bride Name</span><FieldHelp message="Full name of the bride" /></label>
-                  <Input
-                    type="text"
-                    placeholder="Enter partner A name"
-                    value={partnerA}
-                    onChange={(e) => setPartnerA(e.target.value)}
-                  />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Column 1: Bride Details */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5 h-5">
+                      <Venus className="w-4 h-4 text-pink-500 shrink-0" />
+                      <span>Bride Name</span>
+                      <FieldHelp message="Full name of the bride" />
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter partner A name"
+                      value={partnerA}
+                      onChange={(e) => setPartnerA(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5 h-5">
+                      <span>Bride&apos;s Father Name</span>
+                      <FieldHelp message="Optional. Name of the bride's father" />
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter bride's father name"
+                      value={brideFather}
+                      onChange={(e) => setBrideFather(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5 h-5">
+                      <span>Bride&apos;s Mother Name</span>
+                      <FieldHelp message="Optional. Name of the bride's mother" />
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter bride's mother name"
+                      value={brideMother}
+                      onChange={(e) => setBrideMother(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5"><span>Bridegroom Name</span><FieldHelp message="Full name of the bridegroom" /></label>
-                  <Input
-                    type="text"
-                    placeholder="Enter partner B name"
-                    value={partnerB}
-                    onChange={(e) => setPartnerB(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bride&apos;s Father Name</span>
-                    <FieldHelp message="Optional. Name of the bride's father" />
-                  </label>
-                  <Input type="text" placeholder="Enter bride's father name" value={brideFather} onChange={(e) => setBrideFather(e.target.value)} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bride&apos;s Mother Name</span>
-                    <FieldHelp message="Optional. Name of the bride's mother" />
-                  </label>
-                  <Input type="text" placeholder="Enter bride's mother name" value={brideMother} onChange={(e) => setBrideMother(e.target.value)} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bridegroom&apos;s Father Name</span>
-                    <FieldHelp message="Optional. Name of the bridegroom's father" />
-                  </label>
-                  <Input type="text" placeholder="Enter bridegroom's father name" value={groomFather} onChange={(e) => setGroomFather(e.target.value)} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5">
-                    <span>Bridegroom&apos;s Mother Name</span>
-                    <FieldHelp message="Optional. Name of the bridegroom's mother" />
-                  </label>
-                  <Input type="text" placeholder="Enter bridegroom's mother name" value={groomMother} onChange={(e) => setGroomMother(e.target.value)} />
+
+                {/* Column 2: Bridegroom Details */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5 h-5">
+                      <Mars className="w-4 h-4 text-blue-500 shrink-0" />
+                      <span>Bridegroom Name</span>
+                      <FieldHelp message="Full name of the bridegroom" />
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter partner B name"
+                      value={partnerB}
+                      onChange={(e) => setPartnerB(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5 h-5">
+                      <span>Bridegroom&apos;s Father Name</span>
+                      <FieldHelp message="Optional. Name of the bridegroom's father" />
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter bridegroom's father name"
+                      value={groomFather}
+                      onChange={(e) => setGroomFather(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#6771ab] uppercase tracking-widest flex items-center gap-1.5 h-5">
+                      <span>Bridegroom&apos;s Mother Name</span>
+                      <FieldHelp message="Optional. Name of the bridegroom's mother" />
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Enter bridegroom's mother name"
+                      value={groomMother}
+                      onChange={(e) => setGroomMother(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
